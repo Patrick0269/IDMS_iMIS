@@ -1,0 +1,25 @@
+.admission-dialog{width:min(760px,94vw);max-height:90vh;border:0;border-radius:10px;padding:0;box-shadow:0 18px 64px #16101555}
+.admission-dialog::backdrop{background:#1d1118aa}
+.admission-dialog form{padding:24px}
+.admission-dialog header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid #e4dce0;padding-bottom:14px;margin-bottom:18px}
+.admission-dialog header h2{margin:4px 0;font-size:1.4rem}
+.admission-dialog header p{margin:0;color:#62575c}
+.admission-dialog header button{font-size:26px;border:0;background:transparent;cursor:pointer}
+.admission-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admission-form-grid label{display:grid;gap:6px;font-weight:600}
+.admission-form-grid input,.admission-form-grid select{width:100%;min-width:0;padding:10px;border:1px solid #bdb2b7;border-radius:5px;font:inherit}
+.admission-form-grid .wide{grid-column:1/-1}
+.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+@media(max-width:600px){.admission-form-grid{grid-template-columns:1fr}.admission-form-grid .wide{grid-column:auto}.admission-dialog form{padding:16px}}
+
+/* Compact admissions workspace; preserve the original dialogs and review fields. */
+.admissions-sidebar{position:fixed;top:86px;bottom:0;left:0;width:190px;padding:20px 12px;background:#fff;border-right:1px solid #e4dce0;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.admissions-sidebar strong{color:#700c32;margin:0 10px 14px}.admissions-sidebar a{padding:10px;border-radius:6px;color:#45343d;text-decoration:none}.admissions-sidebar a:hover{background:#f7eaf0;color:#700c32}
+.staff-view .portal-shell.wide{margin-left:210px;width:calc(100% - 230px);max-width:none;padding:18px 0}.bulk-workspace{background:white;border:1px solid #e4dce0;border-radius:8px;padding:16px;margin:16px 0}.bulk-workspace h2{font-size:1.1rem;margin:0 0 8px}.bulk-workspace p{font-size:.9rem;color:#62575c}.bulk-workspace label{display:grid;gap:6px;margin-bottom:10px}.bulk-workspace select,.bulk-workspace input{font:inherit;padding:8px;border:1px solid #bdb2b7;border-radius:5px;max-width:100%;min-height:36px}.bulk-workspace progress{width:100%;height:12px;margin-top:12px;accent-color:#700c32}.staff-view .metric{padding:12px}.staff-view .metric strong{font-size:1.4rem}.staff-view .workspace-grid{grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)}.photo-preview-row{display:flex;align-items:center;gap:12px;padding:8px;border-bottom:1px solid #eee}.photo-preview-row img{width:44px;height:50px;object-fit:cover;border-radius:4px}
+@media(max-width:1000px){.staff-view .workspace-grid{grid-template-columns:1fr}}@media(max-width:760px){.admissions-sidebar{position:static;width:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #e4dce0;padding:10px}.admissions-sidebar strong{display:none}.staff-view .portal-shell.wide{margin:0;padding:12px;width:100%}.publication-actions{flex-wrap:wrap}}
+/* Retained applicant bulk-selection controls from the existing workspace. */
+.bulk-bar{align-items:flex-start;flex-direction:column}
+.bulk-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.bulk-actions button{font-size:14px;min-height:38px;padding:7px 11px}
+.bulk-bar #selectedApplicationCount{color:var(--maroon);font-size:18px}
+td input[type="checkbox"],th input[type="checkbox"]{width:18px;height:18px;accent-color:var(--maroon);cursor:pointer}

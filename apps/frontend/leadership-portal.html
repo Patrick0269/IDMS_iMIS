@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Leadership Portal | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/idmc-deep-ui.css">
+  <style>
+    .leadership-shell{max-width:1180px;margin:36px auto;padding:0 22px}.leadership-top{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:25px 28px;background:#fff;border:1px solid #e9e1e4;border-radius:16px;box-shadow:0 8px 26px rgba(54,24,34,.06)}.leadership-top h1{font-size:1.75rem;margin:7px 0;color:#30242a}.leadership-top p{color:#756970;margin:0;max-width:650px;line-height:1.55}.leadership-kicker{font-size:.7rem;letter-spacing:.14em;color:#7a3348;font-weight:750}.leadership-top nav{display:flex;gap:9px;flex-wrap:wrap}.leadership-top nav a{padding:10px 13px;border:1px solid #e5d9de;border-radius:8px;text-decoration:none;color:#542036;background:#fff}.leadership-intro{margin:25px 0 14px}.leadership-intro h2{margin:0 0 6px;font-size:1.2rem;color:#30242a}.leadership-intro p{margin:0;color:#756970}.leadership-grid .idmc-portal-card{border:1px solid #e9e1e4;border-top:1px solid #e9e1e4;border-radius:13px;min-height:154px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;box-shadow:0 5px 18px rgba(54,24,34,.045)}.leadership-grid h3{margin:0 0 8px}.leadership-grid p{margin:0 0 18px;color:#756970;line-height:1.5}.leadership-grid .idmc-portal-link{display:inline-flex;align-items:center}.leadership-note{margin-top:18px;padding:13px 15px;border-left:3px solid #7a3348;background:#f7f2f4;color:#66565d;font-size:.87rem;line-height:1.5}
+    @media(max-width:640px){.leadership-shell{margin:16px auto;padding:0 12px}.leadership-top{align-items:flex-start;flex-direction:column;padding:20px}.leadership-top h1{font-size:1.45rem}}
+  </style>
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+  <main class="leadership-shell" data-roles-any="PRINCIPAL,DEPUTY_PRINCIPAL,DIRECTOR">
+    <header class="leadership-top">
+      <div><span class="leadership-kicker">INSTITUTE OF DEVELOPMENT AND MEDICAL SCIENCES</span><h1>Leadership Portal</h1><p>Institutional oversight and decision workspaces for the Principal, Deputy Principal and Director. Each action remains protected by its assigned permission.</p></div>
+      <nav aria-label="Leadership navigation"><a href="dashboard.html">Institution dashboard</a><a href="profile.html">My profile</a></nav>
+    </header>
+    <section class="leadership-intro"><h2>Institutional work areas</h2><p>Open the relevant workspace to review reports, student matters and approval queues.</p></section>
+    <section class="idmc-portal-grid leadership-grid" aria-label="Leadership work areas">
+      <article class="idmc-portal-card" data-rbac="finance.portal.view"><div><h3>Finance &amp; approvals</h3><p>Review student billing and the expense decision queue assigned to executive approvers.</p></div><a class="idmc-portal-link" href="finance-portal.html#expensesTab">Open finance workspace</a></article>
+      <article class="idmc-portal-card" data-rbac="reports.view"><div><h3>Institutional reports</h3><p>Open approved reports and institutional performance summaries.</p></div><a class="idmc-portal-link" href="reports.html">Open reports</a></article>
+      <article class="idmc-portal-card" data-rbac="admissions.view"><div><h3>Admissions oversight</h3><p>View admissions progress and historical student confirmation work.</p></div><a class="idmc-portal-link" href="admissions.html">Open admissions</a></article>
+      <article class="idmc-portal-card" data-rbac="students.view"><div><h3>Student management</h3><p>Review student records, cohort information and Admin-approved deletion requests.</p></div><a class="idmc-portal-link" href="students.html">Open students</a></article>
+      <article class="idmc-portal-card" data-rbac="hr.view"><div><h3>Human resources</h3><p>Open staff and institutional workforce information available to your role.</p></div><a class="idmc-portal-link" href="hr.html">Open HR</a></article>
+    </section>
+    <p class="leadership-note">If a work area is not listed, your account has not been granted its viewing permission. Ask the system administrator to review your role assignment.</p>
+  </main>
+  <script src="assets/js/idmc-session.js"></script><script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/rbac.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", async () => { if (!(await window.IDMCAuth.requireAuth())) return; const codes=(window.IDMCAuth.getUser()?.roles||[]).map(role=>String(role.roleCode||role.role_code||"").toUpperCase()); const target=codes.includes("PRINCIPAL")?"principal-portal.html":codes.includes("DEPUTY_PRINCIPAL")?"deputy-principal-portal.html":codes.includes("DIRECTOR")?"director-portal.html":"dashboard.html"; window.location.replace(target); });</script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

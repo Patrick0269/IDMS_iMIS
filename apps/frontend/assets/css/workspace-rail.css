@@ -1,0 +1,11 @@
+.idmc-ws-rail{position:fixed;top:0;left:0;bottom:0;width:72px;z-index:1200;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;background:#3a0710;border-right:1px solid rgba(255,255,255,.08);overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.idmc-ws-rail::-webkit-scrollbar{display:none}
+.idmc-ws-item{width:64px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:0;border-radius:10px;background:transparent;color:#f3dfe3;font:500 10px/1.15 Inter,"Segoe UI",system-ui,Arial,sans-serif;text-align:center;text-decoration:none;cursor:pointer}
+.idmc-ws-item:hover,.idmc-ws-item:focus-visible{background:rgba(255,255,255,.12);color:#fff;outline:none}
+.idmc-ws-item.is-active{background:#7a1a2f;color:#fff}
+.idmc-ws-badge{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);font:700 15px/1 Georgia,serif;color:#fff}
+.idmc-ws-item.is-active .idmc-ws-badge{background:#fff;color:#681323}
+.idmc-ws-label{display:-webkit-box;max-width:64px;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.idmc-ws-sep{width:34px;height:1px;background:rgba(255,255,255,.15);margin:4px 0;flex:none}
+html.idmc-ws-on body{padding-left:72px;box-sizing:border-box}
+@media print{.idmc-ws-rail{display:none}html.idmc-ws-on body{padding-left:0}}

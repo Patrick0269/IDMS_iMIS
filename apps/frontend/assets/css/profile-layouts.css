@@ -1,0 +1,579 @@
+/* Shared profile presentation: maroon identity panel, white content workspace. */
+.account-profile-page .profile-main {
+    max-width: 1440px;
+    align-self: center;
+    display: grid;
+    grid-template-columns: minmax(240px, 285px) minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+}
+
+.account-profile-page .page-intro,
+.account-profile-page .profile-footer {
+    grid-column: 1 / -1;
+    max-width: none;
+    width: 100%;
+}
+
+.account-profile-page .profile-container {
+    grid-column: 1 / -1;
+    max-width: none;
+    display: grid;
+    grid-template-columns: minmax(240px, 285px) minmax(0, 1fr);
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.account-profile-page .profile-hero {
+    min-height: 100%;
+    padding: 32px 23px;
+    flex-direction: column;
+    align-items: flex-start;
+    background: linear-gradient(155deg, var(--idmc-maroon-950), var(--idmc-maroon-700));
+}
+
+.account-profile-page .profile-avatar {
+    width: 88px;
+    height: 88px;
+    flex-basis: 88px;
+}
+
+.account-profile-page .profile-number-box {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 0 0;
+    border-top: 1px solid rgba(255,255,255,.24);
+    border-left: 0;
+}
+
+.account-profile-page .profile-body {
+    padding: 28px;
+    background: #fff;
+}
+
+.account-profile-page .details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.account-profile-page .field {
+    min-height: 78px;
+}
+
+.account-profile-page .access-box {
+    border-radius: 7px;
+    background: #fff;
+}
+
+.account-profile-page .role-chip,
+.account-profile-page .permission-chip {
+    border-radius: 5px;
+}
+
+.student-profile-page {
+    background: #f6f2f3;
+    color: #2a1116;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.student-profile-page .page {
+    width: min(1440px, 100%);
+    max-width: 1440px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+    align-items: start;
+    gap: 22px;
+}
+
+.student-profile-sidebar {
+    position: sticky;
+    top: 20px;
+    padding: 27px 22px;
+    border-radius: 10px;
+    background: linear-gradient(155deg, #3d0717, #74162d);
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(61, 7, 23, .12);
+}
+
+.student-profile-avatar {
+    width: 82px;
+    height: 82px;
+    margin-bottom: 20px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(255,255,255,.85);
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(255,255,255,.13);
+    font: bold 18px Georgia, serif;
+    letter-spacing: .04em;
+}
+
+.student-profile-sidebar h2 {
+    margin: 0 0 20px;
+    color: #fff;
+    font: 600 21px/1.3 Georgia, serif;
+    overflow-wrap: anywhere;
+}
+
+.student-profile-sidebar p {
+    margin: 0;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255,255,255,.2);
+}
+
+.student-profile-sidebar p span,
+.student-profile-sidebar p strong {
+    display: block;
+}
+
+.student-profile-sidebar p span {
+    margin-bottom: 4px;
+    color: rgba(255,255,255,.72);
+    font-size: 12px;
+}
+
+.student-profile-sidebar p strong {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.student-profile-main {
+    min-width: 0;
+}
+
+.student-profile-main .back {
+    color: #67152b;
+    font-weight: 700;
+}
+
+.student-profile-main .header {
+    padding: 20px 23px;
+    border-left: 5px solid #67152b;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.student-profile-main h1 {
+    color: #450919;
+    font-family: Georgia, serif;
+}
+
+.student-profile-main .card {
+    overflow: hidden;
+    border: 1px solid #ded2d5;
+    border-top: 4px solid #67152b;
+    border-radius: 9px;
+    box-shadow: 0 8px 24px rgba(69,9,25,.07);
+}
+
+.student-profile-main .card-head {
+    background: #f8f1f3;
+}
+
+.student-profile-main .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-profile-main .field {
+    border-color: #e8dfe1;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.student-profile-main .field small {
+    color: #725f64;
+    font-size: 12px;
+}
+
+.student-profile-main .field strong {
+    color: #3d0717;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.staff-profile-page {
+    background: #f5f1f2;
+}
+
+.staff-profile-page .mast {
+    position: relative;
+    min-height: 82px;
+    padding-left: max(24px, calc((100% - 1440px)/2));
+    padding-right: max(24px, calc((100% - 1440px)/2));
+    background: #641229;
+    border-bottom-color: #fff;
+}
+
+.staff-profile-page .shell {
+    width: 100%;
+    max-width: 1440px;
+    min-height: calc(100vh - 82px);
+    margin: 0 auto;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.staff-profile-page .bar {
+    justify-content: flex-end;
+    background: transparent;
+    border: 0;
+}
+
+.staff-profile-page .content {
+    display: grid;
+    grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px 24px;
+}
+
+.staff-profile-page .notice,
+.staff-profile-page .intro {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.staff-profile-page .intro {
+    margin: 0;
+    padding: 21px 24px;
+    border-left: 5px solid #641229;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.staff-profile-page .intro h1 {
+    margin-bottom: 6px;
+    color: #450919;
+}
+
+.staff-profile-page .tabs {
+    position: sticky;
+    top: 16px;
+    grid-column: 1;
+    grid-row: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #e0d3d6;
+    border-top: 4px solid #641229;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.staff-profile-page .tabs button {
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-radius: 5px;
+    background: #faf7f8;
+    text-align: left;
+}
+
+.staff-profile-page .tabs button.active,
+.staff-profile-page .tabs button:hover {
+    color: #fff;
+    background: #641229;
+}
+
+.staff-profile-page .panel {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid #e0d3d6;
+    border-top: 4px solid #641229;
+    border-radius: 9px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(61,7,23,.06);
+}
+
+.staff-profile-page .panel.active {
+    display: block;
+}
+
+.staff-profile-page #profile.panel.active {
+    display: grid;
+    grid-template-columns: minmax(200px, .75fr) minmax(0, 1.5fr);
+    gap: 14px 24px;
+}
+
+.staff-profile-page #profile h2 {
+    grid-column: 1 / -1;
+}
+
+.staff-profile-page #profileSummary {
+    min-width: 0;
+}
+
+.staff-profile-page #profileSummary table {
+    margin-top: 0;
+}
+
+.staff-profile-page form {
+    border-color: #e0d3d6;
+    border-radius: 7px;
+    background: #faf7f8;
+}
+
+.staff-profile-page input,
+.staff-profile-page select,
+.staff-profile-page textarea {
+    min-height: 42px;
+    border-color: #cbb8bd;
+    border-radius: 5px;
+}
+
+.staff-profile-page button.primary {
+    background: #641229;
+    border-radius: 5px;
+}
+
+.student-record-profile-page .idmc-module-main {
+    width: min(1440px, calc(100% - 48px));
+    max-width: 1440px;
+    display: grid;
+    grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px 24px;
+}
+
+.student-record-profile-page .idmc-module-header,
+.student-record-profile-page #studentRecordStatus {
+    grid-column: 1 / -1;
+}
+
+.student-record-profile-page .idmc-module-header {
+    padding: 20px 24px;
+    border-top: 4px solid #67152b;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.student-record-profile-page .idmc-module-title,
+.student-record-profile-page .idmc-module-eyebrow {
+    color: #4a0d1c;
+}
+
+.student-record-profile-page .idmc-btn {
+    border-color: #67152b;
+    color: #67152b;
+    background: #fff;
+}
+
+.student-record-profile-page .idmc-btn:hover {
+    color: #fff;
+    background: #67152b;
+}
+
+.student-profile-workspace {
+    display: contents;
+}
+
+.student-profile-workspace-sidebar {
+    grid-column: 1;
+    grid-row: 3;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #dfd4d7;
+    border-top: 4px solid #67152b;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.student-record-profile-page .student-identity-card {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+}
+
+.student-record-profile-page .student-identity-card[hidden] {
+    display: none !important;
+}
+
+.student-record-profile-page .student-identity-card div {
+    padding: 10px 8px;
+    border-bottom: 1px solid #eee5e8;
+    border-radius: 0;
+    background: #fff;
+}
+
+.student-record-profile-page .student-record-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0;
+}
+
+.student-record-profile-page .student-record-tabs button {
+    width: 100%;
+    min-height: 40px;
+    text-align: left;
+    border-radius: 5px;
+}
+
+.student-record-profile-page .student-record-panel {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+    border-top: 4px solid #67152b;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(69,9,25,.06);
+}
+
+@media (max-width: 900px) {
+    .account-profile-page .profile-main {
+        grid-template-columns: 1fr;
+    }
+
+    .account-profile-page .profile-container {
+        grid-template-columns: 1fr;
+    }
+
+    .account-profile-page .profile-hero {
+        min-height: auto;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .account-profile-page .profile-number-box {
+        width: auto;
+        margin: 0 0 0 auto;
+        padding: 8px 0 8px 14px;
+        border-top: 0;
+        border-left: 1px solid rgba(255,255,255,.24);
+    }
+
+    .student-profile-page .page {
+        grid-template-columns: 1fr;
+    }
+
+    .student-profile-sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: 76px 1fr 1fr;
+        align-items: center;
+        gap: 8px 18px;
+    }
+
+    .student-profile-avatar {
+        grid-row: span 2;
+        margin: 0;
+    }
+
+    .student-profile-sidebar h2 {
+        grid-column: 2 / -1;
+        margin: 0;
+    }
+
+    .student-profile-sidebar p {
+        padding: 8px 0 0;
+    }
+
+    .staff-profile-page .content {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-profile-page .tabs,
+    .staff-profile-page .panel {
+        position: static;
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .staff-profile-page .tabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .staff-profile-page .tabs button {
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .student-record-profile-page .idmc-module-main {
+        grid-template-columns: 1fr;
+    }
+
+    .student-profile-workspace-sidebar,
+    .student-record-profile-page .student-record-panel {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .student-record-profile-page .student-record-tabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .student-record-profile-page .student-record-tabs button {
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 620px) {
+    .account-profile-page .profile-hero {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .account-profile-page .profile-number-box {
+        width: 100%;
+        margin: 8px 0 0;
+        padding: 12px 0 0;
+        border-top: 1px solid rgba(255,255,255,.24);
+        border-left: 0;
+    }
+
+    .account-profile-page .details-grid,
+    .student-profile-main .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .student-profile-page .page {
+        padding: 14px;
+    }
+
+    .student-profile-sidebar {
+        grid-template-columns: 60px 1fr;
+        padding: 18px;
+    }
+
+    .student-profile-avatar {
+        width: 58px;
+        height: 58px;
+        grid-row: span 2;
+        font-size: 14px;
+    }
+
+    .student-profile-sidebar h2 {
+        grid-column: 2;
+        font-size: 17px;
+    }
+
+    .student-profile-sidebar p {
+        grid-column: 1 / -1;
+    }
+
+    .staff-profile-page .content {
+        padding: 14px;
+    }
+
+    .staff-profile-page #profile.panel.active {
+        grid-template-columns: 1fr;
+    }
+
+    .staff-profile-page #profile h2 {
+        grid-column: 1;
+    }
+}

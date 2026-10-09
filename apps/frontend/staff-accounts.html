@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Staff Accounts | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/staff-institutional.css">
+  <style>
+    .section-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}.section-toolbar h2{margin:0 0 5px}.section-toolbar p{margin:0;color:var(--muted)}
+    .directory-filters{display:grid;grid-template-columns:minmax(240px,1fr) minmax(180px,.35fr) minmax(160px,.3fr) minmax(150px,.3fr);gap:10px;margin:16px 0}.directory-filters input,.directory-filters select{min-height:42px;padding:8px 11px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+    .directory-panel{border-top:4px solid var(--maroon)}.directory-panel .section-toolbar h2{margin:0}.table-count{margin:8px 0 0;color:var(--muted);font-size:13px}
+    .search-results{display:grid;gap:7px;margin-top:8px;max-height:280px;overflow:auto}.search-result{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}.search-result:hover:not(:disabled){border-color:var(--gold);background:#fffaf0}.search-result:disabled{opacity:.6;cursor:not-allowed}.search-result span,.search-result small,.search-hint{color:var(--muted);font-size:13px}.search-hint{margin:5px 0}.search-hint.success{color:var(--green)}.error-text{color:var(--red)}
+    .staff-file{border-top:4px solid var(--gold)}.eyebrow{margin:0 0 3px;color:var(--gold);font-size:11px;font-weight:bold;letter-spacing:.12em}.record-tabs{display:flex;gap:6px;overflow:auto;margin:16px 0;border-bottom:1px solid var(--line)}.record-tab{flex:0 0 auto;padding:9px 12px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);cursor:pointer}.record-tab.active{border-bottom-color:var(--maroon);color:var(--maroon);font-weight:bold}.staff-profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0}.staff-profile-grid div{padding:10px;border:1px solid var(--line);background:#fcfafb}.staff-profile-grid dt{color:var(--muted);font-size:12px}.staff-profile-grid dd{margin:4px 0 0;font-weight:bold;overflow-wrap:anywhere}.staff-file-content .table-wrap{max-height:460px}
+    @media(max-width:800px){.directory-filters{grid-template-columns:1fr}.staff-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.staff-profile-grid{grid-template-columns:1fr}}
+  </style>
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+<header class="masthead"><div class="brand">IDMC</div><div><strong>Institute of Development and Medical Sciences</strong><span>Integrated Management Information System</span></div><button id="menuButton" class="menu" type="button">Menu</button></header>
+<div class="layout">
+  <aside id="sidebar" class="sidebar">
+    <section class="identity"><div class="portrait"><span>AD</span></div><strong>Staff Account Administration</strong><small>Authorized access only</small></section>
+    <nav aria-label="Administration"><a href="dashboard.html">Dashboard</a><a class="active" href="staff-accounts.html">Staff Accounts</a><a href="users.html">Users</a><a href="roles.html">Roles &amp; Permissions</a></nav>
+    <button id="logoutButton" class="logout" type="button">Log Out</button>
+  </aside>
+  <main class="main">
+    <div class="utility"><strong>Identity and RBAC Administration</strong><span id="today"></span></div>
+    <div id="message" class="message" hidden></div>
+    <div class="content">
+      <h1>Staff Accounts and Roles</h1>
+      <p class="lead">Search staff, review their linked account and HR record, then manage the account and role from one workspace.</p>
+      <section class="panel directory-panel">
+        <div class="section-toolbar"><div><h2>Staff directory</h2><p>Search by name, employee number, email, department or role.</p></div><button class="button secondary" id="refreshStaff" type="button">Refresh directory</button></div>
+        <div class="directory-filters"><input id="staffSearch" type="search" placeholder="Search staff name or account details" aria-label="Search staff"><select id="departmentFilter" aria-label="Filter department"><option value="">All departments</option></select><select id="roleFilter" aria-label="Filter role"><option value="">All roles</option></select><select id="statusFilter" aria-label="Filter staff status"><option value="ACTIVE" selected>Active staff</option><option value="">All statuses</option><option>ON_LEAVE</option><option>SUSPENDED</option><option>RESIGNED</option><option>TERMINATED</option><option>RETIRED</option><option>INACTIVE</option></select></div>
+        <div id="accounts"><p class="loading">Loading staff directory…</p></div>
+      </section>
+      <section class="panel staff-file" id="staffFile" hidden>
+        <div class="section-toolbar"><div><p class="eyebrow">STAFF RECORD</p><h2 id="staffFileTitle">Select a staff member</h2><p id="staffFileSubtitle"></p></div><button class="button secondary" id="closeStaffFile" type="button">Close</button></div>
+        <nav id="staffFileTabs" class="record-tabs" aria-label="Staff record sections"></nav>
+        <div id="staffFileContent" class="staff-file-content" role="region" aria-live="polite"></div>
+      </section>
+      <section class="panel">
+        <h2>Provision Staff Account</h2>
+        <p class="notice">Use verified personal or institutional details. A temporary password is sent only to Supabase Auth and is never stored in the staff record.</p>
+        <form id="accountForm" class="form-grid" autocomplete="off">
+          <label class="field">Account action<select name="mode" id="mode" required><option value="CREATE">Create new account</option><option value="LINK">Link existing IDMC account</option></select></label>
+          <label class="field link-field" hidden>Find existing IDMC user<input id="existingUserSearch" type="search" placeholder="Search by staff name or email" autocomplete="off"><button class="button secondary" id="findExistingUser" type="button">Search users</button><div id="existingUserResults" class="search-results" role="listbox" aria-label="Matching users"></div><input name="identifier" id="identifier" maxlength="255" placeholder="Select a matching account above"></label>
+          <label class="field create-field">First name<input name="firstName" id="firstName" maxlength="100"></label>
+          <label class="field create-field">Middle name<input name="middleName" maxlength="100"></label>
+          <label class="field create-field">Last name<input name="lastName" id="lastName" maxlength="100"></label>
+          <label class="field create-field">Email<input name="email" id="email" type="email" maxlength="255"></label>
+          <label class="field create-field">Username<input name="username" maxlength="100"></label>
+          <label class="field create-field">Temporary password<input name="password" id="password" type="password" minlength="10" autocomplete="new-password"></label>
+          <label class="field">Employee number (optional)<input name="employeeNumber" maxlength="50" placeholder="Generated automatically when blank"></label>
+          <label class="field">Operational role<select name="roleCode" id="roleCode" required><option value="">Select role</option></select></label>
+          <label class="field">Institution<select name="institutionId" id="institutionId" required aria-readonly="true"><option value="">Loading IDMS...</option></select></label>
+          <label class="field">Department<select name="departmentId" id="departmentId"><option value="">No department selected</option></select></label>
+          <label class="field">Job title<input name="jobTitle" maxlength="150" placeholder="Defaults from selected role"></label>
+          <label class="field">Phone<input name="phone" maxlength="50"></label>
+          <label class="field">Employment type<select name="employmentType"><option>FULL_TIME</option><option>PART_TIME</option><option>CONTRACT</option><option>TEMPORARY</option><option>VOLUNTEER</option><option>INTERNSHIP</option><option>OTHER</option></select></label>
+          <label class="field">Appointment date<input name="appointmentDate" type="date"></label>
+          <div class="full"><button class="button" type="submit">Save Staff Account</button></div>
+        </form>
+      </section>
+    </div>
+    <footer>IDMC iMIS · Identity, Staff Profile and Role Control</footer>
+  </main>
+</div>
+<script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/staff-account-admin.js?v=20261005-staffhub1"></script>
+<script src="/assets/js/workflow-entry.js?v=20261004-r2"></script><script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

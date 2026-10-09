@@ -1,0 +1,150 @@
+/* Shared student-only navigation and header controls. */
+body{font-family:"Times New Roman",Times,serif}
+.student-page-frame{display:block;width:100%;height:calc(100vh - 190px);min-height:600px;border:0;background:#f6f3f4}
+.student-page-frame[hidden]{display:none!important}
+.portal-shell{display:grid;grid-template-columns:var(--sidebar,286px) minmax(0,1fr);grid-template-rows:74px minmax(0,1fr);min-height:100vh}
+.portal-header{grid-column:2;grid-row:1;position:sticky;top:0;min-width:0;min-height:74px;height:74px}
+.portal-header-inner{max-width:none;min-height:74px;margin:0;padding:0 24px}
+.portal-layout{display:contents;max-width:none;margin:0;padding:0;gap:0}
+.portal-sidebar{grid-column:1;grid-row:1/span 2;align-self:stretch;position:sticky;top:0!important;height:100vh;max-height:100vh;overflow:auto;background:#fff;border-right:1px solid #e2d5d8;box-shadow:3px 0 15px #2f0a140a;padding:0 0 16px}
+.portal-main{grid-column:2;grid-row:2;min-width:0;min-height:calc(100vh - 74px);padding:25px clamp(20px,3vw,46px) 0}
+.portal-header-inner>.portal-brand{display:none}
+.portal-shell.sidebar-collapsed{--sidebar:82px}
+.portal-shell.sidebar-collapsed .sidebar-brand{justify-content:center;padding:10px 5px}
+.portal-shell.sidebar-collapsed .sidebar-brand>span:last-child,.portal-shell.sidebar-collapsed .portal-student-card,.portal-shell.sidebar-collapsed .idmc-account-menu,.portal-shell.sidebar-collapsed .student-number{display:none}
+.portal-shell.sidebar-collapsed .sidebar-collapse-control{justify-content:center;padding:0 4px 6px}
+.portal-shell.sidebar-collapsed .portal-nav{padding-right:7px;padding-left:7px}
+.portal-shell.sidebar-collapsed .idmc-nav-toggle,.portal-shell.sidebar-collapsed .idmc-nav-link,.portal-shell.sidebar-collapsed .idmc-nav-logout{justify-content:center;padding-right:3px;padding-left:3px}
+.portal-shell.sidebar-collapsed .idmc-nav-toggle>span:not(.idmc-nav-icon),.portal-shell.sidebar-collapsed .idmc-nav-link>span:not(.idmc-nav-icon),.portal-shell.sidebar-collapsed .idmc-nav-logout:not(.idmc-nav-icon){font-size:0}
+.portal-shell.sidebar-collapsed .idmc-nav-icon{font-size:18px}
+.portal-shell.sidebar-collapsed .idmc-nav-chevron,.portal-shell.sidebar-collapsed .idmc-nav-children{display:none}
+.student-shell{grid-template-columns:var(--sidebar) minmax(0,1fr);grid-template-rows:74px minmax(0,1fr)}
+.student-shell>.topbar{grid-column:2;grid-row:1;min-height:74px;padding:0 24px}
+.student-shell>.sidebar{grid-column:1;grid-row:1/span 2;position:sticky;top:0;height:100vh;max-height:100vh}
+.student-shell>.main-content{grid-column:2;grid-row:2;min-height:calc(100vh - 74px);padding:25px clamp(20px,3vw,46px) 0}
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(110deg,#3d0717,#641229);color:#fff;text-decoration:none;border-bottom:3px solid #c5a367}
+.sidebar-brand .institution-mark{width:45px;height:45px;flex:0 0 45px;display:grid;place-items:center;border:1px solid #ffffff99;font-weight:700;letter-spacing:.04em}
+.sidebar-brand strong,.sidebar-brand small{display:block}.sidebar-brand strong{font-size:13px;line-height:1.25}.sidebar-brand small{margin-top:3px;color:#eadfe2;font-size:11px}
+.sidebar-collapse-control{display:flex;justify-content:flex-end;padding:0 12px 6px}
+.sidebar-collapse-control button{min-width:44px;min-height:44px;border:0;border-radius:4px;background:#f5e9ec;color:#641229;font-size:1.2rem;cursor:pointer}
+.student-shell.sidebar-collapsed{--sidebar:82px}
+.student-shell.sidebar-collapsed .sidebar-brand{justify-content:center;padding:10px 5px}
+.student-shell.sidebar-collapsed .sidebar-brand>span:last-child,.student-shell.sidebar-collapsed .student-identity>div:last-of-type,.student-shell.sidebar-collapsed .student-number,.student-shell.sidebar-collapsed .idmc-account-menu{display:none}
+.student-shell.sidebar-collapsed .sidebar-collapse-control{justify-content:center;padding:0 4px 6px}
+.student-shell.sidebar-collapsed .student-identity{justify-content:center;padding:12px 5px}
+.student-shell.sidebar-collapsed .student-nav{padding-right:7px;padding-left:7px}
+.student-shell.sidebar-collapsed .idmc-nav-toggle,.student-shell.sidebar-collapsed .idmc-nav-link,.student-shell.sidebar-collapsed .idmc-nav-logout{justify-content:center;padding-right:3px;padding-left:3px}
+.student-shell.sidebar-collapsed .idmc-nav-toggle>span:not(.idmc-nav-icon),.student-shell.sidebar-collapsed .idmc-nav-link>span:not(.idmc-nav-icon),.student-shell.sidebar-collapsed .idmc-nav-logout:not(.idmc-nav-icon){font-size:0}
+.student-shell.sidebar-collapsed .idmc-nav-icon{font-size:18px}
+.student-shell.sidebar-collapsed .idmc-nav-chevron,.student-shell.sidebar-collapsed .idmc-nav-children{display:none}
+.profile-actions{display:flex;align-items:center;gap:12px}.profile-actions button{min-width:40px;min-height:40px;border:1px solid #e2d5d8;background:#fff;color:#641229;font-size:1.2rem;cursor:pointer}
+.profile-actions button[aria-expanded=false]{transform:rotate(180deg)}
+.profile-card [hidden]{display:none}
+.student-shell>.topbar .institution-brand{display:none}
+.main-content .page-heading{margin-top:0}
+.idmc-student-tools{display:flex;align-items:center;gap:.55rem;margin-left:auto;color:#fff}
+.idmc-student-tools>a,.idmc-student-tools>span{display:inline-flex;align-items:center;min-height:44px;padding:0 .6rem;color:#fff;text-decoration:none;font-size:.92rem}
+.idmc-student-tools>a:hover{text-decoration:underline}
+.idmc-student-logout,.idmc-shell-menu{min-height:44px;padding:.55rem .85rem;border:1px solid rgba(255,255,255,.65);border-radius:5px;background:#fff;color:#641229;font-weight:700;cursor:pointer}
+.idmc-shell-menu{display:none}
+.idmc-notification-wrap{position:relative}
+.idmc-bell{position:relative;min-width:44px;min-height:44px;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:transparent;color:#fff;font-size:1.35rem;cursor:pointer}
+.idmc-unread-count{position:absolute;top:-4px;right:-5px;min-width:20px;height:20px;padding:1px 5px;border-radius:12px;background:#fff;color:#641229;font:700 12px/18px system-ui,sans-serif}
+.idmc-notice-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:100;width:min(350px,calc(100vw - 28px));padding:14px;background:#fff;color:#321923;border:1px solid #eadce0;border-top:4px solid #641229;box-shadow:0 12px 32px #1d071344}
+.idmc-notice-menu[hidden]{display:none}
+.idmc-notice-menu>strong{display:block;padding:0 3px 9px;color:#641229}
+.idmc-notice-menu>div>p{margin:8px 3px;color:#725f64}
+.idmc-notice-item{display:block;padding:10px 4px;border-top:1px solid #eadce0;color:#321923;text-decoration:none}
+.idmc-notice-item strong,.idmc-notice-item span{display:block}
+.idmc-notice-item span{margin-top:4px;color:#725f64;font-size:.86rem;line-height:1.4}
+.idmc-notice-menu>a:last-child{display:block;margin-top:8px;padding:10px 4px;border-top:1px solid #eadce0;color:#641229;font-weight:700;text-decoration:none}
+.idmc-nav-group{margin:3px 0}
+.idmc-student-nav{display:grid;gap:3px;margin-top:16px}
+.idmc-nav-toggle,.idmc-nav-link,.idmc-nav-logout{box-sizing:border-box;width:100%;min-height:44px;display:flex;align-items:center;gap:11px;padding:9px 12px;border:0;border-left:3px solid transparent;background:transparent;color:#442d34;text-align:left;text-decoration:none;font:inherit;cursor:pointer}
+.idmc-nav-toggle:hover,.idmc-nav-link:hover,.idmc-nav-link.is-active,.idmc-nav-logout:hover,.idmc-nav-group.is-active>.idmc-nav-toggle{border-left-color:#641229;background:#f5e9ec;color:#641229}
+.idmc-nav-link[aria-current=page],.idmc-nav-children a[aria-current=page]{font-weight:700;color:#641229}
+.idmc-nav-icon{width:21px;flex:0 0 21px;text-align:center;color:#641229}
+.idmc-nav-chevron{margin-left:auto;transition:transform .15s ease}
+.idmc-nav-toggle[aria-expanded=true] .idmc-nav-chevron{transform:rotate(180deg)}
+.idmc-nav-children{padding:2px 5px 6px 34px}
+.idmc-nav-children[hidden]{display:none}
+.idmc-nav-children a{display:flex;align-items:center;min-height:44px;padding:7px 9px;border-left:2px solid #e2d5d8;color:#5a454b;text-decoration:none}
+.idmc-nav-children a:hover{background:#faf5f6;color:#641229}
+.idmc-nav-logout{margin-top:12px;border-top:1px solid #eadce0;color:#641229;font-weight:700}
+.idmc-account-menu{position:relative;margin-left:auto;color:#641229}
+.idmc-account-menu>summary{width:38px;height:38px;display:grid;place-items:center;border:1px solid #d9c8ce;border-radius:50%;background:#fff;color:#641229;cursor:pointer;font-size:1.25rem;list-style:none}
+.idmc-account-menu>summary::-webkit-details-marker{display:none}
+.idmc-account-menu>div{position:absolute;right:0;top:calc(100% + 6px);z-index:110;min-width:190px;padding:6px;background:#fff;border:1px solid #eadce0;box-shadow:0 8px 24px #1d071333}
+.idmc-account-menu>div :is(a,button){display:flex;align-items:center;width:100%;min-height:44px;padding:8px 11px;border:0;background:#fff;color:#442d34;text-align:left;text-decoration:none;font:inherit;cursor:pointer}
+.idmc-account-menu>div :is(a,button):hover{background:#f5e9ec;color:#641229}
+.idmc-account-menu--portal{margin:0 0 12px;padding:0 12px}
+.idmc-account-menu--portal>summary{width:auto;height:auto;min-height:44px;display:flex;justify-content:space-between;padding:8px 11px;border-radius:0;background:#f5e9ec;list-style:none;font-weight:700}
+.idmc-account-menu--portal>div{position:static;box-shadow:none;border-top:0}
+.student-identity .idmc-account-menu>div{right:12px}
+.student-profile-sidebar .idmc-nav-toggle,.student-profile-sidebar .idmc-nav-link,.student-profile-sidebar .idmc-nav-logout{color:#fff;border-left-color:transparent}
+.student-profile-sidebar .idmc-nav-icon{color:#f4dfe5}
+.student-profile-sidebar .idmc-nav-toggle:hover,.student-profile-sidebar .idmc-nav-link:hover,.student-profile-sidebar .idmc-nav-link.is-active,.student-profile-sidebar .idmc-nav-group.is-active>.idmc-nav-toggle{background:#ffffff1a;color:#fff;border-left-color:#c5a367}
+.student-profile-sidebar .idmc-nav-children a{color:#fff;border-color:#ffffff55}
+.student-profile-sidebar .idmc-nav-children a:hover,.student-profile-sidebar .idmc-nav-children a[aria-current=page]{background:#ffffff1a;color:#fff}
+.idmc-password-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:760px}
+.idmc-password-form label{display:grid;gap:7px;color:#4c363c;font-weight:700}
+.idmc-password-form input,.idmc-password-form select,.idmc-password-form textarea{min-height:44px;padding:9px 11px;border:1px solid #d9c8ce;border-radius:4px;color:#2a151b;background:#fff;font:inherit}
+.idmc-password-form .idmc-form-wide{grid-column:1/-1}
+.idmc-password-form p,.idmc-password-form button{grid-column:1/-1;margin:0}
+.idmc-security-history{margin-top:20px}
+.idmc-student-tools :is(a,button):focus-visible,.idmc-nav-group :is(a,button):focus-visible{outline:3px solid #c5a367;outline-offset:2px}
+.student-profile-list-extra{margin:0;padding:0}
+.profile-card details>summary{padding:10px 18px;color:#641229;font-weight:700;cursor:pointer}
+.student-footer a{color:#fff;text-underline-offset:3px}
+@media(max-width:820px){
+  .student-shell{display:block;min-height:100vh}
+  .student-shell>.topbar{grid-column:auto;grid-row:auto;position:sticky;top:0;min-height:74px;padding:0 14px}
+  .student-shell>.sidebar{grid-column:auto;grid-row:auto;position:fixed;top:74px;left:-300px;width:min(286px,88vw);height:calc(100vh - 74px);max-height:calc(100vh - 74px)}
+  .student-shell>.main-content{grid-column:auto;grid-row:auto;min-height:auto;padding:22px 15px 0}
+  .student-shell>.topbar .institution-brand{display:flex;margin-right:auto}
+  .institution-brand strong{font-size:15px}.institution-brand small{display:none}
+  .sidebar-collapse-control{display:none}
+  .student-shell.sidebar-collapsed{--sidebar:286px}
+  .student-shell.sidebar-collapsed .sidebar-brand{justify-content:flex-start;padding:14px 16px}
+  .student-shell.sidebar-collapsed .sidebar-brand>span:last-child,.student-shell.sidebar-collapsed .student-identity>div:last-of-type,.student-shell.sidebar-collapsed .student-number{display:block}
+  .student-shell.sidebar-collapsed .idmc-account-menu{display:block}
+  .student-shell.sidebar-collapsed .student-identity{justify-content:flex-start;padding:24px 20px 18px}
+  .student-shell.sidebar-collapsed .student-nav{padding-right:12px;padding-left:12px}
+  .student-shell.sidebar-collapsed .idmc-nav-toggle,.student-shell.sidebar-collapsed .idmc-nav-link,.student-shell.sidebar-collapsed .idmc-nav-logout{justify-content:flex-start;padding-right:12px;padding-left:12px}
+  .student-shell.sidebar-collapsed .idmc-nav-toggle>span:not(.idmc-nav-icon),.student-shell.sidebar-collapsed .idmc-nav-link>span:not(.idmc-nav-icon),.student-shell.sidebar-collapsed .idmc-nav-logout:not(.idmc-nav-icon){font-size:inherit}
+  .student-shell.sidebar-collapsed .idmc-nav-chevron{display:inline}
+  .student-shell.sidebar-collapsed .idmc-nav-children{display:block}
+  .student-shell.sidebar-collapsed .idmc-nav-children[hidden]{display:none}
+  .idmc-shell-menu{display:inline-flex;align-items:center;justify-content:center;order:-1}
+  .idmc-student-tools{gap:.2rem}
+  .idmc-student-tools>a,.idmc-student-level,.idmc-student-campus{display:none!important}
+  .portal-header-inner>.idmc-student-tools{flex:0 0 auto}
+  .idmc-student-logout{display:none}
+  #studentSidebar.open,.portal-sidebar.open{left:0!important;z-index:90}
+  #studentSidebar,.portal-sidebar{transition:left .2s ease}
+}
+@media(max-width:980px){
+  .portal-shell{display:block;min-height:100vh}
+  .portal-header{position:sticky;top:0;height:auto;min-height:74px}
+  .portal-header-inner{min-height:74px;padding:0 14px}
+  .portal-header-inner>.portal-brand{display:flex;margin-right:auto}
+  .portal-layout{display:block}
+  .portal-main{min-height:auto;padding:22px 15px 0}
+  .portal-sidebar{position:fixed!important;top:76px!important;bottom:0!important;left:-300px!important;width:min(286px,88vw)!important;max-height:calc(100vh - 76px);overflow:auto!important;background:#fff;box-shadow:0 12px 28px #21071133;transition:left .2s ease;z-index:90!important}
+  .portal-sidebar.open{left:0!important}
+  .portal-header-inner .idmc-shell-menu{display:inline-flex;align-items:center;justify-content:center}
+  .portal-shell.sidebar-collapsed{--sidebar:286px}
+  .portal-shell.sidebar-collapsed .sidebar-brand{justify-content:flex-start;padding:14px 16px}
+  .portal-shell.sidebar-collapsed .sidebar-brand>span:last-child,.portal-shell.sidebar-collapsed .portal-student-card,.portal-shell.sidebar-collapsed .idmc-account-menu,.portal-shell.sidebar-collapsed .student-number{display:block}
+  .portal-shell.sidebar-collapsed .portal-student-card{display:block}
+  .portal-shell.sidebar-collapsed .idmc-account-menu{display:block}
+  .portal-shell.sidebar-collapsed .portal-nav{padding-right:12px;padding-left:12px}
+  .portal-shell.sidebar-collapsed .idmc-nav-toggle,.portal-shell.sidebar-collapsed .idmc-nav-link,.portal-shell.sidebar-collapsed .idmc-nav-logout{justify-content:flex-start;padding-right:12px;padding-left:12px}
+  .portal-shell.sidebar-collapsed .idmc-nav-toggle>span:not(.idmc-nav-icon),.portal-shell.sidebar-collapsed .idmc-nav-link>span:not(.idmc-nav-icon),.portal-shell.sidebar-collapsed .idmc-nav-logout:not(.idmc-nav-icon){font-size:inherit}
+  .portal-shell.sidebar-collapsed .idmc-nav-chevron{display:inline}
+  .portal-shell.sidebar-collapsed .idmc-nav-children{display:block}
+  .portal-shell.sidebar-collapsed .idmc-nav-children[hidden]{display:none}
+}
+@media(max-width:600px){.idmc-password-form{grid-template-columns:1fr}}
+@media(max-width:480px){.idmc-student-tools{gap:0}.idmc-notice-menu{right:-8px}}
+@media(prefers-reduced-motion:reduce){.idmc-nav-chevron{transition:none}}

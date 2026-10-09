@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Finance Management | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/finance-portal.css?v=20261006-finance-sidebar-fullheight">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body class="finance-page">
+  <header class="topbar">
+    <div class="brand"><span>IDMC</span><div><strong>Finance Management</strong><small>Institute of Development and Medical Sciences</small></div></div>
+    <nav><a href="dashboard.html">Dashboard</a><button id="refreshAll" type="button">Refresh</button></nav>
+  </header>
+  <main class="shell">
+    <section class="hero"><div><p class="eyebrow">Institutional Finance</p><h1>Student Billing, Payments and Expenditure</h1><p>One controlled workspace for fee publication, student accounts, control numbers, receipts, confirmations and institutional approvals.</p></div><div class="online">ONLINE</div></section>
+    <div id="message" class="message" role="alert" aria-live="polite"></div>
+    <section id="metrics" class="metrics"></section>
+    <div id="financeWorkspace" class="finance-workspace">
+    <aside class="finance-sidebar" id="financeSidebar" aria-label="Finance navigation">
+      <div class="sidebar-heading"><span>Finance</span><button id="sidebarToggle" type="button" aria-expanded="true" aria-controls="financeSidebar" title="Close sidebar">Close sidebar</button></div>
+      <nav class="tabs" aria-label="Finance sections">
+        <button class="active" data-tab="students" aria-label="Student Accounts"><span class="nav-icon" aria-hidden="true">01</span><span class="nav-label">Student Accounts</span></button>
+        <button data-tab="fees" aria-label="Fee Structure"><span class="nav-icon" aria-hidden="true">02</span><span class="nav-label">Fee Structure</span></button>
+        <button data-tab="programmeFees" aria-label="Programme Tuition Fees"><span class="nav-icon" aria-hidden="true">03</span><span class="nav-label">Programme Tuition</span></button><button data-tab="requests" aria-label="Control Numbers and Receipts"><span class="nav-icon" aria-hidden="true">03</span><span class="nav-label">Control Numbers &amp; Receipts</span></button>
+        <button data-tab="paymentSettings" aria-label="Payment Instructions"><span class="nav-icon" aria-hidden="true">04</span><span class="nav-label">Payment Instructions</span></button>
+        <button data-tab="expenses" aria-label="Expenses and Allowances"><span class="nav-icon" aria-hidden="true">05</span><span class="nav-label">Expenses &amp; Allowances</span></button>
+      </nav>
+    </aside>
+    <div class="finance-content">
+    <section id="studentsTab" class="panel tab-panel">
+      <div class="panel-head"><div><h2>Student Accounts</h2><p>Search by Student Number or name. Database IDs are never shown.</p></div><div class="search-row"><input id="studentSearch" type="search" placeholder="Student Number or name"><button id="searchStudents" type="button">Search</button><button id="loadAllStudents" class="secondary" type="button">Load all</button></div></div>
+      <div class="student-layout"><aside id="studentList" class="student-list"></aside><article id="studentAccount" class="account-view"><div class="empty">Select a student to view the account.</div></article></div>
+    </section>
+    <section id="feesTab" class="panel tab-panel" hidden>
+      <div class="panel-head"><div><h2>Publish Fee Structure</h2><p>Enter confirmed amounts only. Semester and annual totals calculate automatically.</p></div></div>
+      <form id="feeForm" class="form-grid">
+        <label>Structure name<input name="name" required placeholder="Certificate and Diploma Fees"></label>
+        <label>Academic year<input name="academicYear" required placeholder="2026/2027"></label>
+        <label>Semester<select name="semester"><option>SEMESTER 1</option><option>SEMESTER 2</option></select></label>
+        <label>First installment (TZS)<input name="firstInstallmentAmount" type="number" min="0" step="1" placeholder="Enter accountant-approved amount"></label>
+        <label>Programme level<select name="programmeLevel"><option value="ALL">All students</option><option value="CERTIFICATE">Certificate</option><option value="DIPLOMA">Diploma</option></select></label>
+        <label class="check"><input name="applyToAll" type="checkbox"> Automatically create invoices for every ACTIVE student</label>
+        <div class="full totals"><span>Semester total <strong id="semesterTotal">TZS 0</strong></span><span>Annual total <strong id="annualTotal">TZS 0</strong></span></div>
+        <div class="full actions fee-item-controls"><button type="button" id="addFeeItem">Add fee / charge item</button><button type="button" class="secondary" id="loadPublishedFeeValues">Copy amounts from latest published structure</button><span class="muted">Add an item if it is missing from the catalog, then enter its amounts in the table.</span></div><div class="full table-wrap"><table><thead><tr><th>No.</th><th>Fee / Charge</th><th>Semester amount</th><th>Annual amount</th><th>First installment (optional)</th><th>Confirmed</th></tr></thead><tbody id="feeRows"></tbody></table></div>
+        <div class="full actions"><button type="submit">Publish Fee Structure</button></div>
+      </form>
+    </section>
+    <section id="programmeFeesTab" class="panel tab-panel" hidden><section id="programmeTuitionPanel"><div class="panel-head"><div><h2>Tuition Fees by Programme</h2><p>Fees load from the active fee structure by default. Finance may enter a manual programme fee or restore the structure amount.</p></div><button type="button" data-refresh>Refresh programme list</button></div><p role="status" aria-live="polite">Loading programmes...</p><div class="table-wrap"><table><thead><tr><th>Code</th><th>Programme</th><th>Award</th><th>Duration</th><th>Annual tuition (TZS)</th><th>Fee source</th><th>Action</th></tr></thead><tbody></tbody></table></div></section></section><section id="requestsTab" class="panel tab-panel" hidden>
+      <div class="panel-head"><div><h2>Control Numbers and Payment Receipts</h2><p>Preview the uploaded receipt, issue a control number, and confirm only a verified payment.</p></div><button id="refreshRequests" type="button">Refresh</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Student</th><th>Request</th><th>Amount</th><th>Control Number</th><th>Receipt</th><th>Status</th><th>Action</th></tr></thead><tbody id="requestRows"></tbody></table></div>
+    </section>
+    <section id="paymentSettingsTab" class="panel tab-panel" hidden>
+      <div class="panel-head"><div><h2>Institution Payment Instructions</h2><p>Finance controls the bank, account name and student control number. Lock the details after confirming them.</p></div><button id="loadPaymentSettings" type="button">Refresh</button></div>
+      <form id="paymentSettingsForm" class="form-grid"><label>Bank<input name="bankName" required></label><label>Account name<input name="accountName" required></label><label>Control number<input name="controlNumber" required></label><label class="check"><input name="lock" type="checkbox">Lock after saving</label><div class="full actions"><button type="submit">Save Payment Instructions</button><button id="unlockPaymentSettings" class="secondary" type="button">Unlock for editing</button></div><p id="paymentSettingsStatus" class="full"></p></form>
+    </section>
+    <section id="expensesTab" class="panel tab-panel" hidden>
+      <div class="panel-head"><div><h2>Expenses and Meeting Allowances</h2><p>Staff request → Finance review → Principal/Director approval → Finance payment.</p></div><button id="newExpense" type="button">New Request</button></div>
+      <div class="workflow"><span>1. Submitted</span><span>2. Finance reviewed</span><span>3. Principal approved</span><span>4. Paid</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Request</th><th>Requester</th><th>Type</th><th>Description</th><th>Amount</th><th>Finance</th><th>Approval</th><th>Status</th><th>Action</th></tr></thead><tbody id="expenseRows"></tbody></table></div>
+    </section>
+    </div>
+    </div>
+  </main>
+  <dialog id="modal"><div class="dialog"><header><h2 id="modalTitle">Finance Action</h2><button id="modalClose" type="button" class="secondary">Close</button></header><div id="modalBody"></div></div></dialog>
+  <script src="assets/js/config.js"></script><script src="assets/js/auth.js?v=20261001-role-portals"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/rbac.js"></script><script src="assets/js/finance-portal.js?v=20261006-programme-fees-3"></script><script src="assets/js/programme-finance-editor.js?v=20261006-programme-fees-3"></script>
+<script src="/assets/js/workflow-entry.js?v=20261004-r2"></script><script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+
+</html>

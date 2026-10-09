@@ -1,0 +1,10 @@
+.aw-course-picker{border:1px solid var(--line);padding:14px;min-width:0}
+.aw-course-picker legend{font-weight:700;color:var(--maroon);padding:0 6px}
+.aw-course-picker p{color:var(--muted);margin:0 0 10px}
+.aw-course-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:240px;overflow:auto}
+.aw-course-choice{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);padding:10px;background:#fff;cursor:pointer}
+.aw-course-choice input{width:auto;margin:3px 0 0}
+.aw-course-choice span{font-weight:400;line-height:1.4}
+.aw-file-control{display:grid;gap:6px;font-weight:700}
+.aw-file-control input{max-width:240px}
+@media(max-width:760px){.aw-course-choices{grid-template-columns:1fr}}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#8b1e2d">
+  <title>Course Allocation · HOD | IDMC iMIS</title><link rel="stylesheet" href="assets/css/hod-course-allocation.css?v=20261005-hod2">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+  <header class="ha-header"><a href="hod-portal.html" class="ha-brand"><span>IDMC</span><strong>IDMC iMIS <small>Department academic desk</small></strong></a><div class="ha-header-actions"><a href="hod-portal.html">HOD Dashboard</a><button id="haRefresh" type="button">Refresh</button></div></header>
+  <main class="ha-page">
+    <div class="ha-breadcrumb">Department <span>/</span> Course allocation</div>
+    <section class="ha-intro"><div><span class="ha-eyebrow">HOD workspace</span><h1>Course allocation</h1><p>Assign an active lecturer to a course offering in your department. Lecturer and course choices are restricted to your department.</p></div><div class="ha-scope" id="haScope">Loading department…</div></section>
+    <div id="haMessage" class="ha-message" role="status" aria-live="polite">Loading departmental teaching records…</div>
+    <section class="ha-layout">
+      <article class="ha-panel"><div class="ha-panel-head"><div><h2>Assign lecturer</h2><p>Choose the course offering and a staff member with ACTIVE employment status.</p></div></div>
+        <form id="haForm" class="ha-form">
+          <label>Course offering <span>*</span><select name="courseOfferingId" id="haOffering" required><option value="">Loading offerings…</option></select></label>
+          <label>Lecturer <span>*</span><select name="lecturerUserId" id="haLecturer" required><option value="">Loading active staff…</option></select></label>
+          <label>Assignment role<select name="assignmentRole"><option value="LECTURER">Lecturer</option><option value="CO_LECTURER">Co-lecturer</option><option value="TUTOR">Tutor</option><option value="LAB_INSTRUCTOR">Lab instructor</option><option value="CLINICAL_SUPERVISOR">Clinical supervisor</option></select></label>
+          <label>Teaching workload (hours)<input name="workloadHours" type="number" min="0" step="0.5" value="0"></label>
+          <label class="ha-wide">Internal note<textarea name="notes" rows="3" maxlength="2000" placeholder="Optional allocation note"></textarea></label>
+          <div class="ha-wide ha-actions"><button type="submit" id="haSubmit">Assign lecturer</button><button type="reset" class="ha-secondary">Clear</button></div>
+        </form>
+      </article>
+      <aside class="ha-guidance"><span class="ha-eyebrow">Assignment controls</span><h2>Department scope applies</h2><ul><li>Only active staff linked to your department are selectable.</li><li>The course offering must belong to your department.</li><li>Archived or terminated staff are rejected by the backend.</li><li>Each new assignment is recorded in the audit trail.</li></ul></aside>
+    </section>
+    <section class="ha-panel ha-list"><div class="ha-panel-head"><div><h2>Current allocations</h2><p id="haCount">Department teaching assignments</p></div><input id="haSearch" type="search" placeholder="Search lecturer or course"></div>
+      <div class="ha-table-wrap"><table><thead><tr><th>Course offering</th><th>Lecturer</th><th>Role</th><th>Workload</th><th>Status</th><th>Assigned</th></tr></thead><tbody id="haRows"><tr><td colspan="6">Loading allocations…</td></tr></tbody></table></div>
+    </section>
+    <footer class="ha-footer"><a href="hod-portal.html">← Return to HOD dashboard</a><span>IDMC iMIS · Department-restricted access</span></footer>
+  </main>
+  <script src="assets/js/config.js"></script><script src="assets/js/auth.js?v=20261005-hod2"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/rbac.js"></script><script src="assets/js/hod-course-allocation.js?v=20261005-hod2"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Student Profile | IDMC iMIS</title>
+    <link rel="stylesheet" href="assets/css/module-full-forms.css">
+    <link rel="stylesheet" href="assets/css/student-record.css">
+    <link rel="stylesheet" href="assets/css/profile-layouts.css?v=20261006-1">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body class="idmc-module-shell student-record-profile-page">
+<main class="idmc-module-main">
+    <header class="idmc-module-header">
+        <div><p class="idmc-module-eyebrow">Students</p><h1 class="idmc-module-title">Student Profile Workspace</h1><p class="idmc-module-subtitle">REGNO identity, programme, registration and academic records.</p></div>
+        <div class="idmc-module-actions"><button class="idmc-btn" id="activateStudentButton" type="button" hidden>Activate Student</button><a class="idmc-btn" href="students.html">Back to Students</a></div>
+    </header>
+    <div id="studentRecordStatus" class="student-record-status">Loading student profile...</div>
+    <div class="student-profile-workspace">
+    <aside class="student-profile-workspace-sidebar">
+    <section class="student-identity-card" id="studentIdentity" hidden>
+        <div><span>Student Number / REGNO</span><strong id="recordRegno">—</strong></div>
+        <div><span>Legacy Student Number</span><strong id="recordLegacyNumber">—</strong></div>
+        <div><span>Full Name</span><strong id="recordName">—</strong></div>
+        <div><span>Programme</span><strong id="recordProgramme">—</strong></div>
+        <div><span>Programme Version</span><strong id="recordProgrammeVersion">—</strong></div>
+        <div><span>Cohort / Entry</span><strong id="recordCohort">—</strong></div>
+        <div><span>Status</span><strong id="recordStatus">—</strong></div>
+        <div><span>Portal Account</span><strong id="recordAccount">—</strong></div>
+        <div><span>Contact</span><strong id="recordContact">—</strong></div>
+        <div><span>Record Source</span><strong id="recordSource">—</strong></div>
+        <div><span>Current Academic Year</span><strong id="recordYear">—</strong></div>
+        <div><span>Current Semester</span><strong id="recordSemester">—</strong></div>
+        <div><span>Semester Registration No.</span><strong id="recordRegistration">—</strong></div>
+        <div><span>Registration Status</span><strong id="recordRegistrationStatus">—</strong></div>
+    </section>
+    <nav class="student-record-tabs">
+        <button class="active" data-record-tab="academic">Academic</button><button data-record-tab="registration">Registration</button>
+        <button data-record-tab="results">Results</button><button data-record-tab="fees">Fees</button>
+        <button data-record-tab="attendance">Attendance</button><button data-record-tab="documents">Documents</button><button data-record-tab="requests">Requests</button>
+    </nav>
+    </aside>
+    <section class="student-record-panel"><h2 id="recordPanelTitle">Academic</h2><div class="student-record-table-wrap"><table><thead id="recordTableHead"></thead><tbody id="recordTableBody"></tbody></table></div></section>
+    </div>
+</main>
+<script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/student-record.js"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

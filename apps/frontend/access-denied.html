@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Access not assigned | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/role-portal.css">
+</head>
+<body>
+  <main class="rp-intro" style="max-width:680px;margin:12vh auto;padding:32px">
+    <span class="rp-eyebrow">IDMC iMIS</span>
+    <h1>Portal access is not assigned</h1>
+    <p>Your account is authenticated, but it does not currently have an active role that opens a portal. Ask an authorised administrator to review your role assignment.</p>
+    <button class="rp-button" id="logoutButton" type="button">Sign out</button>
+  </main>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>document.getElementById("logoutButton").addEventListener("click", () => window.IDMCAuth.logout());</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Academic Management | IDMC iMIS</title>
+  <link rel="stylesheet" href="/assets/css/institutional-workspace.css">
+  <link rel="stylesheet" href="/assets/css/academic-management-editor.css?v=20261007-academic-navigation">
+<script src="../assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="../assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body data-workspace="academics">
+  <header class="iw-header">
+    <div class="iw-mark">IDMC</div>
+    <div><h1>Academic Management</h1><p>Integrated Management Information System</p></div>
+    <nav>
+      <button id="academicSidebarToggle" type="button" aria-controls="academicSidebar" aria-expanded="false" aria-label="Open academic navigation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+      <a href="/dashboard.html">Home</a><button id="logoutButton" type="button">Log out</button>
+      <a href='../cohorts.html'>Cohort Management</a>
+</nav>
+  </header>
+  <main class="iw-shell">
+    <section class="iw-hero">
+      <div><span class="eyebrow">Institutional workspace</span><h2 id="workspaceTitle">Academic Management</h2><p id="workspaceSubtitle">Academic years, programmes, curricula and course delivery.</p></div>
+      <div class="iw-actions" id="contextActions" aria-label="Academic actions"></div>
+    </section>
+    <div class="iw-message" id="workspaceMessage" role="status" aria-live="polite"></div>
+    <div class="iw-academic-layout">
+      <aside class="iw-academic-sidebar" aria-label="Academic navigation" id="academicSidebar">
+        <div class="academic-side-brand"><span class="academic-side-mark">ID</span><div><strong>IDMC iMIS</strong><small>Academic workspace</small></div></div>
+        <div class="academic-side-label">COURSE WORKFLOW</div>
+        <nav class="academic-primary-nav" aria-label="Course workflow">
+          <button type="button" data-amx-stage="courses"><span>Course Master</span></button>
+          <button type="button" data-amx-stage="curriculumCourses"><span>Curriculum Mapping</span></button>
+          <button type="button" data-amx-stage="offerings"><span>Course Offerings</span></button>
+          <a href="/registration.html"><span>Student Registration</span></a>
+        </nav>
+        <div class="academic-side-label">SETUP</div>
+        <nav class="academic-primary-nav" aria-label="Academic setup">
+          <button type="button" data-amx-stage="years"><span>Academic Years</span></button>
+          <button type="button" data-amx-stage="semesters"><span>Semesters</span></button>
+          <button type="button" data-amx-stage="programmes"><span>Programmes</span></button>
+          <button type="button" data-amx-stage="versions"><span>Programme Versions</span></button>
+          <button type="button" data-amx-stage="curricula"><span>Curricula</span></button>
+          <button type="button" data-amx-stage="prerequisites"><span>Prerequisites</span></button>
+        </nav>
+        <div class="academic-side-label">TEACHING &amp; ASSESSMENT</div>
+        <nav class="academic-secondary-nav" aria-label="Teaching and assessment">
+          <a href="/timetable.html"><span>Timetable</span></a><a href="/attendance.html"><span>Attendance</span></a>
+          <a href="/examinations.html"><span>Examinations</span></a><a href="/results.html"><span>Results &amp; GPA</span></a>
+        </nav>
+        <div class="academic-side-label">STUDENT LIFECYCLE</div>
+        <nav class="academic-secondary-nav" aria-label="Student lifecycle">
+          <a href="/historical-academics.html"><span>Historical Academics</span></a>
+          <a href="/lifecycle-completion.html"><span>Lifecycle Completion</span></a><a href="/graduation.html"><span>Graduation</span></a>
+        </nav>
+        <div class="academic-side-footer"><a href="/dashboard.html"><span>Back to dashboard</span></a><small>Institute of Development and Medical Sciences</small></div>
+      </aside>
+      <div class="iw-academic-main">
+        <div id="amxPanelHost"></div>
+        <details class="amx-secondary programme-requirements-details" id="programmeRequirementsDetails">
+          <summary>Programme Entry Requirements</summary>
+          <section class="programme-requirements-card" id="programmeRequirementsPanel">
+            <p>Academic Management controls the requirements applicants see for Social Work and Project and Business Administration.</p>
+            <p role="status" aria-live="polite">Loading programme requirements...</p>
+            <div class="iw-table-wrap"><table class="iw-table"><thead><tr><th>Code</th><th>Programme</th><th>Award</th><th>Specialization</th><th>Direct entry requirements</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+          </section>
+        </details>
+      </div>
+    </div>
+  </main>
+  <button id="academicSidebarBackdrop" type="button" aria-label="Close academic navigation"></button>
+  <script src="/assets/js/config.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/api.js?v=20261009-single"></script>
+  <script type="module" src="/assets/js/academic-management-editor.js?v=20261008-offering-hr"></script>
+  <script src="/assets/js/programme-requirements-editor.js?v=20261007-requirements-refresh"></script>
+  <script src="/assets/js/workflow-entry.js?v=20261004-r2"></script><script src="/assets/js/institutional-context-actions.js?v=20261008-upload-progress"></script>
+<script src="../assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="../assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="../assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>
+

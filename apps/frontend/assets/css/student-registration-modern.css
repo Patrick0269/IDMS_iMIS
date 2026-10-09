@@ -1,0 +1,133 @@
+.student-registration-page .portal-layout {
+    padding-top: 30px !important;
+}
+
+.student-registration-page .portal-card {
+    border-radius: 12px !important;
+    border-top: 4px solid var(--student-maroon) !important;
+    box-shadow: 0 12px 32px rgba(69, 9, 25, .08) !important;
+}
+
+.student-registration-page .portal-card-header {
+    min-height: 62px;
+    justify-content: flex-end !important;
+    background: #fff !important;
+}
+
+.student-registration-page .portal-card-body {
+    padding: 26px !important;
+}
+
+.registration-overview {
+    display: grid;
+    grid-template-columns: minmax(230px, .85fr) minmax(0, 1.6fr);
+    align-items: center;
+    gap: 28px;
+    margin: 0 0 26px;
+    padding: 24px 26px;
+    border: 1px solid var(--student-line);
+    border-left: 5px solid var(--student-maroon);
+    border-radius: 9px;
+    background: linear-gradient(115deg, #fbf7f8, #fff 68%);
+}
+
+.registration-overview__heading > span {
+    color: var(--student-maroon);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.registration-overview__heading h2 {
+    margin: 7px 0 4px;
+    color: var(--student-maroon-dark);
+    font-size: clamp(20px, 2.2vw, 27px);
+}
+
+.registration-overview__heading p {
+    margin: 0;
+    color: var(--student-muted);
+    font-size: 15px;
+}
+
+.registration-overview__details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.35fr;
+    align-items: center;
+}
+
+.registration-overview__details > div {
+    min-height: 54px;
+    padding: 2px 19px;
+    border-left: 1px solid var(--student-line);
+}
+
+.registration-overview__details small,
+.registration-overview__details strong {
+    display: block;
+}
+
+.registration-overview__details small {
+    margin-bottom: 8px;
+    color: var(--student-muted);
+    font-size: 12px;
+}
+
+.registration-overview__details strong {
+    color: var(--student-maroon-dark);
+    font-size: 15px;
+}
+
+.student-registration-page #portalContent > h3 {
+    margin: 25px 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--student-line);
+    color: var(--student-maroon-dark);
+    font-size: 19px;
+}
+
+.student-registration-page .portal-table {
+    min-width: 900px;
+}
+
+.student-registration-page .select-course {
+    min-width: 94px;
+    color: #fff !important;
+    background: var(--student-maroon) !important;
+}
+
+.student-registration-page .select-course:hover {
+    background: var(--student-maroon-dark) !important;
+}
+
+@media (max-width: 900px) {
+    .registration-overview {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .registration-overview__details {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .student-registration-page .portal-card-body {
+        padding: 16px !important;
+    }
+
+    .registration-overview {
+        padding: 18px;
+    }
+
+    .registration-overview__details {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .registration-overview__details > div {
+        padding: 0 0 10px;
+        border-left: 0;
+        border-bottom: 1px solid var(--student-line);
+    }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cohort Management | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/cohorts.css">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+  <header class="topbar"><a class="brand" href="dashboard.html"><span>IDMS</span><strong>IDMC iMIS</strong></a><nav><a href="students.html">Students</a><a href="dashboard.html">Dashboard</a><button id="logoutButton" type="button">Log out</button></nav></header>
+  <main class="page">
+    <div class="heading"><div><p class="eyebrow">ACADEMIC MANAGEMENT</p><h1>Cohort Management</h1><p>Create cohorts, manage membership and track programme intake capacity.</p></div><div class="heading-actions"><button id="exportButton" class="secondary">Export CSV</button><button id="newButton" class="primary" hidden>+ New cohort</button></div></div>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+
+    <section class="filters card" aria-label="Cohort filters">
+      <label>Search<input id="searchFilter" placeholder="Code or cohort name"></label>
+      <label>Programme<select id="programmeFilter"><option value="">All programmes</option></select></label>
+      <label>Academic year<select id="academicYearFilter"><option value="">All academic years</option></select></label>
+      <label>Admission year<input id="yearFilter" type="number" min="1900" max="2200" placeholder="e.g. 2026"></label>
+      <label>Intake<input id="intakeFilter" placeholder="Intake code"></label>
+      <label>Status<select id="statusFilter"><option value="">All statuses</option><option>ACTIVE</option><option>INACTIVE</option><option>CLOSED</option><option>ARCHIVED</option></select></label>
+      <button id="filterButton" class="secondary">Apply filters</button>
+    </section>
+
+    <section id="formCard" class="card form-card" hidden>
+      <div class="section-heading"><div><h2 id="formTitle">Create cohort</h2><p>Fields marked * are required. Cohort codes must be unique.</p></div><button id="cancelButton" class="quiet" type="button">Close</button></div>
+      <form id="cohortForm">
+        <div class="form-grid">
+          <label>Cohort code *<input name="cohortCode" required maxlength="30" pattern="[A-Za-z0-9][A-Za-z0-9_-]*" placeholder="e.g. NURSING-2026-SEP"></label>
+          <label>Cohort name *<input name="cohortName" required maxlength="120" placeholder="e.g. Nursing September 2026"></label>
+          <label>Programme *<select name="programmeId" required><option value="">Select programme</option></select></label>
+          <label>Programme version<select name="programmeVersionId"><option value="">Select version (optional)</option></select></label>
+          <label>Academic year<select name="academicYearId"><option value="">Select year (optional)</option></select></label>
+          <label>Intake code<input name="intakeCode" maxlength="30" placeholder="e.g. SEPTEMBER"></label>
+          <label>Intake name<input name="intakeName" maxlength="80" placeholder="e.g. September intake"></label>
+          <label>Admission year *<input name="admissionYear" type="number" min="1900" max="2200" required></label>
+          <label>Start date<input name="startDate" type="date"></label>
+          <label>Expected completion<input name="expectedCompletionDate" type="date"></label>
+          <label>Study mode<select name="studyMode"><option value="FULL_TIME">Full time</option><option value="PART_TIME">Part time</option><option value="DISTANCE">Distance</option><option value="BLENDED">Blended</option><option value="EVENING">Evening</option><option value="OTHER">Other</option></select></label>
+          <label>Campus<select name="campusId"><option value="">No campus specified</option></select></label>
+          <label>Maximum capacity<input name="maxCapacity" type="number" min="1" step="1" placeholder="No limit"></label>
+          <label>Status<select name="status"><option>ACTIVE</option><option>INACTIVE</option><option>CLOSED</option><option>ARCHIVED</option></select></label>
+          <label class="wide">Notes<textarea name="notes" rows="3" maxlength="3000" placeholder="Optional cohort notes"></textarea></label>
+        </div>
+        <div class="form-actions"><button class="primary" type="submit">Save cohort</button><span id="formHint" class="muted"></span></div>
+      </form>
+    </section>
+
+    <section class="card table-card">
+      <div class="section-heading"><div><h2>Cohorts</h2><p id="resultCount">Loading cohorts…</p></div><button id="refreshButton" class="quiet">Refresh</button></div>
+      <div class="table-scroll"><table><thead><tr><th>Cohort</th><th>Programme</th><th>Year / intake</th><th>Study mode / campus</th><th>Students</th><th>Capacity</th><th>Status</th><th>Actions</th></tr></thead><tbody id="cohortRows"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody></table></div>
+      <div class="pagination"><button id="previousButton" class="secondary" disabled>Previous</button><span id="pageLabel">Page 1</span><button id="nextButton" class="secondary" disabled>Next</button></div>
+    </section>
+
+    <section id="rosterCard" class="card table-card" hidden>
+      <div class="section-heading"><div><h2 id="rosterTitle">Cohort roster</h2><p id="rosterCount"></p></div><div class="heading-actions"><button id="assignButton" class="primary" hidden>Assign / transfer students</button><button id="closeRosterButton" class="quiet">Close</button></div></div>
+      <div class="table-scroll"><table><thead><tr><th>Student number</th><th>Name</th><th>Programme</th><th>Admission year</th><th>Status</th><th></th></tr></thead><tbody id="rosterRows"></tbody></table></div>
+      <div class="pagination"><button id="rosterPreviousButton" class="secondary" disabled>Previous</button><span id="rosterPageLabel">Page 1</span><button id="rosterNextButton" class="secondary" disabled>Next</button></div>
+    </section>
+
+    <dialog id="assignDialog" class="dialog">
+      <form id="assignForm" method="dialog">
+        <div class="section-heading"><div><h2>Assign / transfer students</h2><p>Choose records and enter the authorized transfer reason.</p></div><button id="closeAssignButton" class="quiet" type="button">Close</button></div>
+        <label class="search-label">Find students<input id="studentSearch" placeholder="Student number or name"></label>
+        <div id="candidateRows" class="candidate-list"><p class="empty">Load students to begin.</p></div>
+        <div class="pagination"><button id="candidatePreviousButton" class="secondary" type="button" disabled>Previous</button><span id="candidatePageLabel">Page 1</span><button id="candidateNextButton" class="secondary" type="button" disabled>Next</button></div>
+        <p id="candidateSelectionCount" class="muted" aria-live="polite">0 students selected</p>
+        <label>Assignment / transfer reason<textarea id="assignmentReason" required minlength="5" maxlength="500" rows="3"></textarea></label>
+        <div class="form-actions"><button class="primary" type="submit">Save assignments</button></div>
+      </form>
+    </dialog>
+  </main>
+  <script src="assets/js/idmc-session.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js?v=20261009-single"></script>
+  <script src="assets/js/cohorts.js"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

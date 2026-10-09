@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Panel | IDMC iMIS</title>
+    <link rel="stylesheet" href="assets/css/student-portal-home.css">
+    <link rel="stylesheet" href="assets/css/student-shell.css">
+    <link rel="stylesheet" href="assets/css/idmc-portal-enhancements.css">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+<div class="student-shell">
+    <header class="topbar">
+        <div class="topbar-actions">
+            <a class="institution-brand" href="student-portal.html" aria-label="IDMC Student Panel home"><span class="institution-mark">IDMC</span><span><strong>IDMC iMIS</strong><small>Student Information System</small></span></a>
+            <button id="menuButton" class="menu-button" type="button" aria-label="Open menu">☰</button>
+        </div>
+    </header>
+
+    <aside id="studentSidebar" class="sidebar">
+        <a class="sidebar-brand" href="student-portal.html" aria-label="IDMC Student Panel home"><span class="institution-mark">IDMC</span><span><strong>Institute of Development and Medical Sciences</strong><small>Student Information System</small></span></a>
+        <section class="student-identity">
+            <div class="photo-wrap"><img id="studentPhoto" alt="Student profile photograph" hidden><span id="photoFallback">ST</span></div>
+            <div><strong id="sidebarName">Student</strong><small>Student Panel</small></div>
+            <details class="idmc-account-menu"><summary aria-label="Student account menu">⋮</summary><div><a href="student-profile.html">Profile</a><a href="student-security.html">Password and security</a><button id="logoutSide" type="button">Log Out</button></div></details>
+        </section>
+        <div class="student-number"><span>Student Number</span><strong id="sidebarNumber">—</strong></div>
+        <div class="sidebar-collapse-control"><button id="sidebarCollapseButton" type="button" aria-label="Collapse sidebar" aria-pressed="false">⇤</button></div>
+
+        <nav class="student-nav" aria-label="Student services">
+            <a class="active" href="student-portal.html"><span>⌂</span>Home</a>
+        </nav>
+    </aside>
+
+    <main id="studentMain" class="main-content">
+        <div id="panelMessage" class="panel-message" hidden></div>
+
+        <section class="page-heading">
+            <div><p>IDMC iMIS</p><h1>Student Panel</h1></div>
+            <div class="panel-badge">Academic Self-Service</div>
+        </section>
+        <section class="content-grid">
+            <article class="card timetable-card">
+                <header class="card-header"><div><span class="section-number">01</span><h2>Latest Timetable</h2></div><a href="student-timetable.html">View full timetable</a></header>
+                <div class="day-tabs"><button class="active" data-day="today" type="button">Today</button><button data-day="tomorrow" type="button">Tomorrow</button></div>
+                <div class="table-scroll"><table><thead><tr><th>#</th><th>Code</th><th>Module Name</th><th>Time</th><th>Room</th></tr></thead><tbody id="timetableRows"><tr><td colspan="5" class="empty-cell">Loading timetable…</td></tr></tbody></table></div>
+            </article>
+
+            <article class="card profile-card">
+                <header class="card-header"><div><span class="section-number">02</span><h2>Academic Profile</h2></div><div class="profile-actions"><a href="student-profile.html">View profile</a><button id="toggleProfilePanel" type="button" aria-label="Collapse profile panel" aria-controls="profilePanelContent" aria-expanded="true">⌄</button></div></header>
+                <div id="profilePanelContent">
+                <dl class="profile-list">
+                    <div><dt>Entry Year</dt><dd id="entryYear">—</dd></div>
+                    <div><dt>Intake</dt><dd id="intake">—</dd></div>
+                    <div><dt>Session</dt><dd id="session">—</dd></div>
+                    <div><dt>Programme</dt><dd id="programme">—</dd></div>
+                    <div><dt>Department</dt><dd id="department">—</dd></div>
+                </dl>
+                <details><summary>Onyesha taarifa zaidi za IDMC</summary><dl class="profile-list student-profile-list-extra">
+                    <div><dt>Student Number</dt><dd id="profileStudentNumber">—</dd></div>
+                    <div><dt>School / Faculty</dt><dd id="school">—</dd></div>
+                    <div><dt>Campus</dt><dd id="campus">—</dd></div>
+                </dl></details>
+                </div>
+            </article>
+        </section>
+
+        <section class="content-grid lower-grid">
+            <article class="card compact-card">
+                <header class="card-header"><div><span class="section-number">03</span><h2>Academic Summary</h2></div></header>
+                <div class="summary-list">
+                    <a href="student-registration.html"><span>Registered Courses</span><strong id="registeredCourses">0</strong></a>
+                    <a href="student-attendance.html"><span>Attendance</span><strong id="attendanceRate">—</strong></a>
+                    <a href="student-results.html"><span>Published Results</span><strong id="publishedResults">0</strong></a>
+                    <a href="student-fees.html"><span>Account Balance</span><strong id="accountBalance">TZS 0</strong></a>
+                </div>
+            </article>
+            <article class="card compact-card">
+                <header class="card-header"><div><span class="section-number">04</span><h2>Notices</h2></div><a href="student-notifications.html">View all</a></header>
+                <div id="noticeList" class="notice-list"><p class="empty-notice">Loading notices…</p></div>
+            </article>
+        </section>
+
+        <footer class="student-footer"><p><strong>Institute of Development and Medical Sciences</strong></p><p>Copyright © <span id="copyrightYear"></span> IDMC. All rights reserved.</p><a href="http://www.idmc.ac.tz" target="_blank" rel="noopener">Institute Website</a></footer>
+    </main>
+</div>
+<script src="assets/js/idmc-session.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js?v=20261009-single"></script>
+<script type="module" src="assets/js/student-shell.js?v=20261009-single"></script>
+<script src="assets/js/student-portal-home.js"></script>
+    <script defer src="assets/js/idmc-portal-enhancements.js"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

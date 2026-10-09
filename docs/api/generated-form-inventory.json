@@ -1,0 +1,832 @@
+{
+  "generated_at": "2026-10-09T18:33:46.611Z",
+  "count": 69,
+  "forms": [
+    {
+      "page": "admissions.html",
+      "form_id": "officerApplicationForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "firstName",
+        "middleName",
+        "lastName",
+        "email",
+        "phone",
+        "dateOfBirth",
+        "gender",
+        "nationality",
+        "region",
+        "district",
+        "addressLine1",
+        "academicYearId",
+        "programmeId",
+        "secondProgrammeId",
+        "qualificationType",
+        "institutionName",
+        "indexNumber",
+        "awardName",
+        "completionYear",
+        "grade",
+        "qualification2Type",
+        "institution2Name",
+        "index2Number",
+        "completion2Year",
+        "kinName",
+        "kinRelationship",
+        "kinPhone",
+        "kinEmail",
+        "kinAddress",
+        "applicantConfirmed"
+      ]
+    },
+    {
+      "page": "alumni.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "applicant-access.html",
+      "form_id": "applicantLoginForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "email",
+        "password"
+      ]
+    },
+    {
+      "page": "applicant-access.html",
+      "form_id": "applicantRegisterForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "firstName",
+        "middleName",
+        "lastName",
+        "phone",
+        "email",
+        "dateOfBirth",
+        "gender",
+        "nationality",
+        "nationalIdNumber",
+        "passportNumber",
+        "password",
+        "confirmPassword",
+        "consent"
+      ]
+    },
+    {
+      "page": "applicant-portal.html",
+      "form_id": "profileForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "firstName",
+        "middleName",
+        "lastName",
+        "email",
+        "phone",
+        "dateOfBirth",
+        "gender",
+        "nationality",
+        "maritalStatus",
+        "birthDistrict",
+        "birthRegion",
+        "birthCountry",
+        "nationalIdNumber",
+        "passportNumber",
+        "city",
+        "region",
+        "district",
+        "country",
+        "addressLine1",
+        "addressLine2",
+        "permanentAddress",
+        "bankName",
+        "bankBranch",
+        "bankAccountNumber",
+        "nhifCardNumber",
+        "disabilityStatus",
+        "disabilityDetails"
+      ]
+    },
+    {
+      "page": "applicant-portal.html",
+      "form_id": "applicationDetailsForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "academicYearId",
+        "applicationCategory",
+        "applicationRound",
+        "sponsorshipType",
+        "sponsorName",
+        "sponsorOccupation",
+        "sponsorPhone",
+        "sponsorAddress"
+      ]
+    },
+    {
+      "page": "applicant-portal.html",
+      "form_id": "qualificationForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "qualificationId",
+        "country",
+        "educationLevel",
+        "indexNumber",
+        "institutionName",
+        "programmeName",
+        "startYear",
+        "endYear",
+        "certificateFile"
+      ]
+    },
+    {
+      "page": "applicant-portal.html",
+      "form_id": "choiceForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "programmeId",
+        "secondProgrammeId"
+      ]
+    },
+    {
+      "page": "applicant-portal.html",
+      "form_id": "nextOfKinForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "kinName",
+        "kinRelationship",
+        "kinPhone",
+        "kinOccupation",
+        "kinEmail",
+        "kinAddress"
+      ]
+    },
+    {
+      "page": "assessment.html",
+      "form_id": "marksForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "assessment.html",
+      "form_id": "assessmentForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "assessmentCode",
+        "assessmentName",
+        "assessmentType",
+        "assessmentNumber",
+        "maximumMarks",
+        "weightPercentage",
+        "dueDate",
+        "dueTime",
+        "status",
+        "instructions"
+      ]
+    },
+    {
+      "page": "attendance.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "campuses.html",
+      "form_id": null,
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "campusCode",
+        "status",
+        "campusName",
+        "location",
+        "description"
+      ]
+    },
+    {
+      "page": "clinical-placement.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "cohorts.html",
+      "form_id": "cohortForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "cohortCode",
+        "cohortName",
+        "programmeId",
+        "programmeVersionId",
+        "academicYearId",
+        "intakeCode",
+        "intakeName",
+        "admissionYear",
+        "startDate",
+        "expectedCompletionDate",
+        "studyMode",
+        "campusId",
+        "maxCapacity",
+        "status",
+        "notes"
+      ]
+    },
+    {
+      "page": "cohorts.html",
+      "form_id": "assignForm",
+      "method": "DIALOG",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "data-deletion.html",
+      "form_id": "dataDeletionForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "deleteGroup"
+      ]
+    },
+    {
+      "page": "departments.html",
+      "form_id": null,
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "departmentCode",
+        "status",
+        "departmentName",
+        "schoolId",
+        "description"
+      ]
+    },
+    {
+      "page": "documents.html",
+      "form_id": "documentForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "institutionId",
+        "documentNumber",
+        "documentType",
+        "title",
+        "moduleCode",
+        "visibility",
+        "file",
+        "description"
+      ]
+    },
+    {
+      "page": "examinations.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "field-practical.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "finance-portal.html",
+      "form_id": "feeForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "name",
+        "academicYear",
+        "semester",
+        "firstInstallmentAmount",
+        "programmeLevel",
+        "applyToAll"
+      ]
+    },
+    {
+      "page": "finance-portal.html",
+      "form_id": "paymentSettingsForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "bankName",
+        "accountName",
+        "controlNumber",
+        "lock"
+      ]
+    },
+    {
+      "page": "finance.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "graduation.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "historical-students.html",
+      "form_id": "manualForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "studentNumber",
+        "formFourIndex",
+        "formFourYear",
+        "firstName",
+        "middleName",
+        "lastName",
+        "cohortYear",
+        "programmeCode",
+        "programmeVersionCode",
+        "academicYear",
+        "studentStatus",
+        "gender",
+        "dateOfBirth",
+        "phone",
+        "email"
+      ]
+    },
+    {
+      "page": "hod-course-allocation.html",
+      "form_id": "haForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "courseOfferingId",
+        "lecturerUserId",
+        "assignmentRole",
+        "workloadHours",
+        "notes"
+      ]
+    },
+    {
+      "page": "hostel.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "hr.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "institutions.html",
+      "form_id": "institutionForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "registration_number",
+        "accreditation_number",
+        "institution_type",
+        "ownership_type",
+        "email",
+        "phone",
+        "website",
+        "physical_address",
+        "postal_address",
+        "city",
+        "region",
+        "country"
+      ]
+    },
+    {
+      "page": "institutions.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "id",
+        "kind"
+      ]
+    },
+    {
+      "page": "library.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "login.html",
+      "form_id": "loginForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "username",
+        "password"
+      ]
+    },
+    {
+      "page": "news.html",
+      "form_id": "newsSearch",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "search"
+      ]
+    },
+    {
+      "page": "payroll.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "registration.html",
+      "form_id": "registrationForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "academicYearId",
+        "semesterId",
+        "notes"
+      ]
+    },
+    {
+      "page": "research.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "results.html",
+      "form_id": "resultGridForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "results.html",
+      "form_id": "resultPolicyForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "courseOfferingId",
+        "gradeScaleId",
+        "courseworkWeight",
+        "examinationWeight",
+        "minimumCourseworkRequired",
+        "minimumExamRequired",
+        "minimumPassMark"
+      ]
+    },
+    {
+      "page": "schools.html",
+      "form_id": null,
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "schoolCode",
+        "status",
+        "schoolName",
+        "campusId",
+        "description"
+      ]
+    },
+    {
+      "page": "set-password.html",
+      "form_id": "passwordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "staff-accounts.html",
+      "form_id": "accountForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "mode",
+        "identifier",
+        "firstName",
+        "middleName",
+        "lastName",
+        "email",
+        "username",
+        "password",
+        "employeeNumber",
+        "roleCode",
+        "institutionId",
+        "departmentId",
+        "jobTitle",
+        "phone",
+        "employmentType",
+        "appointmentDate"
+      ]
+    },
+    {
+      "page": "staff-self-service.html",
+      "form_id": "profileForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "phone",
+        "emergencyContactName",
+        "emergencyContactPhone",
+        "postalAddress",
+        "physicalAddress"
+      ]
+    },
+    {
+      "page": "staff-self-service.html",
+      "form_id": "leaveForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "leaveTypeId",
+        "startDate",
+        "endDate",
+        "reason"
+      ]
+    },
+    {
+      "page": "staff-self-service.html",
+      "form_id": "expenseForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "expenseType",
+        "title",
+        "amount",
+        "meetingDate",
+        "description"
+      ]
+    },
+    {
+      "page": "staff-self-service.html",
+      "form_id": "passwordForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "currentPassword",
+        "newPassword",
+        "confirmPassword"
+      ]
+    },
+    {
+      "page": "student-actions.html",
+      "form_id": "addDropForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "requestType",
+        "courseOfferingId",
+        "reason"
+      ]
+    },
+    {
+      "page": "student-actions.html",
+      "form_id": "uploadForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "documentType",
+        "file"
+      ]
+    },
+    {
+      "page": "student-evaluation.html",
+      "form_id": "evaluationForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "courseOfferingId",
+        "rating",
+        "lecturerPreparation",
+        "contentDelivery",
+        "learningResources",
+        "comment"
+      ]
+    },
+    {
+      "page": "student-first-password.html",
+      "form_id": "form",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "student-help.html",
+      "form_id": "helpForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "categoryId",
+        "priority",
+        "subject",
+        "description"
+      ]
+    },
+    {
+      "page": "student-request-center.html",
+      "form_id": "studentRequestForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "requestType",
+        "subject",
+        "reason",
+        "evidenceUrl"
+      ]
+    },
+    {
+      "page": "student-requests.html",
+      "form_id": "decisionForm",
+      "method": "DIALOG",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "student-requests.html",
+      "form_id": "workflowForm",
+      "method": "DIALOG",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "student-security.html",
+      "form_id": "passwordForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "currentPassword",
+        "newPassword",
+        "confirmPassword"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "assessmentForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "assessmentId",
+        "file",
+        "remarks"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "logbookForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "placement",
+        "entryDate",
+        "activityTitle",
+        "hoursCompleted",
+        "activityDescription",
+        "competencies"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "fieldReportForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "fieldPracticalId",
+        "reportType",
+        "title",
+        "file"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "scholarshipForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "scholarshipName",
+        "sponsorName",
+        "requestedAmount",
+        "academicYear",
+        "reason"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "refundForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "paymentId",
+        "amount",
+        "reason"
+      ]
+    },
+    {
+      "page": "student-services.html",
+      "form_id": "preferencesForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "emailNotifications",
+        "smsNotifications",
+        "pushNotifications",
+        "inAppNotifications"
+      ]
+    },
+    {
+      "page": "students.html",
+      "form_id": "studentForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "timetable.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "transcripts.html",
+      "form_id": "recordForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "users.html",
+      "form_id": "createUserForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "users.html",
+      "form_id": "editForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "users.html",
+      "form_id": "roleForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "website-content.html",
+      "form_id": "contentForm",
+      "method": "JS",
+      "action": null,
+      "fields": []
+    },
+    {
+      "page": "website-content.html",
+      "form_id": "siteItemForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "id",
+        "itemType",
+        "status",
+        "slug",
+        "category",
+        "title",
+        "summary",
+        "body",
+        "searchVisible",
+        "seoTitle",
+        "seoDescription",
+        "imageUrl",
+        "attachmentUrl",
+        "linkUrl",
+        "publishAt",
+        "expireAt",
+        "featured"
+      ]
+    }
+  ]
+}

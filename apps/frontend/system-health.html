@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#641229">
+  <title>System Health | IDMC iMIS</title>
+  <link rel="stylesheet" href="assets/css/system-health.css">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body class="health-page">
+  <header class="health-topbar">
+    <a class="health-brand" href="dashboard.html" aria-label="IDMC iMIS dashboard">
+      <span class="health-brand__mark" aria-hidden="true">IDMC</span>
+      <span><strong>IDMC iMIS</strong><small>System administration</small></span>
+    </a>
+    <nav class="health-topbar__actions" aria-label="System navigation">
+      <a class="health-nav-link" href="system.html">System settings</a>
+      <a class="health-nav-link" href="dashboard.html">Dashboard</a>
+      <button id="logoutButton" class="health-button health-button--quiet" type="button">Log out</button>
+    </nav>
+  </header>
+
+  <div id="accessState" class="health-access" role="status" aria-live="polite">Checking your system access...</div>
+  <main id="healthApp" class="health-main" hidden>
+    <section class="health-heading" aria-labelledby="pageTitle">
+      <div>
+        <p class="health-eyebrow">SYSTEM ADMINISTRATION / MONITORING</p>
+        <h1 id="pageTitle">System health</h1>
+        <p class="health-lead">Read-only checks for the IDMC API and its database connection.</p>
+      </div>
+      <button id="refreshButton" class="health-button health-button--primary" type="button">
+        <span aria-hidden="true">&#8635;</span> Refresh checks
+      </button>
+    </section>
+
+    <section id="overallCard" class="health-overview health-state--checking" aria-labelledby="overallTitle" aria-live="polite">
+      <span id="overallIcon" class="health-overview__icon" aria-hidden="true">&#8230;</span>
+      <div>
+        <p class="health-eyebrow">CURRENT SUMMARY</p>
+        <h2 id="overallTitle">Checking services</h2>
+        <p id="overallMessage">Waiting for the health endpoints to respond.</p>
+      </div>
+      <span id="overallBadge" class="health-badge">Checking</span>
+    </section>
+
+    <section class="health-services" aria-label="Health checks">
+      <article class="health-service-card" aria-labelledby="apiTitle">
+        <div class="health-service-card__top"><span class="health-service-icon" aria-hidden="true">API</span><span id="apiBadge" class="health-badge health-badge--checking">Checking</span></div>
+        <h2 id="apiTitle">Backend API</h2>
+        <p id="apiMessage" class="health-service-message">Checking the API health endpoint.</p>
+        <dl class="health-details"><div><dt>Application</dt><dd id="apiApplication">&#8212;</dd></div><div><dt>Reported time</dt><dd id="apiTime">&#8212;</dd></div></dl>
+      </article>
+      <article class="health-service-card" aria-labelledby="databaseTitle">
+        <div class="health-service-card__top"><span class="health-service-icon health-service-icon--database" aria-hidden="true">DB</span><span id="databaseBadge" class="health-badge health-badge--checking">Checking</span></div>
+        <h2 id="databaseTitle">Database readiness</h2>
+        <p id="databaseMessage" class="health-service-message">Checking the existing readiness endpoint.</p>
+        <dl class="health-details"><div><dt>Check duration</dt><dd id="databaseLatency">&#8212;</dd></div><div><dt>Dependency</dt><dd id="databaseDependency">&#8212;</dd></div></dl>
+      </article>
+      <article class="health-service-card health-service-card--info" aria-labelledby="scopeTitle">
+        <div class="health-service-card__top"><span class="health-service-icon health-service-icon--scope" aria-hidden="true">i</span><span class="health-badge health-badge--info">Read only</span></div>
+        <h2 id="scopeTitle">Check coverage</h2>
+        <p class="health-service-message">This page reports only API health and database readiness from existing endpoints.</p>
+        <p class="health-scope-note">It does not inspect student records, migration history, backups, email delivery or external integrations.</p>
+      </article>
+    </section>
+
+    <section class="health-footer" aria-label="Refresh information">
+      <p id="lastChecked">No check has completed yet.</p>
+      <p>Automatic refresh: every 60 seconds while this page is visible.</p>
+    </section>
+    <div id="healthNotice" class="health-notice" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js?v=20261009-single"></script>
+  <script src="assets/js/rbac.js"></script>
+  <script src="assets/js/system-health.js"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

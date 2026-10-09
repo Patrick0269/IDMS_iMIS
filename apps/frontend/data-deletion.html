@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>IDMC iMIS | Data deletion portal</title>
+  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/app-workflow.css">
+  <style>
+    :root{--del-ink:#32131b;--del-muted:#71636a;--del-line:#e6dfe1;--del-red:#8f2432;--del-bg:#faf8f8}
+    body{margin:0;background:var(--del-bg);color:var(--del-ink);font-family:Inter,Arial,sans-serif}
+    .deletion-page{max-width:1120px;margin:0 auto;padding:28px 22px 48px}
+    .deletion-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}
+    .deletion-top a{color:var(--del-red);font-weight:650;text-decoration:none}
+    .deletion-eyebrow{font-size:11px;font-weight:750;letter-spacing:.12em;color:var(--del-red);text-transform:uppercase}
+    h1{font-size:28px;margin:6px 0}.deletion-lead{color:var(--del-muted);max-width:780px;line-height:1.55;margin:8px 0 22px}
+    .deletion-card{background:#fff;border:1px solid var(--del-line);border-radius:8px;padding:22px;margin:16px 0;box-shadow:0 3px 12px #32131b0a}
+    .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:14px 0}
+    .group{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--del-line);border-radius:6px;background:#fff;line-height:1.35}
+    .group input{margin-top:2px;accent-color:var(--del-red)}.group strong{display:block;font-size:14px}.group small{display:block;color:var(--del-muted);margin-top:3px}
+    .group.everything{grid-column:1/-1;border-color:#d4a0a5;background:#fff8f8}.group.everything strong{color:#7d1726}
+    .warning{padding:12px 14px;background:#fff7e9;border:1px solid #ebd5a8;border-left:4px solid #b27a16;color:#60450f;border-radius:4px;line-height:1.5;font-size:13px;margin:14px 0}
+    .confirm-row{display:grid;grid-template-columns:minmax(240px,1fr) auto;gap:12px;align-items:end;margin-top:16px}
+    label.confirm-label{font-weight:650;font-size:13px}input[type=text]{box-sizing:border-box;width:100%;margin-top:6px;padding:11px 12px;border:1px solid #d9ced1;border-radius:4px;font:inherit}
+    button{border:0;border-radius:4px;padding:11px 16px;min-height:42px;font:inherit;font-weight:700;cursor:pointer;background:var(--del-red);color:#fff}button.secondary{background:#fff;border:1px solid #c9b9be;color:var(--del-red)}button:disabled{opacity:.48;cursor:not-allowed}
+    .preview{margin-top:16px;color:var(--del-muted);line-height:1.5}.preview table{width:100%;border-collapse:collapse;margin-top:8px}.preview th,.preview td{padding:7px 9px;border-bottom:1px solid var(--del-line);text-align:left;font-size:13px}.preview th:last-child,.preview td:last-child{text-align:right}
+    .status{min-height:22px;margin:10px 0;color:var(--del-muted)}.status.error{color:#9b1e2a}.status.success{color:#176b45}
+    @media(max-width:620px){.deletion-page{padding:18px 13px 36px}.deletion-card{padding:16px}.confirm-row{grid-template-columns:1fr}.deletion-top{align-items:flex-start}}
+  </style>
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+  <main class="deletion-page">
+    <nav class="deletion-top"><a href="dashboard.html">← Dashboard</a><span id="deletionSignedIn" class="deletion-eyebrow">Admin access</span></nav>
+    <div class="deletion-eyebrow">System administration</div>
+    <h1>Data deletion portal</h1>
+    <p class="deletion-lead">Choose specific data groups to clear, or use Delete everything to clear operational records across the system. Preview the affected table counts before you proceed.</p>
+    <section class="deletion-card">
+      <form id="dataDeletionForm">
+        <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:750">Select what to delete</legend>
+          <div class="groups">
+            <label class="group"><input type="checkbox" name="deleteGroup" value="admissions"><span><strong>Admissions</strong><small>Applications, offers, imports and admission workflow</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="students"><span><strong>Students</strong><small>Student records, cohorts, services and lifecycle history</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="academics"><span><strong>Academic records</strong><small>Marks, results, examinations, timetable and attendance</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="finance"><span><strong>Finance</strong><small>Fee structures, invoices, balances, payments and expenses</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="staff"><span><strong>Staff and HR</strong><small>Staff records, leave, attendance and qualifications</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="operations"><span><strong>Operations</strong><small>Procurement, inventory, library, hostel and research records</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="communications"><span><strong>Communications</strong><small>Messages, helpdesk, documents and report runs</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="audit"><span><strong>Audit history</strong><small>Audit, security and workflow logs</small></span></label>
+            <label class="group"><input type="checkbox" name="deleteGroup" value="accounts"><span><strong>Non-admin accounts</strong><small>Application users and account profile data</small></span></label>
+            <label class="group everything"><input type="checkbox" name="deleteGroup" value="everything"><span><strong>Delete everything</strong><small>All operational database records and non-admin Supabase Auth accounts</small></span></label>
+          </div>
+        </fieldset>
+        <div class="warning"><strong>Retained:</strong> The admin account submitting the reset, other ADMIN/SUPER_ADMIN accounts, institutional setup and role definitions remain so the system can be used again. Student <code>IDMC/2026/00001</code> is no longer protected and will be deleted when Students or Delete everything is selected. Uploaded files in Supabase Storage are not deleted. “Delete everything” cannot be undone from this portal.</div>
+        <div class="confirm-row"><label class="confirm-label">Confirmation phrase<input type="text" id="deletionPhrase" autocomplete="off" placeholder="Preview first" required></label><button type="button" class="secondary" id="previewDeletion">Preview selected data</button></div>
+        <div id="deletionPreview" class="preview" role="status" aria-live="polite">Choose data groups, then preview the records.</div>
+        <div id="deletionMessage" class="status" role="status" aria-live="polite"></div>
+        <button type="submit" id="executeDeletion" disabled>Delete selected data</button>
+      </form>
+    </section>
+  </main>
+  <script src="assets/js/idmc-session.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/api.js?v=20261009-single"></script>
+  <script src="assets/js/rbac.js"></script>
+  <script src="assets/js/admin-data-reset.js?v=20261004-2"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

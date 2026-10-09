@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Security | IDMC iMIS Student Panel</title>
+  <link rel="stylesheet" href="assets/css/student-portal-pages.css">
+  <link rel="stylesheet" href="assets/css/student-panel-final.css">
+  <link rel="stylesheet" href="assets/css/student-shell.css">
+<script src="assets/js/action-progress.js?v=20261009-single"></script>
+<link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
+<body>
+<div class="portal-shell">
+  <header class="portal-header"><div class="portal-header-inner">
+    <a class="portal-brand" href="student-portal.html"><span class="portal-brand-mark">IDMC</span><span>IDMC iMIS<small>Student Panel</small></span></a>
+  </div></header>
+  <div class="portal-layout">
+    <aside class="portal-sidebar" id="studentSidebar">
+      <section class="portal-student-card"><h3 id="studentName">Student</h3><p><strong>Student No:</strong> <span id="studentNumber">—</span></p><p><strong>Programme:</strong> <span id="studentProgramme">—</span></p></section>
+      <nav class="portal-nav" aria-label="Student services"></nav>
+    </aside>
+    <main class="portal-main">
+      <section class="portal-page-heading"><h1>Security</h1><p>Change your password and review your recent account security history.</p></section>
+      <div id="securityMessage" class="portal-state" role="status" aria-live="polite" hidden></div>
+      <section class="portal-card"><div class="portal-card-header"><h2>Change Password</h2></div><div class="portal-card-body">
+        <form id="passwordForm" class="idmc-password-form">
+          <label>Current password<input type="password" name="currentPassword" autocomplete="current-password" required></label>
+          <label>New password<input type="password" name="newPassword" minlength="10" autocomplete="new-password" required></label>
+          <label>Confirm new password<input type="password" name="confirmPassword" minlength="10" autocomplete="new-password" required></label>
+          <p>Use at least 10 characters with upper-case, lower-case and a number.</p>
+          <button class="portal-button" type="submit">Change password</button>
+        </form>
+      </div></section>
+      <section class="portal-card idmc-security-history"><div class="portal-card-header"><h2>Login and Security History</h2></div><div class="portal-card-body" id="securityHistory"><p>Loading security history…</p></div></section>
+    </main>
+  </div>
+</div>
+<script src="assets/js/idmc-session.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/api.js?v=20261009-single"></script>
+<script src="assets/js/student-security.js"></script>
+<script type="module" src="assets/js/student-shell.js?v=20261009-single"></script>
+<script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
+<script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
+</html>

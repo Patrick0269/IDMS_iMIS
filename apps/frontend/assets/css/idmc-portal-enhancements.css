@@ -1,0 +1,18 @@
+/* IDMC_PORTAL_ENHANCEMENTS v1: additive presentation only; no data/API changes. */
+.idmc-upgrade-panel{box-sizing:border-box;margin:1.25rem 0;padding:1.15rem clamp(1rem,2.5vw,1.5rem);border:1px solid #e4d9dc;border-radius:16px;background:linear-gradient(135deg,#fff 0%,#fbf7f8 100%);box-shadow:0 8px 24px rgba(45,20,28,.06)}
+.idmc-upgrade-panel__head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.9rem}
+.idmc-upgrade-panel__head h2{margin:0;color:#4a0d1c;font-size:clamp(1.05rem,2vw,1.3rem);line-height:1.35}
+.idmc-upgrade-panel__head p{margin:.3rem 0 0;color:#5d5356;max-width:68ch;line-height:1.55}
+.idmc-upgrade-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr));gap:.7rem}
+.idmc-upgrade-link{display:flex;min-height:46px;align-items:center;justify-content:space-between;gap:.75rem;padding:.8rem 1rem;border:1px solid #e7dadd;border-radius:12px;background:#fff;color:#4a0d1c;font-weight:650;text-decoration:none;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.idmc-upgrade-link::after{content:'→';font-size:1.15rem;color:#8a5361}
+.idmc-upgrade-link:hover{transform:translateY(-1px);border-color:#9d6a77;box-shadow:0 5px 15px rgba(45,20,28,.08)}
+.idmc-upgrade-link:focus-visible,.idmc-upgrade-panel a:focus-visible,.idmc-portal-polished :is(a,button,input,select,textarea):focus-visible{outline:3px solid #d59b31;outline-offset:3px}
+.idmc-upgrade-nav{display:flex;flex-wrap:wrap;gap:.55rem;margin:1rem 0;padding:.8rem;border:1px solid #e4d9dc;border-radius:12px;background:#fff}
+.idmc-upgrade-nav a{display:inline-flex;align-items:center;min-height:40px;padding:.45rem .8rem;border-radius:9px;background:#f7eff1;color:#4a0d1c;font-weight:650;text-decoration:none}
+.idmc-portal-polished .idmc-portal-card{border-radius:14px;transition:transform .15s ease,box-shadow .15s ease}
+.idmc-portal-polished .idmc-portal-card:hover{transform:translateY(-2px);box-shadow:0 9px 22px rgba(45,20,28,.11)}
+.idmc-portal-polished #applicationSteps li[aria-current=step]{font-weight:750;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+@media(max-width:600px){.idmc-upgrade-panel{padding:1rem}.idmc-upgrade-link{min-height:48px}}
+@media(prefers-reduced-motion:reduce){.idmc-upgrade-link,.idmc-portal-polished .idmc-portal-card{transition:none}.idmc-upgrade-link:hover,.idmc-portal-polished .idmc-portal-card:hover{transform:none}}
+@media print{.idmc-upgrade-panel,.idmc-upgrade-nav{display:none!important}}
