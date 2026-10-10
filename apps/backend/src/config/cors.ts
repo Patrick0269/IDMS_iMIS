@@ -16,3 +16,14 @@ export function assertSafeProductionOrigins(nodeEnv: string, allowedOrigins: str
     if (parsed.protocol !== "https:") throw new Error(`Production CORS origin must use HTTPS: ${origin}`);
   }
 }
+
+export function isOriginSameHost(origin: string | undefined, requestHost: string | undefined): boolean {
+  if (!origin || !requestHost) return false;
+  try {
+    const parsed = new URL(origin);
+    return parsed.protocol === "https:" &&
+      parsed.host.toLowerCase() === requestHost.toLowerCase();
+  } catch {
+    return false;
+  }
+}

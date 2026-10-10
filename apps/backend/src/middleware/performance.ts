@@ -36,7 +36,8 @@ export function compressJson(req: Request, res: Response, next: NextFunction): v
  * for long. Mutations always bypass the cache.
  */
 export function apiCachePolicy(req: Request, res: Response, next: NextFunction): void {
-  if (req.method === "GET" && !req.path.endsWith("/health") && !req.path.endsWith("/ready")) {
+  const authEndpoint = req.path.split("/").includes("auth");
+  if (!authEndpoint && req.method === "GET" && !req.path.endsWith("/health") && !req.path.endsWith("/ready")) {
     res.setHeader("Cache-Control", "private, max-age=5, stale-while-revalidate=15");
   } else {
     res.setHeader("Cache-Control", "no-store");

@@ -13,6 +13,8 @@ test("backend has gzip, private cache policy and bounded keep-alive", async () =
   assert.match(app, /compressJson/);
   assert.match(middleware, /Content-Encoding/);
   assert.match(middleware, /private, max-age=5/);
+  assert.match(middleware, /req\.path\.split\("\/"\)\.includes\("auth"\)/);
+  assert.match(middleware, /!authEndpoint/);
   assert.match(server, /keepAliveTimeout = 65_000/);
 });
 

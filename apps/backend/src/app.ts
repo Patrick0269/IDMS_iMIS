@@ -10,7 +10,7 @@ import apiRouter from "./routes/index.js";
 import institutionManagementRoutes from "./modules/institution-management/institution-management.routes.js";
 import studentManagementRoutes from "./modules/student-management/student-management.routes.js";
 import { requestContext } from "./middleware/requestContext.js";
-import { assertSafeProductionOrigins, isOriginAllowed, parseAllowedOrigins } from "./config/cors.js";
+import { assertSafeProductionOrigins, isOriginAllowed, isOriginSameHost, parseAllowedOrigins } from "./config/cors.js";
 import { getSupabase } from "./config/database.js";
 import { openApiDocument } from "./config/openapi.js";
 import { apiCachePolicy, compressJson } from "./middleware/performance.js";
@@ -33,15 +33,16 @@ app.use(requestContext);
 app.use(apiCachePolicy);
 app.use(compressJson);
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      const allowed = isOriginAllowed(origin, allowedOrigins);
-      callback(allowed ? null : new Error("CORS origin is not allowed."), allowed);
-    },
-    credentials: true,
-  })
-);
+app.use(cors((req, callback) => {
+  const origin = req.get("Origin");
+  const allowed =
+    isOriginAllowed(origin, allowedOrigins) ||
+    isOriginSameHost(origin, req.get("Host"));
+  callback(
+    allowed ? null : new Error("CORS origin is not allowed."),
+    { origin: allowed, credentials: true }
+  );
+}));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
