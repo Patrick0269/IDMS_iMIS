@@ -30,11 +30,12 @@
           <label class="field">National ID number (optional)<input name="nationalIdNumber" maxlength="100"></label><label class="field">Passport number (optional)<input name="passportNumber" maxlength="100"></label>
           <label class="field">Create password<input name="password" type="password" required autocomplete="new-password" minlength="12" maxlength="128"></label><label class="field">Confirm password<input name="confirmPassword" type="password" required autocomplete="new-password" minlength="12" maxlength="128"></label>
         </div><label class="checkline"><input name="consent" type="checkbox" required><span>I confirm these are my details and agree to receive application account and admission messages at the email address above.</span></label><button class="submit" id="applicantRegisterButton" type="submit">Create applicant account</button><p class="form-note">Choose a password with at least 12 characters. We will ask you to verify your email before sign-in.</p></form>
-      </section>
-    </div>
+         <form id="applicantResendForm" hidden><label class="field">Email address<input name="email" type="email" required autocomplete="email" maxlength="255"></label><button class="submit" id="applicantResendButton" type="submit">Resend verification email</button></form>
+       </section>
+     </div>
     <p class="footer">Institute of Development and Medical Sciences · IDMC iMIS</p>
   </main>
   <script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js"></script>
-  <script src="assets/js/applicant-access.js?v=20261009-applicant-login"></script>
+  <script src="assets/js/applicant-access.js?v=20261010-applicant-verification-fix"></script>
 </body>
 </html>

@@ -22,7 +22,7 @@ export async function registerApplicant(req: Request, res: Response): Promise<vo
       nationalIdNumber: String(req.body?.nationalIdNumber ?? "").trim().slice(0, 100),
       passportNumber: String(req.body?.passportNumber ?? "").trim().slice(0, 100),
     });
-    res.status(201).json({ success: true, data, message: "Account created. Check your email to verify the address, then sign in to continue your application." });
+    res.status(201).json({ success: true, data, message: data.verificationEmailSent ? "Account created. Check your email to verify the address, then sign in to continue your application." : "Your applicant account was created, but we could not send the verification email. Use Resend verification below; do not submit the registration form again." });
   } catch (error) {
     const status = Number((error as { statusCode?: number })?.statusCode) || 500;
     if (status >= 500) logError("Applicant account registration failed", error);
@@ -30,6 +30,17 @@ export async function registerApplicant(req: Request, res: Response): Promise<vo
   }
 }
 
+export async function resendApplicantVerification(req: Request, res: Response): Promise<void> {
+  const email = String(req.body?.email ?? "").trim().slice(0, 255);
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    try {
+      await authService.resendApplicantVerification(email);
+    } catch (error) {
+      logError("Applicant verification resend request failed", error);
+    }
+  }
+  res.json({ success: true, message: "If this address has an unverified applicant account, a new verification email will be sent." });
+}
 export async function login(req: Request, res: Response): Promise<void> {
   const identifier = String(req.body?.identifier ?? "").trim();
   const password = String(req.body?.password ?? "");

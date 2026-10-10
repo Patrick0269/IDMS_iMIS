@@ -42,7 +42,7 @@ export async function registerApplicant(input: {
   const frontend = env.FRONTEND_URL.replace(/\/+$/, "");
   const generated = await db.auth.admin.generateLink({
     type: "signup", email, password,
-    options: { data: { first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName }, redirectTo: `${frontend}/applicant-access.html` },
+    options: { data: { first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName }, redirectTo: frontend + "/applicant-access.html" },
   });
   if (generated.error || !generated.data?.user?.id || !generated.data.properties?.action_link) {
     throw Object.assign(new Error(generated.error?.message || "Unable to create the applicant account."), { statusCode: 400 });
@@ -52,7 +52,7 @@ export async function registerApplicant(input: {
   let userId: string | null = null;
   let applicantId: string | null = null;
   try {
-    const userNumber = `IDMC/APPLICANT/${new Date().getFullYear()}/${randomUUID().slice(0, 8).toUpperCase()}`;
+    const userNumber = "IDMC/APPLICANT/" + new Date().getFullYear() + "/" + randomUUID().slice(0, 8).toUpperCase();
     const user = await db.from("users").insert({
       auth_user_id: authUserId, user_number: userNumber, first_name: firstName, middle_name: middleName,
       last_name: lastName, display_name: displayName, email, phone: input.phone?.trim() || null, status: "ACTIVE",
@@ -64,7 +64,7 @@ export async function registerApplicant(input: {
     if (assignment.error) throw assignment.error;
 
     const applicant = await db.from("applicants").insert({
-      applicant_number: `APP/${new Date().toISOString().slice(0, 10).replace(/-/g, "")}/${randomUUID().slice(0, 8).toUpperCase()}`,
+      applicant_number: "APP/" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + "/" + randomUUID().slice(0, 8).toUpperCase(),
       first_name: firstName, middle_name: middleName, last_name: lastName, email, phone: input.phone?.trim() || null,
       date_of_birth: input.dateOfBirth || null, gender: input.gender || null, nationality: input.nationality?.trim() || "Tanzanian",
       national_id_number: input.nationalIdNumber?.trim() || null, passport_number: input.passportNumber?.trim() || null,
@@ -74,8 +74,6 @@ export async function registerApplicant(input: {
     applicantId = applicant.data.id;
 
     await createAuditLog({ actorUserId: userId, actionCode: "APPLICANT_ACCOUNT_CREATED", moduleCode: "admissions", entityType: "applicant", entityId: applicantId, newValues: { email, email_verified: false } });
-    await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: generated.data.properties.action_link });
-    return { verificationRequired: true };
   } catch (error) {
     if (applicantId) await db.from("applicants").delete().eq("id", applicantId);
     if (userId) {
@@ -85,8 +83,36 @@ export async function registerApplicant(input: {
     await db.auth.admin.deleteUser(authUserId);
     throw error;
   }
+
+  let verificationEmailSent = false;
+  try {
+    await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: generated.data.properties.action_link });
+    verificationEmailSent = true;
+  } catch {
+    try {
+      const resend = await db.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: frontend + "/applicant-access.html" },
+      });
+      if (resend.error) throw resend.error;
+      verificationEmailSent = true;
+    } catch {
+      console.warn("Applicant verification delivery failed through Worker SMTP and Supabase Auth fallback.");
+    }
+  }
+  return { verificationRequired: true, verificationEmailSent };
 }
 
+export async function resendApplicantVerification(email: string): Promise<void> {
+  const frontend = env.FRONTEND_URL.replace(/\/+$/, "");
+  const { error } = await getSupabase().auth.resend({
+    type: "signup",
+    email: email.trim().toLowerCase(),
+    options: { emailRedirectTo: frontend + "/applicant-access.html" },
+  });
+  if (error) throw error;
+}
 function normaliseIdentifier(value: string): string {
   return String(value ?? "").trim();
 }

@@ -57,11 +57,40 @@
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.success === false) throw new Error(payload.message || payload.error || "Unable to create applicant account.");
       form.reset();
-      showMessage(payload.message || "Account created. Check your email and confirm your address before signing in.", "success");
+      if (payload.data?.verificationEmailSent === false) {
+        const resendForm = document.getElementById("applicantResendForm");
+        resendForm.elements.email.value = values.email;
+        resendForm.hidden = false;
+        showMessage(payload.message, "error");
+      } else {
+        showMessage(payload.message || "Account created. Check your email and confirm your address before signing in.", "success");
+      }
     } catch (error) {
+      const resendForm = document.getElementById("applicantResendForm");
+      resendForm.elements.email.value = values.email;
+      resendForm.hidden = false;
       showMessage(error.message || "Unable to create applicant account.", "error");
     } finally {
       button.disabled = false;
     }
   });
-})();
+  document.getElementById("applicantResendForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = document.getElementById("applicantResendButton");
+    button.disabled = true;
+    try {
+      const response = await fetch(apiBase + "/auth/applicant-verification-resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.elements.email.value })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.success === false) throw new Error(payload.message || "Unable to request a verification email.");
+      showMessage(payload.message || "If this address has an unverified applicant account, a new verification email will be sent.", "success");
+    } catch (error) {
+      showMessage(error.message || "Unable to request a verification email.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });})();
