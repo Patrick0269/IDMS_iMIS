@@ -10,7 +10,7 @@ test("backend has gzip, private cache policy and bounded keep-alive", async () =
     source("../src/middleware/performance.ts"),
     source("../src/server.ts"),
   ]);
-  assert.match(app, /compressJson/);
+  assert.match(app, /Cloudflare handles response compression/);
   assert.match(middleware, /Content-Encoding/);
   assert.match(middleware, /private, max-age=5/);
   assert.match(middleware, /req\.path\.split\("\/"\)\.includes\("auth"\)/);

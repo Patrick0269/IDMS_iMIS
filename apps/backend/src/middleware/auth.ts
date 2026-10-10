@@ -21,6 +21,7 @@ declare global {
         id: string;
         email: string | undefined;
         emailVerified: boolean;
+        mustChangePassword: boolean;
       };
     }
   }
@@ -182,7 +183,8 @@ export async function authenticate(
     req.authUser = {
       id: authUser.id,
       email: authUser.email,
-      emailVerified: Boolean(authUser.email_confirmed_at)
+      emailVerified: Boolean(authUser.email_confirmed_at),
+      mustChangePassword: passwordChangeRequired
     };
 
     req.user = {

@@ -12,7 +12,7 @@
     const USER_KEY = "idmc_user";
     const REDIRECT_KEY = "idmc_redirect";
     const ACTIVE_ROLE_KEY = "idmc_active_role";
-    const REQUEST_TIMEOUT_MS = 12000;
+    const REQUEST_TIMEOUT_MS = 25000;
 
     async function fetchWithTimeout(url, options) {
         const controller = new AbortController();
@@ -28,7 +28,7 @@
         } catch (error) {
             if (error && error.name === "AbortError") {
                 throw new Error(
-                    "The backend did not respond within 12 seconds. Confirm that it is running on port 4000."
+                    "The IDMC service did not respond within 25 seconds. Please retry."
                 );
             }
 
@@ -340,7 +340,15 @@
         saveSession(payload.data);
         return payload.data;
     }
-    async function getCurrentUser() {
+    let currentUserRequest = null;
+    function getCurrentUser() {
+        if (!currentUserRequest) {
+            currentUserRequest = loadCurrentUser().finally(function () { currentUserRequest = null; });
+        }
+        return currentUserRequest;
+    }
+
+    async function loadCurrentUser() {
         const token = getAccessToken();
 
         if (!token) {

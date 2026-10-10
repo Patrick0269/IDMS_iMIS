@@ -304,7 +304,10 @@ export async function getCurrentUser(userId: string) {
         role_code,
         role_name,
         description,
-        status
+        status,
+        role_permissions (
+          permissions!inner ( permission_code, status )
+        )
       )
     `)
     .eq("user_id", userId)
@@ -330,27 +333,17 @@ export async function getCurrentUser(userId: string) {
     }));
 
   const permissionSet = new Set<string>();
-  for (const role of roles) {
-    const { data: rolePermissions, error: permissionError } = await supabase
-      .from("role_permissions")
-      .select(`
-        permissions!inner (
-          permission_code,
-          status
-        )
-      `)
-      .eq("role_id", role.id);
-
-    if (permissionError) throw permissionError;
-
-    for (const item of rolePermissions ?? []) {
-      const permission = item.permissions as any;
-      if (permission?.status === "ACTIVE") {
+  for (const item of userRoles ?? []) {
+    const role = roles.find((candidate: any) => String(candidate.id) === String(item.role_id));
+    if (!role) continue;
+    for (const link of (item.roles as any)?.role_permissions ?? []) {
+      const permission = link.permissions as any;
+      if (permission?.status === "ACTIVE" && permission.permission_code) {
         permissionSet.add(permission.permission_code);
         role.permissions.push(permission.permission_code);
       }
     }
-    role.permissions.sort();
+    role.permissions = Array.from(new Set(role.permissions)).sort();
   }
 
   const staffProfile = await supabase

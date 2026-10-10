@@ -145,9 +145,7 @@ export async function me(req: Request, res: Response): Promise<void> {
   }
   const activeRole = requestedRole || data.roles.find(role => ["ADMIN", "SUPER_ADMIN", "SYSTEM_ADMIN"].includes(String(role.roleCode || "").toUpperCase())) || data.roles[0] || null;
   req.user.activeRoleId = activeRole?.id ?? null;
-  const identity = await (await import("../../../config/database.js")).getSupabase().auth.admin.getUserById(req.user.authUserId);
-  if (identity.error || !identity.data.user) { res.status(401).json({ success: false, message: "Login identity not found." }); return; }
-  res.json({ success: true, data: { ...data, activeRoleId: req.user.activeRoleId, mustChangePassword: identity.data.user.app_metadata?.idmc_student_first_login === true } });
+  res.json({ success: true, data: { ...data, activeRoleId: req.user.activeRoleId, mustChangePassword: req.authUser?.mustChangePassword === true } });
 }
 
 export async function authHealth(
