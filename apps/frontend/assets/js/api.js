@@ -7,10 +7,10 @@
         CONFIG.API_BASE_URL ||
         "/api/v1";
 
-    const progressScriptUrl = new URL("action-progress.js?v=20261009-coursework", document.currentScript && document.currentScript.src || location.href).href;
+    const progressScriptUrl = new URL("action-progress.js?v=20261010-centered-progress", document.currentScript && document.currentScript.src || location.href).href;
     let progressReady;
     function ensureProgress(){
-        if(window.IDMCProgress && window.IDMCProgress.version === "20261009-coursework")return Promise.resolve();
+        if(window.IDMCProgress && window.IDMCProgress.version === "20261010-centered-progress")return Promise.resolve();
         if(progressReady)return progressReady;
         progressReady=new Promise(resolve=>{const script=document.createElement("script"),fallback=setTimeout(resolve,8000);script.src=progressScriptUrl;script.onload=script.onerror=()=>{clearTimeout(fallback);resolve();};document.head.appendChild(script);});
         return progressReady;

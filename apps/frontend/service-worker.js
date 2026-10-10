@@ -1,4 +1,4 @@
-const CACHE_NAME = "idmc-shell-v8-applicant-portal-embedded-ui-20261010";
+const CACHE_NAME = "idmc-shell-v9-centered-progress-20261010";
 const MAX_CACHED_FILES = 180;
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async () => {
