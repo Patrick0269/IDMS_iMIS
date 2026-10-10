@@ -1,4 +1,4 @@
-﻿import { getSupabase } from "../../../config/database.js";
+import { getSupabase } from "../../../config/database.js";
 import { env } from "../../../config/env.js";
 import {
   createAuditLog,
@@ -940,74 +940,67 @@ export async function assignRole(
   requestId?: string | null
 ) {
   const supabase = getSupabase();
-
-  const user =
-    await getUserById(userId);
-
-  const role =
-    await findRoleByCode(
-      roleCode.trim().toUpperCase()
-    );
-
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("user_roles")
-    .insert({
-      user_id: userId,
-      role_id: role.id,
-      assigned_by: actorUserId,
-      status: "ACTIVE",
-    })
-    .select(`
+  const user = await getUserById(userId);
+  const role = await findRoleByCode(roleCode.trim().toUpperCase());
+  const selectFields = `
+    id,
+    user_id,
+    role_id,
+    status,
+    assigned_at,
+    expires_at,
+    roles (
       id,
-      user_id,
-      role_id,
-      status,
-      assigned_at,
-      expires_at,
-      roles (
-        id,
-        role_code,
-        role_name
-      )
-    `)
-    .single();
+      role_code,
+      role_name
+    )
+  `;
 
-  if (error || !data) {
-    throw new Error(
-      error?.message ||
-        "Unable to assign role."
-    );
+  // user_roles has a unique (user_id, role_id) constraint. Reuse/reactivate
+  // an existing row instead of turning a repeat assignment into a 500 error.
+  const existingResult = await supabase
+    .from("user_roles")
+    .select(selectFields)
+    .eq("user_id", userId)
+    .eq("role_id", role.id)
+    .maybeSingle();
+  if (existingResult.error) throw new Error(`Unable to check existing role assignment: ${existingResult.error.message}`);
+
+  const existing = existingResult.data;
+  if (existing?.status === "ACTIVE" && (!existing.expires_at || new Date(existing.expires_at).getTime() > Date.now())) {
+    return existing;
   }
+
+  const now = new Date().toISOString();
+  let result = existing
+    ? await supabase.from("user_roles").update({ status: "ACTIVE", assigned_by: actorUserId, assigned_at: now, expires_at: null }).eq("id", existing.id).select(selectFields).single()
+    : await supabase.from("user_roles").insert({ user_id: userId, role_id: role.id, assigned_by: actorUserId, status: "ACTIVE" }).select(selectFields).single();
+
+  // Handle two administrators assigning the same role at nearly the same time.
+  if (result.error?.code === "23505") {
+    const raced = await supabase.from("user_roles").select(selectFields).eq("user_id", userId).eq("role_id", role.id).maybeSingle();
+    if (raced.error) throw new Error(`Unable to reload role assignment: ${raced.error.message}`);
+    if (raced.data?.status === "ACTIVE" && (!raced.data.expires_at || new Date(raced.data.expires_at).getTime() > Date.now())) return raced.data;
+    if (raced.data) {
+      result = await supabase.from("user_roles").update({ status: "ACTIVE", assigned_by: actorUserId, assigned_at: now, expires_at: null }).eq("id", raced.data.id).select(selectFields).single();
+    }
+  }
+
+  if (result.error || !result.data) throw new Error(result.error?.message || "Unable to assign role.");
 
   await createAuditLog({
     actorUserId,
-
-    actionCode:
-      "USER_ROLE_ASSIGNED",
-
+    actionCode: "USER_ROLE_ASSIGNED",
     moduleCode: "users",
-
     entityType: "user_role",
-    entityId: data.id,
-
-    newValues: {
-      user_id: userId,
-      user_number:
-        user.user_number,
-      role_code:
-        role.role_code,
-    },
-
+    entityId: result.data.id,
+    newValues: { user_id: userId, user_number: user.user_number, role_code: role.role_code },
     ipAddress,
     requestId,
   });
 
-  return data;
+  return result.data;
 }
-
 export async function removeRole(
   userId: string,
   roleId: string,
