@@ -88,7 +88,7 @@ export async function registerApplicant(input: {
   try {
     await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: generated.data.properties.action_link });
     verificationEmailSent = true;
-  } catch {
+  } catch (smtpError) {
     try {
       const resend = await db.auth.resend({
         type: "signup",
@@ -97,8 +97,14 @@ export async function registerApplicant(input: {
       });
       if (resend.error) throw resend.error;
       verificationEmailSent = true;
-    } catch {
-      console.warn("Applicant verification delivery failed through Worker SMTP and Supabase Auth fallback.");
+    } catch (fallbackError) {
+      const errorCode = (error: unknown) => {
+        if (typeof error === "object" && error !== null && "code" in error) return String((error as { code: unknown }).code).slice(0, 40);
+        return error instanceof Error ? error.name : "unknown";
+      };
+      console.warn("Applicant verification delivery failed through Worker SMTP and Supabase Auth fallback.", {
+        smtpCode: errorCode(smtpError), fallbackCode: errorCode(fallbackError),
+      });
     }
   }
   return { verificationRequired: true, verificationEmailSent };

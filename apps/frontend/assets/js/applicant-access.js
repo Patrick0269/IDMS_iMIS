@@ -8,9 +8,44 @@
   const apiBase = String(window.IDMC_CONFIG?.API_BASE_URL || "/api/v1").replace(/\/+$/, "");
 
   const params = new URLSearchParams(window.location.search);
-  if (params.has("verified") || window.location.hash.includes("type=signup")) {
-    showMessage("Your email confirmation link has been opened. You can now sign in to your applicant account.", "success");
+  async function completeEmailConfirmation() {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const accessToken = hash.get("access_token");
+    const confirmationType = hash.get("type");
+    const authError = hash.get("error_description") || hash.get("error");
+    if (authError) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+      showMessage(authError.replace(/\+/g, " "), "error");
+      return;
+    }
+    if (!accessToken || (confirmationType && confirmationType !== "signup")) {
+      if (params.has("verified")) showMessage("Your email confirmation link has been opened. Sign in to continue.", "success");
+      return;
+    }
+
+    const session = {
+      access_token: accessToken,
+      refresh_token: hash.get("refresh_token") || null,
+      token_type: hash.get("token_type") || "bearer",
+      expires_in: Number(hash.get("expires_in")) || null,
+      expires_at: Number(hash.get("expires_at")) || null
+    };
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+    try {
+      window.IDMCAuth.saveSession(session);
+      showMessage("Email verified. Opening your applicant account…", "success");
+      const profile = await window.IDMCAuth.getCurrentUser();
+      const roles = profile?.roles || profile?.user?.roles || [];
+      const applicantRole = roles.find(role => String(role.roleCode || role.role_code || role.code || "").toUpperCase() === "APPLICANT");
+      if (!applicantRole) throw new Error("Email verified, but an applicant portal role was not found. Contact Admissions.");
+      window.IDMCAuth.setActiveRole(applicantRole.id || applicantRole.roleId || applicantRole.role_id);
+      window.location.replace("/applicant-portal.html");
+    } catch (error) {
+      window.IDMCAuth.clearSession();
+      showMessage(error.message || "Your email was verified, but we could not open your account. Please sign in.", "error");
+    }
   }
+  void completeEmailConfirmation();
 
   document.getElementById("applicantLoginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -63,7 +98,7 @@
         resendForm.hidden = false;
         showMessage(payload.message, "error");
       } else {
-        showMessage(payload.message || "Account created. Check your email and confirm your address before signing in.", "success");
+        showMessage(payload.message || "Account created. Open the verification link sent to your email; it will sign you in automatically.", "success");
       }
     } catch (error) {
       const resendForm = document.getElementById("applicantResendForm");

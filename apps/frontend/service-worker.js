@@ -1,4 +1,4 @@
-const CACHE_NAME = "idmc-shell-v7-verified-password-recovery";
+const CACHE_NAME = "idmc-shell-v8-applicant-portal-embedded-ui-20261010";
 const MAX_CACHED_FILES = 180;
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async () => {
