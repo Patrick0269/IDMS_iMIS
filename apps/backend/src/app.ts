@@ -13,7 +13,7 @@ import { requestContext } from "./middleware/requestContext.js";
 import { assertSafeProductionOrigins, isOriginAllowed, isOriginSameHost, parseAllowedOrigins } from "./config/cors.js";
 import { getSupabase } from "./config/database.js";
 import { openApiDocument } from "./config/openapi.js";
-import { apiCachePolicy, compressJson } from "./middleware/performance.js";
+import { apiCachePolicy } from "./middleware/performance.js";
 import adminDataResetRoutes from "./modules/system/admin-data-reset.routes.js";
 
 const app = express();
@@ -31,7 +31,7 @@ app.use(
 
 app.use(requestContext);
 app.use(apiCachePolicy);
-app.use(compressJson);
+// Cloudflare handles response compression.
 
 app.use(cors((req, callback) => {
   const origin = req.get("Origin");

@@ -17,8 +17,8 @@
   "vars": {
     "NODE_ENV": "production",
     "PORT": "8787",
-    "CORS_ORIGIN": "https://idms-imis.pages.dev,https://idms-imis-worker.dcf-org.workers.dev",
-    "FRONTEND_URL": "https://idms-imis-worker.dcf-org.workers.dev"
+    "CORS_ORIGIN": "https://idms-imis.pages.dev,https://idms-imis-worker.pnl0269-org.workers.dev",
+    "FRONTEND_URL": "https://idms-imis-worker.pnl0269-org.workers.dev"
   },
   "observability": {
     "enabled": true
