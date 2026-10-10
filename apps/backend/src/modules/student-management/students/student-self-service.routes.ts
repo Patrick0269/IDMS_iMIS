@@ -41,7 +41,7 @@ router.get("/portal", requirePermission("students.self.view"), handle(portal));
 router.get("/summary", requirePermission("students.self.view"), handle(async req => {
   // Keep the landing page small: the full portal fetches dozens of tables and
   // can exceed Cloudflare's per-invocation subrequest limit.
-  const student = await ownStudent(req);
+  const student = await getMyStudentRecord(req) as Row;
   const studentId = String(student.id);
   const reads = await Promise.all([
     institutionDb.from("student_registrations").select("*").eq("student_id", studentId).order("created_at", { ascending: false }).limit(5),
@@ -60,7 +60,8 @@ router.get("/summary", requirePermission("students.self.view"), handle(async req
   ]);
   const labels = ["registrations", "attendance", "semester results", "CGPA", "financial account", "academic deficiencies", "course results", "notifications", "service requests", "course registrations", "student documents", "login history", "announcements"];
   for (let index = 0; index < reads.length; index++) {
-    if (reads[index].error) throw new Error(`Unable to load student ${labels[index]}: ${reads[index].error.message}`);
+    const queryError = reads[index]?.error;
+    if (queryError) throw new Error(`Unable to load student ${labels[index]}: ${queryError.message}`);
   }
   const [registrationRows, attendanceRows, semesterRows, cgpaRows, accountResult, deficiencyRows, resultRows, notificationRows, requestRows, courseRegistrationRows, documentRows, loginResult, announcementResult] = reads;
   const registrations = registrationRows.data ?? [];
