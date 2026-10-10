@@ -1,4 +1,4 @@
-﻿import {
+import {
   Request,
   Response,
   NextFunction,
@@ -195,8 +195,9 @@ export async function createUserController(
 
     res.status(201).json({
       success: true,
-      message:
-        "User created successfully and welcome email sent.",
+      message: result.onboarding.welcome_email_sent
+        ? "User created successfully and welcome email sent."
+        : "User created successfully, but the welcome email could not be sent. Check SMTP settings.",
 
       data: result,
     });

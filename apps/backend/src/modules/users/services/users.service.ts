@@ -604,6 +604,7 @@ export async function createUser(
       input.sendWelcomeMessage !== false;
 
     let setupPasswordUrl: string | null = null;
+    let welcomeEmailSent = false;
 
     if (shouldSendWelcomeMessage) {
       const {
@@ -655,6 +656,7 @@ export async function createUser(
 
           setupPasswordUrl,
         });
+        welcomeEmailSent = true;
       } catch (emailError) {
       await createAuditLog({
         actorUserId,
@@ -680,11 +682,10 @@ export async function createUser(
         requestId,
       });
 
-        throw new Error(
-          emailError instanceof Error
-            ? emailError.message
-            : "Welcome email could not be sent."
-        );
+        // The account already has the administrator-supplied password. A mail transport failure
+        // must not roll back the account and its role; report delivery status to the UI instead.
+        console.error("User account created, but welcome email delivery failed.", emailError);
+        setupPasswordUrl = null;
       }
 
       await createAuditLog({
@@ -731,6 +732,7 @@ export async function createUser(
         username,
         status,
         role: role?.role_code ?? null,
+        welcome_email_sent: welcomeEmailSent,
       },
 
       ipAddress,
@@ -749,8 +751,8 @@ export async function createUser(
         : null,
 
       onboarding: {
-        welcome_email_sent: shouldSendWelcomeMessage,
-        password_setup_required: shouldSendWelcomeMessage,
+        welcome_email_sent: welcomeEmailSent,
+        password_setup_required: false,
       },
     };
   } catch (error) {
