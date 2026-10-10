@@ -58,4 +58,4 @@ TEST-RESULTS.txt
 **/*repair-backups*/
 **/current-frontend-repair-backups/
 *.backup
-*.backup[0-9]
+*.backup[0-9]backup-cors-*/
