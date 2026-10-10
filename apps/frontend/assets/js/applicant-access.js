@@ -20,8 +20,9 @@
     }
     const tokenHash = params.get("token_hash");
     if (tokenHash) {
+      const tokenType = params.get("type") || "signup";
       history.replaceState(null, "", window.location.pathname);
-      if (params.get("type") !== "signup") {
+      if (!["signup", "magiclink"].includes(tokenType)) {
         showMessage("This verification link is invalid. Request a new verification email.", "error");
         return;
       }
@@ -30,7 +31,7 @@
         const response = await fetch(`${apiBase}/auth/applicant-verification-confirm`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token_hash: tokenHash })
+          body: JSON.stringify(tokenType === "signup" ? { token_hash: tokenHash } : { token_hash: tokenHash, type: tokenType })
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || payload.success === false || !payload.data?.access_token) {
@@ -42,7 +43,7 @@
       }
       return;
     }
-    if (!accessToken || (confirmationType && confirmationType !== "signup")) {
+    if (!accessToken || (confirmationType && !["signup", "magiclink"].includes(confirmationType))) {
       if (params.has("verified")) showMessage("Your email confirmation link has been opened. Sign in to continue.", "success");
       return;
     }

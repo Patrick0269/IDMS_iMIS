@@ -113,20 +113,59 @@ export async function registerApplicant(input: {
   return { verificationRequired: true, verificationEmailSent };
 }
 
-export async function resendApplicantVerification(email: string): Promise<void> {
+export async function resendApplicantVerification(email: string): Promise<boolean> {
+  const db = getSupabase();
+  const normalizedEmail = email.trim().toLowerCase();
+  const { data: profile, error: profileError } = await db.from("users")
+    .select("id,auth_user_id,status,display_name,first_name,last_name,email")
+    .ilike("email", normalizedEmail)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  if (!profile || profile.status !== "ACTIVE" || !profile.auth_user_id) return false;
+
+  const { data: assignments, error: rolesError } = await db.from("user_roles")
+    .select("roles(role_code)")
+    .eq("user_id", profile.id)
+    .eq("status", "ACTIVE");
+  if (rolesError) throw rolesError;
+  if (!(assignments || []).some((assignment: any) => String(assignment.roles?.role_code || "").toUpperCase() === "APPLICANT")) return false;
+
+  const { data: identity, error: identityError } = await db.auth.admin.getUserById(String(profile.auth_user_id));
+  if (identityError) throw identityError;
+  if (!identity?.user || String(identity.user.email ?? "").trim().toLowerCase() !== normalizedEmail || identity.user.email_confirmed_at) return false;
+
+  // Generate a one-time sign-in/verification token server-side and deliver it
+  // through the same Worker SMTP transport used by password recovery.
   const frontend = env.FRONTEND_URL.replace(/\/+$/, "");
-  const { error } = await getSupabase().auth.resend({
-    type: "signup",
-    email: email.trim().toLowerCase(),
-    options: { emailRedirectTo: `${frontend}/applicant-access.html` },
-  });
-  if (error) throw error;
+  const generated = await db.auth.admin.generateLink({ type: "magiclink", email: normalizedEmail });
+  const tokenHash = generated.data?.properties?.hashed_token;
+  if (generated.error || !tokenHash) throw generated.error ?? new Error("Unable to create applicant verification link.");
+
+  const verifyUrl = new URL(`${frontend}/applicant-access.html`);
+  verifyUrl.searchParams.set("token_hash", tokenHash);
+  verifyUrl.searchParams.set("type", "magiclink");
+  const recipientName = String(profile.display_name || [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Applicant");
+  try {
+    await sendApplicantVerificationEmail({ recipientEmail: normalizedEmail, recipientName, actionLink: verifyUrl.toString() });
+    return true;
+  } catch (smtpError) {
+    // Supabase Auth SMTP is a separate fallback provider. Keep it as a fallback
+    // so an SMTP outage in either service does not make resend impossible.
+    const { error } = await db.auth.resend({
+      type: "signup",
+      email: normalizedEmail,
+      options: { emailRedirectTo: `${frontend}/applicant-access.html` },
+    });
+    if (error) throw new AggregateError([smtpError, error], "Applicant verification delivery failed through both email providers.");
+    return true;
+  }
 }
 
-export async function verifyApplicantEmail(tokenHash: string) {
+export async function verifyApplicantEmail(tokenHash: string, type: "signup" | "magiclink" = "signup") {
   if (!tokenHash || tokenHash.length > 512) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
+  if (type !== "signup" && type !== "magiclink") throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
   const authClient = createSupabaseAuthClient();
-  const { data, error } = await authClient.auth.verifyOtp({ token_hash: tokenHash, type: "signup" });
+  const { data, error } = await authClient.auth.verifyOtp({ token_hash: tokenHash, type });
   if (error || !data.session || !data.user) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
 
   const db = getSupabase();

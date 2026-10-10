@@ -39,16 +39,17 @@ export async function resendApplicantVerification(req: Request, res: Response): 
       logError("Applicant verification resend request failed", error);
     }
   }
-  res.json({ success: true, message: "If this address has an unverified applicant account, a new verification email will be sent." });
+  res.json({ success: true, message: "If this address has an unverified applicant account, a verification email was requested. Check Inbox and Spam. If it does not arrive, contact Admissions with the request reference." });
 }
 export async function confirmApplicantVerification(req: Request, res: Response): Promise<void> {
   const tokenHash = String(req.body?.token_hash ?? "").trim();
+  const type = String(req.body?.type ?? "signup").trim().toLowerCase();
   if (!tokenHash || tokenHash.length > 512) {
     res.status(400).json({ success: false, message: "This verification link is invalid or has expired. Request a new one." });
     return;
   }
   try {
-    const data = await authService.verifyApplicantEmail(tokenHash);
+    const data = await authService.verifyApplicantEmail(tokenHash, type as "signup" | "magiclink");
     res.json({ success: true, data });
   } catch (error) {
     const status = Number((error as { statusCode?: number })?.statusCode) || 400;

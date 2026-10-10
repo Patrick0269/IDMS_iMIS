@@ -131,11 +131,19 @@ export async function requestVerifiedPasswordReset(
     options: { redirectTo: `${env.FRONTEND_URL.replace(/\/$/, "")}/set-password.html` },
   });
   if (linkError || !generated?.properties?.action_link) throw linkError ?? new Error("Unable to create password reset link.");
-  await deliver({
-    recipientEmail: email,
-    recipientName: String(profile.data.display_name || [profile.data.first_name, profile.data.last_name].filter(Boolean).join(" ") || recoveryName),
-    recoveryUrl: generated.properties.action_link,
-  });
+  try {
+    await deliver({
+      recipientEmail: email,
+      recipientName: String(profile.data.display_name || [profile.data.first_name, profile.data.last_name].filter(Boolean).join(" ") || recoveryName),
+      recoveryUrl: generated.properties.action_link,
+    });
+  } catch (smtpError) {
+    const frontend = env.FRONTEND_URL.replace(/\/$/, "");
+    const { error: fallbackError } = await db.auth.resetPasswordForEmail(email, {
+      redirectTo: `${frontend}/set-password.html`,
+    });
+    if (fallbackError) throw new AggregateError([smtpError, fallbackError], "Password reset delivery failed through both email providers.");
+  }
   const { error: auditError } = await db.from("security_logs").insert({
     user_id: profile.data.id, event_code: "PASSWORD_RESET_REQUESTED", success: true,
     details: { account_type: input.accountType },
