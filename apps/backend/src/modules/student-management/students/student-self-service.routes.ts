@@ -39,84 +39,108 @@ async function portal(req: Request): Promise<Row> {
 router.get("/portal", requirePermission("students.self.view"), handle(portal));
 
 router.get("/summary", requirePermission("students.self.view"), handle(async req => {
-  const data = await portal(req);
-  const student = data.student ?? {};
-  const attendance = data.attendance_records ?? [];
-  const attended = attendance.filter((item: Row) => ["PRESENT", "LATE"].includes(String(item.attendance_status).toUpperCase())).length;
-  const semester = latest(data.semester_results ?? []);
-  const cgpa = latest(data.cgpa_records ?? []);
-  const registration = latest(data.registrations ?? []);
-  const account = data.financial_account ?? {};
-  const deficiencies = data.academic_deficiencies ?? [];
-  const failed = (data.course_results ?? []).filter((item: Row) => String(item.pass_status).toUpperCase() === "FAIL");
-  const unread = (data.notifications ?? []).filter((item: Row) => !item.read_at && String(item.status ?? "").toUpperCase() !== "READ");
-  const pendingRequests = (data.service_requests ?? []).filter((item: Row) => !["APPROVED", "REJECTED", "CLOSED", "CANCELLED"].includes(String(item.status).toUpperCase()));
+  // Keep the landing page small: the full portal fetches dozens of tables and
+  // can exceed Cloudflare's per-invocation subrequest limit.
+  const student = await ownStudent(req);
+  const studentId = String(student.id);
+  const reads = await Promise.all([
+    institutionDb.from("student_registrations").select("*").eq("student_id", studentId).order("created_at", { ascending: false }).limit(5),
+    institutionDb.from("attendance_records").select("id,attendance_status").eq("student_id", studentId).limit(500),
+    institutionDb.from("student_semester_results").select("*").eq("student_id", studentId).order("created_at", { ascending: false }).limit(5),
+    institutionDb.from("student_cgpa_records").select("*").eq("student_id", studentId).order("calculated_at", { ascending: false }).limit(5),
+    institutionDb.from("student_financial_accounts").select("*").eq("student_id", studentId).maybeSingle(),
+    institutionDb.from("student_academic_deficiencies").select("id").eq("student_id", studentId).limit(200),
+    institutionDb.from("course_results").select("id,pass_status,result_status").eq("student_id", studentId).limit(500),
+    institutionDb.from("notifications").select("id,read_at,status").eq("recipient_student_id", studentId).order("created_at", { ascending: false }).limit(100),
+    institutionDb.from("student_service_requests").select("id,status").eq("student_id", studentId).limit(100),
+    institutionDb.from("course_registrations").select("id,course_id,course_offering_id,registration_status").eq("student_id", studentId).limit(100),
+    institutionDb.from("student_documents").select("id").eq("student_id", studentId).limit(100),
+    student.user_id ? institutionDb.from("users").select("last_login_at").eq("id", student.user_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    institutionDb.from("announcements").select("id,title,summary,body,publish_at").eq("status", "PUBLISHED").order("publish_at", { ascending: false }).limit(5),
+  ]);
+  const labels = ["registrations", "attendance", "semester results", "CGPA", "financial account", "academic deficiencies", "course results", "notifications", "service requests", "course registrations", "student documents", "login history", "announcements"];
+  for (let index = 0; index < reads.length; index++) {
+    if (reads[index].error) throw new Error(`Unable to load student ${labels[index]}: ${reads[index].error.message}`);
+  }
+  const [registrationRows, attendanceRows, semesterRows, cgpaRows, accountResult, deficiencyRows, resultRows, notificationRows, requestRows, courseRegistrationRows, documentRows, loginResult, announcementResult] = reads;
+  const registrations = registrationRows.data ?? [];
+  const registration = registrations[0] ?? null;
+  const attendance = attendanceRows.data ?? [];
+  const semester = semesterRows.data?.[0] ?? null;
+  const cgpa = cgpaRows.data?.[0] ?? null;
+  const account = accountResult.data ?? {};
+  const deficiencies = deficiencyRows.data ?? [];
+  const courseResults = resultRows.data ?? [];
+  const notifications = notificationRows.data ?? [];
+  const requests = requestRows.data ?? [];
+  const courseRegistrations = courseRegistrationRows.data ?? [];
   const balance = Number(account.balance ?? account.outstanding_balance ?? account.current_balance ?? account.account_balance ?? 0);
-  const userResult = student.user_id
-    ? await institutionDb.from("users").select("last_login_at").eq("id", student.user_id).maybeSingle()
-    : { data: null, error: null };
-  if (userResult.error) throw new Error(`Unable to load student login history: ${userResult.error.message}`);
-  const positionYear=student.current_academic_year_id?await institutionDb.from('academic_years').select('year_name').eq('id',student.current_academic_year_id).maybeSingle():{data:null,error:null};
-  if(positionYear.error)throw new Error(positionYear.error.message);
-  const currentYearName = positionYear.data?.year_name ?? registration?.academic_year_name ?? null;
-  const yearOfStudy = student.current_year_number == null ? null : Number(student.current_year_number);
-  const entryYear = Number(student.admission_year ?? String(student.admission_date ?? student.enrollment_date ?? "").slice(0,4));
-  const ordinal = (value: number | null) => {
-    if (!value) return null;
-    const suffix = value % 100 >= 11 && value % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[value % 10] ?? "th";
-    return `${value}${suffix} Year`;
-  };
-  const intakeResult=student.intake_id?await institutionDb.from('idmc_intakes').select('code').eq('id',student.intake_id).maybeSingle():{data:null,error:null};
-  if(intakeResult.error)throw new Error(intakeResult.error.message);
-  const intake=intakeResult.data?.code??null;
-  const classRecord = (data.student_classes ?? [])[0] ?? null;
+
+  let yearName = null;
+  const yearId = registration?.academic_year_id ?? student.current_academic_year_id;
+  if (yearId) {
+    const yearResult = await institutionDb.from("academic_years").select("year_name,year_code").eq("id", yearId).maybeSingle();
+    if (!yearResult.error) yearName = yearResult.data?.year_name ?? yearResult.data?.year_code ?? null;
+  }
+
+  const offeringIds = [...new Set(courseRegistrations.map((row: Row) => row.course_offering_id).filter(Boolean))];
+  let upcomingClasses: Row[] = [];
+  if (offeringIds.length) {
+    const timetableResult = await institutionDb.from("timetable_entries").select("*").in("course_offering_id", offeringIds).limit(100);
+    if (!timetableResult.error && timetableResult.data?.length) {
+      const timetableRows = timetableResult.data;
+      const [offeringsResult, slotsResult, roomsResult] = await Promise.all([
+        institutionDb.from("course_offerings").select("id,course_id,offering_code").in("id", offeringIds),
+        institutionDb.from("timetable_slots").select("*").in("id", timetableRows.map((row: Row) => row.timetable_slot_id).filter(Boolean)),
+        institutionDb.from("rooms").select("id,room_name,room_code").in("id", timetableRows.map((row: Row) => row.room_id).filter(Boolean)),
+      ]);
+      const offerings = offeringsResult.data ?? [];
+      const courseIds = [...new Set(offerings.map((row: Row) => row.course_id).filter(Boolean))];
+      const coursesResult = courseIds.length ? await institutionDb.from("courses").select("id,course_code,course_name").in("id", courseIds) : { data: [], error: null };
+      const byId = (rows: Row[]) => new Map(rows.map(row => [row.id, row]));
+      const offeringMap = byId(offerings);
+      const slotMap = byId(slotsResult.data ?? []);
+      const roomMap = byId(roomsResult.data ?? []);
+      const courseMap = byId(coursesResult.data ?? []);
+      upcomingClasses = timetableRows.map((row: Row) => {
+        const offering = offeringMap.get(row.course_offering_id) ?? {};
+        const course = courseMap.get(offering.course_id) ?? {};
+        return { ...row, ...course, offering_code: offering.offering_code ?? null, slot: slotMap.get(row.timetable_slot_id) ?? null, room: roomMap.get(row.room_id) ?? null };
+      });
+    }
+  }
+
+  const attended = attendance.filter((row: Row) => ["PRESENT", "LATE"].includes(String(row.attendance_status).toUpperCase())).length;
+  const unread = notifications.filter((row: Row) => !row.read_at && String(row.status ?? "").toUpperCase() !== "READ");
+  const pending = requests.filter((row: Row) => !["APPROVED", "REJECTED", "CLOSED", "CANCELLED"].includes(String(row.status).toUpperCase()));
+  const failed = courseResults.filter((row: Row) => String(row.pass_status).toUpperCase() === "FAIL");
+  const published = courseResults.filter((row: Row) => ["PUBLISHED", "LOCKED"].includes(String(row.result_status).toUpperCase()));
+  const currentYear = Number(student.current_year_number);
+  const yearOfStudy = Number.isFinite(currentYear) && currentYear > 0 ? `${currentYear}${currentYear % 100 >= 11 && currentYear % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[currentYear % 10] ?? "th"} Year` : null;
+  const entryYear = Number(student.admission_year ?? String(student.admission_date ?? student.enrollment_date ?? "").slice(0, 4));
+  const programme = Array.isArray(student.programmes) ? student.programmes[0] : student.programmes;
   const alerts: Row[] = [];
   if (!registration) alerts.push({ severity: "warning", title: "No semester registration", message: "Contact the Academic Office to create the current registration." });
-  else if (!["REGISTERED", "LOCKED", "APPROVED"].includes(String(registration.registration_status).toUpperCase())) alerts.push({ severity: "warning", title: "Registration requires attention", message: `Current status: ${registration.registration_status}.` });
   if (balance > 0) alerts.push({ severity: "warning", title: "Outstanding balance", message: `Your account has an outstanding balance of ${balance}.` });
   if (deficiencies.length || failed.length) alerts.push({ severity: "danger", title: "Academic action required", message: `${deficiencies.length || failed.length} course item(s) require attention.` });
   if (unread.length) alerts.push({ severity: "info", title: "Unread notifications", message: `${unread.length} notification(s) have not been read.` });
 
   return {
-    student,
-    panel: {
-      current_year: currentYearName,
-      last_login_at: userResult.data?.last_login_at ?? null,
-      year_of_study: ordinal(yearOfStudy),
-      year_of_study_number: yearOfStudy,
-      stream: classRecord?.class_name ?? classRecord?.class_code ?? null,
-      student_status: student.student_status ?? student.status ?? null,
-      entry_year: Number.isFinite(entryYear) && entryYear > 0 ? `${entryYear}/${entryYear + 1}` : null,
-      intake: intake,
-      session: student.mode_of_study ?? null,
-      programme: student.programme_name ?? null,
-      programme_code: student.programme_code ?? null,
-      department: student.department_name ?? null,
-      school: student.school_name ?? null,
-      campus: student.campus_name ?? null,
-    },
+    student: { ...student, programme_name: student.programme_name ?? programme?.programme_name ?? null, programme_code: student.programme_code ?? programme?.programme_code ?? null },
+    panel: { current_year: yearName ?? registration?.academic_year_name ?? null, last_login_at: loginResult.data?.last_login_at ?? null, year_of_study: yearOfStudy, year_of_study_number: Number.isFinite(currentYear) ? currentYear : null, stream: null, student_status: student.student_status ?? student.status ?? null, entry_year: Number.isFinite(entryYear) && entryYear > 0 ? `${entryYear}/${entryYear + 1}` : null, intake: null, session: student.mode_of_study ?? programme?.mode_of_study ?? null, programme: student.programme_name ?? programme?.programme_name ?? null, programme_code: student.programme_code ?? programme?.programme_code ?? null, department: null, school: null, campus: null },
     current_registration: registration,
     latest_result: { gpa: semester?.gpa ?? null, cgpa: cgpa?.cgpa ?? semester?.cgpa ?? null, academic_standing: semester?.academic_standing ?? cgpa?.academic_standing ?? null },
     attendance: { total: attendance.length, attended, percentage: attendance.length ? Number(((attended / attendance.length) * 100).toFixed(1)) : null },
     finance: { balance, account_status: account.account_status ?? null, currency: account.currency_code ?? "TZS" },
-    counts: {
-      registered_courses: (data.course_registrations ?? []).filter((item: Row) => !["DROPPED", "REJECTED", "CANCELLED"].includes(String(item.registration_status).toUpperCase())).length,
-      published_results: (data.course_results ?? []).filter((item: Row) => ["PUBLISHED", "LOCKED"].includes(String(item.result_status).toUpperCase())).length,
-      documents: (data.student_documents ?? []).length,
-      unread_notifications: unread.length,
-      pending_requests: pendingRequests.length,
-      deficiencies: deficiencies.length,
-      failed_courses: failed.length,
-    },
+    counts: { registered_courses: courseRegistrations.filter((row: Row) => !["DROPPED", "REJECTED", "CANCELLED"].includes(String(row.registration_status).toUpperCase())).length, published_results: published.length, documents: documentRows.data?.length ?? 0, unread_notifications: unread.length, pending_requests: pending.length, deficiencies: deficiencies.length, failed_courses: failed.length },
     academic_risk: deficiencies.length || failed.length ? "AT_RISK" : (semester?.academic_standing ?? "GOOD"),
     alerts,
-    upcoming_classes: (data.timetable_entries ?? []).slice(0, 5),
-    upcoming_examinations: (data.examination_timetable ?? []).filter((item: Row) => !item.examination_date || new Date(item.examination_date).getTime() >= Date.now() - 86400000).slice(0, 5),
-    announcements: (data.announcements ?? []).slice(0, 5),
-    audit_warnings: data.audit_warnings ?? [],
+    upcoming_classes: upcomingClasses,
+    upcoming_examinations: [],
+    announcements: announcementResult.data ?? [],
+    audit_warnings: [],
   };
 }));
-
 router.get("/registration", requirePermission("students.self.view"), handle(async req => {
   const data = await portal(req);
   return {
