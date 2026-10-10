@@ -44,7 +44,7 @@ export async function registerApplicant(input: {
     type: "signup", email, password,
     options: { data: { first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName }, redirectTo: frontend + "/applicant-access.html" },
   });
-  if (generated.error || !generated.data?.user?.id || !generated.data.properties?.action_link) {
+  if (generated.error || !generated.data?.user?.id || !generated.data.properties?.hashed_token) {
     throw Object.assign(new Error(generated.error?.message || "Unable to create the applicant account."), { statusCode: 400 });
   }
 
@@ -86,7 +86,10 @@ export async function registerApplicant(input: {
 
   let verificationEmailSent = false;
   try {
-    await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: generated.data.properties.action_link });
+    const verifyUrl = new URL(`${frontend}/applicant-access.html`);
+    verifyUrl.searchParams.set("token_hash", generated.data.properties.hashed_token);
+    verifyUrl.searchParams.set("type", "signup");
+    await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: verifyUrl.toString() });
     verificationEmailSent = true;
   } catch (smtpError) {
     try {
@@ -115,9 +118,32 @@ export async function resendApplicantVerification(email: string): Promise<void> 
   const { error } = await getSupabase().auth.resend({
     type: "signup",
     email: email.trim().toLowerCase(),
-    options: { emailRedirectTo: frontend + "/applicant-access.html" },
+    options: { emailRedirectTo: `${frontend}/applicant-access.html` },
   });
   if (error) throw error;
+}
+
+export async function verifyApplicantEmail(tokenHash: string) {
+  if (!tokenHash || tokenHash.length > 512) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
+  const authClient = createSupabaseAuthClient();
+  const { data, error } = await authClient.auth.verifyOtp({ token_hash: tokenHash, type: "signup" });
+  if (error || !data.session || !data.user) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
+
+  const db = getSupabase();
+  const { data: user, error: userError } = await db.from("users").select("id,status").eq("auth_user_id", data.user.id).maybeSingle();
+  if (userError) throw userError;
+  if (!user || user.status !== "ACTIVE") throw Object.assign(new Error("Applicant access is not available for this account."), { statusCode: 403 });
+  const { data: assignments, error: rolesError } = await db.from("user_roles").select("roles(role_code)").eq("user_id", user.id).eq("status", "ACTIVE");
+  if (rolesError) throw rolesError;
+  const hasApplicantRole = (assignments || []).some((assignment: any) => String(assignment.roles?.role_code || "").toUpperCase() === "APPLICANT");
+  if (!hasApplicantRole) throw Object.assign(new Error("Applicant access is not available for this account."), { statusCode: 403 });
+  return {
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+    expires_at: data.session.expires_at,
+    expires_in: data.session.expires_in,
+    token_type: data.session.token_type,
+  };
 }
 function normaliseIdentifier(value: string): string {
   return String(value ?? "").trim();

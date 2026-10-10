@@ -10,7 +10,7 @@
 
   function table(columns, records) {
     if (!records.length) return `<div class="portal-empty"><strong>No records found</strong></div>`;
-    return `<div class="portal-table-wrap"><table class="portal-table"><thead><tr>${columns.map(c => `<th>${esc(c[0])}</th>`).join("")}</tr></thead><tbody>${records.map(r => `<tr>${columns.map(c => `<td>${c[2] ? c[1](r) : esc(val(c[1](r)))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    return `<div class="portal-table-wrap"><table class="portal-table"><thead><tr>${columns.map(c => `<th>${esc(c[0])}</th>`).join("")}</tr></thead><tbody>${records.map(r => `<tr>${columns.map(c => `<td data-label="${esc(c[0])}">${c[2] ? c[1](r) : esc(val(c[1](r)))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
   }
   const summary = cards => `<div class="portal-summary">${cards.map(c => `<div class="portal-stat"><div class="portal-stat-label">${esc(c[0])}</div><div class="portal-stat-value">${esc(val(c[1]))}</div></div>`).join("")}</div>`;
   const setContent = html => { $("portalContent").innerHTML = html; };

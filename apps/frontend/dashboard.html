@@ -3379,7 +3379,7 @@
       .sidebar-brand{min-height:76px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.1)}
       .brand-logo{width:44px;height:44px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
       .institution-mini{padding:12px 20px 10px;color:rgba(255,255,255,.78)}
-      .sidebar-navigation{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:8px 12px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+      .sidebar-navigation{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:8px 12px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
       .nav-section{margin:4px 0 10px;padding:0 0 8px;border-bottom:1px solid rgba(255,255,255,.075)}
       .nav-section-title{padding:9px 11px 6px;color:#d7b9c2;font-size:9px;letter-spacing:.13em}
       .nav-item{min-height:41px;margin:2px 3px;padding:7px 9px;gap:10px;border:1px solid transparent;border-left:3px solid transparent;border-radius:9px;color:rgba(255,255,255,.8);transition:background .16s ease,border-color .16s ease,color .16s ease}
@@ -3414,7 +3414,7 @@
       #adminDeletionDashboardCard table{font-size:.86rem}
       #adminDeletionDashboardCard th{color:#6f2038;background:#fbf7f8}
       #adminDeletionDashboardCard tbody tr:hover{background:#fbf6f8}
-      @media(max-width:900px){.sidebar{width:min(88vw,320px)!important;min-width:min(88vw,320px)!important;max-width:min(88vw,320px)!important}.main-content>.dashboard-page{padding:18px 16px 32px!important}.workspace-grid{grid-template-columns:1fr;gap:10px}.workspace-card{min-height:84px}#adminDeletionDashboardCard{width:calc(100% - 24px)!important;padding:15px!important}}
+      @media(max-width:900px){.sidebar{width:min(88vw,320px)!important;min-width:min(88vw,320px)!important;max-width:min(88vw,320px)!important;max-height:100dvh!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}.sidebar-navigation{flex:1 1 auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}.main-content{overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}.main-content>.dashboard-page{padding:18px 16px 32px!important}.workspace-grid{grid-template-columns:1fr;gap:10px}.workspace-card{min-height:84px}#adminDeletionDashboardCard{width:calc(100% - 24px)!important;padding:15px!important}}
       @media(prefers-reduced-motion:reduce){.workspace-card,.nav-item{transition:none!important}}
       /* Workspace directory: grouped, compact links with role-based visibility. */
       .idmc-portal-directory{padding:clamp(20px,3vw,32px)!important;border:1px solid #e8e0e2!important;border-radius:16px!important;background:#fff!important;box-shadow:0 8px 26px rgba(46,24,31,.045)!important}

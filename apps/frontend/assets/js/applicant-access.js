@@ -14,8 +14,32 @@
     const confirmationType = hash.get("type");
     const authError = hash.get("error_description") || hash.get("error");
     if (authError) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
+      history.replaceState(null, "", window.location.pathname);
       showMessage(authError.replace(/\+/g, " "), "error");
+      return;
+    }
+    const tokenHash = params.get("token_hash");
+    if (tokenHash) {
+      history.replaceState(null, "", window.location.pathname);
+      if (params.get("type") !== "signup") {
+        showMessage("This verification link is invalid. Request a new verification email.", "error");
+        return;
+      }
+      showMessage("Verifying your email address…");
+      try {
+        const response = await fetch(`${apiBase}/auth/applicant-verification-confirm`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token_hash: tokenHash })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success === false || !payload.data?.access_token) {
+          throw new Error(payload.message || "This verification link is invalid or has expired. Request a new one.");
+        }
+        await openApplicantSession(payload.data);
+      } catch (error) {
+        showMessage(error.message || "Unable to verify your email address. Request a new link.", "error");
+      }
       return;
     }
     if (!accessToken || (confirmationType && confirmationType !== "signup")) {
@@ -30,7 +54,11 @@
       expires_in: Number(hash.get("expires_in")) || null,
       expires_at: Number(hash.get("expires_at")) || null
     };
-    history.replaceState(null, "", window.location.pathname + window.location.search);
+    history.replaceState(null, "", window.location.pathname);
+    await openApplicantSession(session);
+  }
+
+  async function openApplicantSession(session) {
     try {
       window.IDMCAuth.saveSession(session);
       showMessage("Email verified. Opening your applicant account…", "success");

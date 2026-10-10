@@ -148,3 +148,5 @@ body{font-family:"Times New Roman",Times,serif}
 @media(max-width:600px){.idmc-password-form{grid-template-columns:1fr}}
 @media(max-width:480px){.idmc-student-tools{gap:0}.idmc-notice-menu{right:-8px}}
 @media(prefers-reduced-motion:reduce){.idmc-nav-chevron{transition:none}}
+/* Keep touch scrolling responsive in student drawers and nested portal panels. */
+@media(max-width:980px){.student-shell>.sidebar,.portal-sidebar{max-height:100vh;max-height:100dvh;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}.student-shell>.main-content,.portal-main{min-width:0;max-width:100%;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}.student-shell,.portal-shell{min-width:0;max-width:100vw}.student-shell.sidebar-open,.portal-shell.sidebar-open{overflow:hidden}}

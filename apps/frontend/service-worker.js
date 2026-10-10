@@ -1,4 +1,4 @@
-const CACHE_NAME = "idmc-shell-v9-centered-progress-20261010";
+const CACHE_NAME = "idmc-shell-v10-mobile-email-confirm-20261011";
 const MAX_CACHED_FILES = 180;
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async () => {
@@ -23,7 +23,7 @@ self.addEventListener("fetch", event => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request);
-    const authAsset = /\/(?:login\.html|forgot-password\.html|set-password\.html|student-first-password\.html|assets\/js\/(?:auth|api|config|student-first-password|forgot-password)\.js)$/.test(url.pathname);
+    const authAsset = /\/(?:login\.html|forgot-password\.html|set-password\.html|student-first-password\.html|applicant-access\.html|assets\/js\/(?:auth|api|config|student-first-password|forgot-password|applicant-access)\.js)$/.test(url.pathname);
     if (authAsset) {
       try { const fresh = await fetch(request, { cache: "no-store" }); await store(cache, request, fresh); return fresh; }
       catch { if (cached) return cached; throw new Error("Authentication asset unavailable."); }

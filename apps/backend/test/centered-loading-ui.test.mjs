@@ -63,5 +63,5 @@ test("shared operation loading uses one centered overlay for the main workspace 
 test("API loader version and service worker cache advance together", async () => {
   const [api, worker] = await Promise.all([read("assets/js/api.js"), read("service-worker.js")]);
   assert.match(api, /20261010-centered-progress/);
-  assert.match(worker, /idmc-shell-v9-centered-progress-20261010/);
+  assert.match(worker, /idmc-shell-v10-mobile-email-confirm-20261011/);
 });

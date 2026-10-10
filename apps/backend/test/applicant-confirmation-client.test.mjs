@@ -6,14 +6,14 @@ import vm from "node:vm";
 const scriptUrl = new URL("../../frontend/assets/js/applicant-access.js", import.meta.url);
 const source = await readFile(scriptUrl, "utf8");
 
-function runConfirmation(hash, profile = { roles: [{ id: "applicant-role", roleCode: "APPLICANT" }] }) {
+function runConfirmation(hash, profile = { roles: [{ id: "applicant-role", roleCode: "APPLICANT" }] }, search = "", verifyPayload = { success: true, data: { access_token: "verified-token", refresh_token: "refresh-token" } }) {
   const elements = new Map();
   const element = id => {
     if (!elements.has(id)) elements.set(id, { id, hidden: true, className: "", textContent: "", handlers: {}, elements: { email: { value: "" } }, addEventListener(name, fn) { this.handlers[name] = fn; } });
     return elements.get(id);
   };
-  const calls = { session: null, role: null, redirect: null, cleared: false, cleanedUrl: null };
-  const location = { search: "", hash, pathname: "/applicant-access.html", replace(url) { calls.redirect = url; } };
+  const calls = { session: null, role: null, redirect: null, cleared: false, cleanedUrl: null, verifyUrl: null, verifyBody: null };
+  const location = { search, hash, pathname: "/applicant-access.html", replace(url) { calls.redirect = url; } };
   const context = {
     URLSearchParams,
     URL,
@@ -29,7 +29,7 @@ function runConfirmation(hash, profile = { roles: [{ id: "applicant-role", roleC
     },
     document: { getElementById: element },
     history: { replaceState(_state, _title, url) { calls.cleanedUrl = url; } },
-    fetch: async () => ({ ok: true, json: async () => ({ success: true }) }),
+    fetch: async (url, options) => { calls.verifyUrl = url; calls.verifyBody = JSON.parse(options.body); return { ok: true, json: async () => verifyPayload }; },
     FormData: class {},
     console,
     setTimeout
@@ -57,4 +57,14 @@ test("verification callback does not grant access if the returned identity lacks
   assert.equal(calls.redirect, null);
   assert.equal(calls.cleared, true);
   assert.match(elements.get("applicantMessage").textContent, /applicant portal role was not found/i);
+});
+
+test("custom signup token confirmation calls the IDMC backend and strips the one-time token from the address bar", async () => {
+  const { calls } = runConfirmation("", { roles: [{ id: "applicant-role", roleCode: "APPLICANT" }] }, "?token_hash=one-time-token&type=signup");
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(calls.verifyUrl, "/api/v1/auth/applicant-verification-confirm");
+  assert.deepEqual(calls.verifyBody, { token_hash: "one-time-token" });
+  assert.equal(calls.cleanedUrl, "/applicant-access.html");
+  assert.equal(calls.session.access_token, "verified-token");
+  assert.equal(calls.redirect, "/applicant-portal.html");
 });

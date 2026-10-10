@@ -41,6 +41,21 @@ export async function resendApplicantVerification(req: Request, res: Response): 
   }
   res.json({ success: true, message: "If this address has an unverified applicant account, a new verification email will be sent." });
 }
+export async function confirmApplicantVerification(req: Request, res: Response): Promise<void> {
+  const tokenHash = String(req.body?.token_hash ?? "").trim();
+  if (!tokenHash || tokenHash.length > 512) {
+    res.status(400).json({ success: false, message: "This verification link is invalid or has expired. Request a new one." });
+    return;
+  }
+  try {
+    const data = await authService.verifyApplicantEmail(tokenHash);
+    res.json({ success: true, data });
+  } catch (error) {
+    const status = Number((error as { statusCode?: number })?.statusCode) || 400;
+    if (status >= 500) logError("Applicant email confirmation failed", error);
+    res.status(status).json({ success: false, message: error instanceof Error ? error.message : "Unable to verify this email address." });
+  }
+}
 export async function login(req: Request, res: Response): Promise<void> {
   const identifier = String(req.body?.identifier ?? "").trim();
   const password = String(req.body?.password ?? "");
