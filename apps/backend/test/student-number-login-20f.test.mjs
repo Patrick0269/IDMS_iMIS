@@ -34,9 +34,12 @@ test("linked Supabase auth identity is authoritative", () => {
   assert.doesNotMatch(service, /linkStudentPortalAccount/);
 });
 
-test("student numbers are never used as passwords and password recovery verifies institutional records", () => {
+test("student number is a first-login temporary password only; recovery verifies institutional records", () => {
   const service = read("apps/backend/src/modules/auth/services/student-login.service.ts");
   const linking = read("apps/backend/src/services/student-portal-link.service.ts");
+  assert.match(service, /initialiseStudentFirstLogin/);
+  assert.match(service, /needsStudentPasswordChange/);
+  assert.match(service, /idmc_student_initial_number/);
   assert.doesNotMatch(linking, /password:\s*String\(student\.student_number\)/);
   assert.match(service, /generateLink\(\{[\s\S]*type: "recovery"/);
   assert.match(service, /sendAccountPasswordRecoveryEmail/);

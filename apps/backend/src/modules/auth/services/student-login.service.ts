@@ -1,6 +1,7 @@
 import { getSupabase } from "../../../config/database.js";
 import { env } from "../../../config/env.js";
 import { sendAccountPasswordRecoveryEmail } from "../../../services/email.service.js";
+import { initialiseStudentFirstLogin, needsStudentPasswordChange, studentInitialNumber } from "../../../services/student-first-login.service.js";
 
 const BLOCKED_STUDENT_STATUSES = new Set([
   "PENDING_ACTIVATION",
@@ -47,7 +48,7 @@ async function findStudentByIdentifier(value: string): Promise<StudentRow | null
 /** Resolve an existing linked identity only; login must never create/link an account. */
 export async function resolveStudentLoginEmail(identifier: string, password: string): Promise<string | null> {
   const studentNumber = normaliseStudentNumber(identifier);
-  if (!isValidStudentNumber(studentNumber) || !password || normaliseStudentNumber(password) === studentNumber) return null;
+  if (!isValidStudentNumber(studentNumber) || !password) return null;
 
   const student = await findStudentByIdentifier(studentNumber);
   if (!student || BLOCKED_STUDENT_STATUSES.has(String(student.student_status ?? "").toUpperCase()) || !student.user_id) return null;
@@ -60,9 +61,15 @@ export async function resolveStudentLoginEmail(identifier: string, password: str
   if (error) throw error;
   if (!user || user.status !== "ACTIVE" || !user.auth_user_id) return null;
 
+  const initialNumber = studentInitialNumber(student);
+  const usingInitialPassword = normaliseStudentNumber(password) === initialNumber;
+  if (usingInitialPassword) await initialiseStudentFirstLogin(String(user.auth_user_id), student);
+
   const { data, error: authError } = await supabase.auth.admin.getUserById(String(user.auth_user_id));
-  const email = String(data?.user?.email ?? "").trim().toLowerCase();
+  const identity = data?.user;
+  const email = String(identity?.email ?? "").trim().toLowerCase();
   if (authError || !email) throw new Error(INVALID);
+  if (usingInitialPassword && (!needsStudentPasswordChange(identity?.app_metadata) || String(identity?.app_metadata?.idmc_student_initial_number ?? "").toUpperCase() !== initialNumber)) return null;
   return email;
 }
 

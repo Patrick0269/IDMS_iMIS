@@ -84,7 +84,7 @@ test('student recovery response is non-enumerating and account setup uses an ema
 
     dbCalls = 0;
     assert.equal(await resolveStudentLoginEmail('IDMC/2026/00001', 'idmc/2026/00001'), null);
-    assert.equal(dbCalls, 0, 'the public student number is rejected before any database lookup');
+    assert.ok(dbCalls > 0, 'the temporary number password is checked against an active, linked student account');
 
     records.students[0].user_id = 'user-1';
     records.students[0].registration_number = 'NS1179/0269/2020';
@@ -145,5 +145,40 @@ test('student recovery response is non-enumerating and account setup uses an ema
     db.auth.admin.generateLink = originalGenerateLink;
     db.auth.admin.updateUserById = originalUpdateUserById;
     await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('historical student number works as a temporary password only while first-login change is required', async () => {
+  const db = getSupabase();
+  const originalFrom = db.from;
+  const originalGetUserById = db.auth.admin.getUserById;
+  const originalUpdateUserById = db.auth.admin.updateUserById;
+  const number = 'NS2929/2000/2000';
+  const records = {
+    students: [{ id: 'student-2', student_number: 'IDMC/2026/00002', registration_number: number, user_id: 'user-2', student_status: 'ACTIVE' }],
+    users: [{ id: 'user-2', auth_user_id: 'auth-2', status: 'ACTIVE' }],
+    user_roles: [{ user_id: 'user-2', status: 'ACTIVE', roles: { role_code: 'STUDENT' } }],
+  };
+  const identity = { id: 'auth-2', email: 'student@example.edu', app_metadata: {} };
+  let initialPassword = '';
+  db.from = tableMock(records);
+  db.auth.admin.getUserById = async () => ({ data: { user: identity }, error: null });
+  db.auth.admin.updateUserById = async (_id, input) => {
+    initialPassword = input.password;
+    identity.app_metadata = input.app_metadata;
+    return { data: { user: identity }, error: null };
+  };
+  try {
+    assert.equal(await resolveStudentLoginEmail(number.toLowerCase(), number.toLowerCase()), 'student@example.edu');
+    assert.equal(initialPassword, number, 'initialization uses the registration number as the temporary password');
+    assert.equal(identity.app_metadata.idmc_student_first_login, true, 'first login is marked for a forced password change');
+    assert.equal(await resolveStudentLoginEmail(number, number), 'student@example.edu');
+
+    identity.app_metadata.idmc_student_first_login = false;
+    assert.equal(await resolveStudentLoginEmail(number, number), null, 'the temporary number password stops working after the required change');
+  } finally {
+    db.from = originalFrom;
+    db.auth.admin.getUserById = originalGetUserById;
+    db.auth.admin.updateUserById = originalUpdateUserById;
   }
 });

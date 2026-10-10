@@ -287,11 +287,13 @@ export async function login(identifier: string, password: string) {
 
 export async function studentLogin(studentNumber: string, password: string) {
   const number = normaliseStudentNumber(studentNumber);
-  if (!isValidStudentNumber(number) || !String(password ?? "")) {
+  const suppliedPassword = String(password ?? "");
+  if (!isValidStudentNumber(number) || !suppliedPassword) {
     throw new Error("Invalid login credentials");
   }
 
-  const email = await resolveStudentLoginEmail(number, String(password));
+  const passwordToCheck = normaliseStudentNumber(suppliedPassword) === number ? number : suppliedPassword;
+  const email = await resolveStudentLoginEmail(number, passwordToCheck);
   if (!email) {
     throw new Error("Invalid login credentials");
   }
@@ -300,7 +302,7 @@ export async function studentLogin(studentNumber: string, password: string) {
   const authClient = createSupabaseAuthClient();
   const { data, error } = await authClient.auth.signInWithPassword({
     email,
-    password: String(password),
+    password: passwordToCheck,
   });
 
   if (error || !data.session) {
