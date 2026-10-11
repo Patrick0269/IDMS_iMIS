@@ -83,7 +83,10 @@
           previewKey = "";
         } catch (error) {
           message.className = "status error";
-          message.textContent = error.message || "Deletion failed. The database transaction was rolled back.";
+          const detail = error.message || "Deletion failed. The database transaction was rolled back.";
+          message.textContent = error.requestId
+            ? `${detail} Support reference: ${error.requestId}. No records were deleted.`
+            : `${detail} No records were deleted.`;
           previewKey = "";
         } finally { refreshButton(); }
       });
