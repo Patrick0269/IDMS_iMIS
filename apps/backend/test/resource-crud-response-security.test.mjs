@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { projectCrudResponse } from "../dist/utils/resourceCrud.js";
+import { projectCrudResponse } from "../dist/utils/crud-response.js";
 
 test("generic CRUD responses project rows onto their declared field allowlist", () => {
   const row = { id: "app-1", first_name: "Amina", email: "a@example.edu", auth_user_id: "auth-secret", bank_account_number: "private", internal_review_token: "hidden" };

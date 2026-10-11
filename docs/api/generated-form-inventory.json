@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-09T18:33:46.611Z",
-  "count": 69,
+  "generated_at": "2026-10-11T06:10:12.152Z",
+  "count": 71,
   "forms": [
     {
       "page": "admissions.html",
@@ -76,6 +76,15 @@
         "password",
         "confirmPassword",
         "consent"
+      ]
+    },
+    {
+      "page": "applicant-access.html",
+      "form_id": "applicantResendForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "email"
       ]
     },
     {
@@ -336,6 +345,20 @@
       "method": "JS",
       "action": null,
       "fields": []
+    },
+    {
+      "page": "forgot-password.html",
+      "form_id": "recoveryForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "accountType",
+        "registrationNumber",
+        "studentEmail",
+        "formFourYear",
+        "phone",
+        "lecturerEmail"
+      ]
     },
     {
       "page": "graduation.html",

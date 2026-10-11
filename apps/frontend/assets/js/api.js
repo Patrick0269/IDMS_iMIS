@@ -7,13 +7,13 @@
         CONFIG.API_BASE_URL ||
         "/api/v1";
 
-    const progressScriptUrl = new URL("action-progress.js?v=20261010-centered-progress", document.currentScript && document.currentScript.src || location.href).href;
+    const progressScriptUrl = new URL("action-progress.js?v=20261011-form-progress", document.currentScript && document.currentScript.src || location.href).href;
     let progressReady;
     function ensureProgress(){
         // Standalone forms can own their progress UI instead of showing the
         // site-wide overlay. Set this flag before api.js is loaded.
         if(window.IDMC_DISABLE_GLOBAL_PROGRESS === true)return Promise.resolve();
-        if(window.IDMCProgress && window.IDMCProgress.version === "20261010-centered-progress")return Promise.resolve();
+        if(window.IDMCProgress && window.IDMCProgress.version === "20261011-form-progress")return Promise.resolve();
         if(progressReady)return progressReady;
         progressReady=new Promise(resolve=>{const script=document.createElement("script"),fallback=setTimeout(resolve,8000);script.src=progressScriptUrl;script.onload=script.onerror=()=>{clearTimeout(fallback);resolve();};document.head.appendChild(script);});
         return progressReady;

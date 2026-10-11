@@ -101,6 +101,7 @@ Generated from backend route source. Mount prefixes remain documented in `apps/b
 | GET | `/review/documents/:id/access` | See route middleware | `apps/backend/src/modules/admissions/admissions.routes.ts` |
 | POST | `/review/qualifications/:id` | See route middleware | `apps/backend/src/modules/admissions/admissions.routes.ts` |
 | POST | `/students/:id/photo` | See route middleware | `apps/backend/src/modules/admissions/admissions.routes.ts` |
+| POST | `/students/photo-matches` | See route middleware | `apps/backend/src/modules/admissions/admissions.routes.ts` |
 | GET | `/workspace` | See route middleware | `apps/backend/src/modules/admissions/admissions.routes.ts` |
 | DELETE/:id | `/records` | alumni.view | alumni.manage | `apps/backend/src/modules/alumni/alumni.routes.ts` |
 | GET | `/records` | alumni.view | alumni.manage | `apps/backend/src/modules/alumni/alumni.routes.ts` |
@@ -163,13 +164,15 @@ Generated from backend route source. Mount prefixes remain documented in `apps/b
 | POST | `/` | See route middleware | `apps/backend/src/modules/attendance/attendance.routes.ts` |
 | GET | `/` | See route middleware | `apps/backend/src/modules/audit/audit.routes.ts` |
 | POST | `/applicant-register` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
+| POST | `/applicant-verification-confirm` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
+| POST | `/applicant-verification-resend` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | POST | `/change-password` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | GET | `/health` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | POST | `/login` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | GET | `/me` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
+| POST | `/password-reset` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | POST | `/password-setup-complete` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | POST | `/student-login` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
-| POST | `/student-password-setup` | See route middleware | `apps/backend/src/modules/auth/routes/auth.routes.ts` |
 | GET | `/` | See route middleware | `apps/backend/src/modules/cohorts/cohorts.routes.ts` |
 | POST | `/` | See route middleware | `apps/backend/src/modules/cohorts/cohorts.routes.ts` |
 | GET | `/:id` | See route middleware | `apps/backend/src/modules/cohorts/cohorts.routes.ts` |

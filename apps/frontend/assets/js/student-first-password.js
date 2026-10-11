@@ -63,7 +63,12 @@
     setProgress(true, "Tunathibitisha akaunti yako…");
     try {
       const profile = await IDMCAuth.requireAuth();
-      if (!profile) return;
+      if (!profile) {
+        setProgress(false);
+        button.disabled = true;
+        showMessage("Session haijapatikana. Ingia tena kwa namba yako ya usajili na password ya muda.", "error");
+        return;
+      }
       if (!profile.mustChangePassword) {
         IDMCAuth.redirectAfterLogin();
         return;

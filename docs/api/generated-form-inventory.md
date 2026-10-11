@@ -8,6 +8,7 @@ This is structural discovery. The E2E status remains unverified until a real bro
 | `alumni.html` | `recordForm` | JS |  |
 | `applicant-access.html` | `applicantLoginForm` | JS | `email`, `password` |
 | `applicant-access.html` | `applicantRegisterForm` | JS | `firstName`, `middleName`, `lastName`, `phone`, `email`, `dateOfBirth`, `gender`, `nationality`, `nationalIdNumber`, `passportNumber`, `password`, `confirmPassword`, `consent` |
+| `applicant-access.html` | `applicantResendForm` | JS | `email` |
 | `applicant-portal.html` | `profileForm` | JS | `firstName`, `middleName`, `lastName`, `email`, `phone`, `dateOfBirth`, `gender`, `nationality`, `maritalStatus`, `birthDistrict`, `birthRegion`, `birthCountry`, `nationalIdNumber`, `passportNumber`, `city`, `region`, `district`, `country`, `addressLine1`, `addressLine2`, `permanentAddress`, `bankName`, `bankBranch`, `bankAccountNumber`, `nhifCardNumber`, `disabilityStatus`, `disabilityDetails` |
 | `applicant-portal.html` | `applicationDetailsForm` | JS | `academicYearId`, `applicationCategory`, `applicationRound`, `sponsorshipType`, `sponsorName`, `sponsorOccupation`, `sponsorPhone`, `sponsorAddress` |
 | `applicant-portal.html` | `qualificationForm` | JS | `qualificationId`, `country`, `educationLevel`, `indexNumber`, `institutionName`, `programmeName`, `startYear`, `endYear`, `certificateFile` |
@@ -28,6 +29,7 @@ This is structural discovery. The E2E status remains unverified until a real bro
 | `finance-portal.html` | `feeForm` | JS | `name`, `academicYear`, `semester`, `firstInstallmentAmount`, `programmeLevel`, `applyToAll` |
 | `finance-portal.html` | `paymentSettingsForm` | JS | `bankName`, `accountName`, `controlNumber`, `lock` |
 | `finance.html` | `recordForm` | JS |  |
+| `forgot-password.html` | `recoveryForm` | JS | `accountType`, `registrationNumber`, `studentEmail`, `formFourYear`, `phone`, `lecturerEmail` |
 | `graduation.html` | `recordForm` | JS |  |
 | `historical-students.html` | `manualForm` | JS | `studentNumber`, `formFourIndex`, `formFourYear`, `firstName`, `middleName`, `lastName`, `cohortYear`, `programmeCode`, `programmeVersionCode`, `academicYear`, `studentStatus`, `gender`, `dateOfBirth`, `phone`, `email` |
 | `hod-course-allocation.html` | `haForm` | JS | `courseOfferingId`, `lecturerUserId`, `assignmentRole`, `workloadHours`, `notes` |

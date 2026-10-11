@@ -76,12 +76,12 @@ test("one login form recognizes student identifiers and redirects by verified ac
   assert.doesNotMatch(html, /Registration No\., Application No\. or Email/);
 });
 
-test("reconciliation preserves a dedicated student identity", () => {
-  const script = read("apps/backend/scripts/reconcile-student-login.mjs");
-  assert.match(script, /@students\.idmc\.local/);
-  assert.match(script, /role_code.*STUDENT/s);
-  assert.match(script, /signInWithPassword/);
-  assert.doesNotMatch(script, /deleteUser/);
+test("student login only authenticates the existing linked student account", () => {
+  const service = read("apps/backend/src/modules/auth/services/student-login.service.ts");
+  assert.match(service, /student\.user_id\)/);
+  assert.match(service, /\.eq\("id", student\.user_id\)/);
+  assert.match(service, /auth\.admin\.getUserById\(String\(user\.auth_user_id\)\)/);
+  assert.doesNotMatch(service, /auth\.admin\.createUser|\.from\("user_roles"\)\.insert/);
 });
 
 

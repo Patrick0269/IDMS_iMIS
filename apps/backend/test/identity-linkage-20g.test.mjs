@@ -34,10 +34,9 @@ test("login and admissions email lookups escape user supplied ILIKE patterns", (
   assert.match(admissions, /\.ilike\("email", escapeIlikeLiteral\(email\)\)/);
 });
 
-test("owner reconciler links auth, public profile and super administrator role", () => {
-  const source = read("apps/backend/scripts/reconcile-owner-login.mjs");
-  assert.match(source, /SUPER_ADMIN/);
-  assert.match(source, /role_permissions/);
-  assert.match(source, /linkage_test: "PASS"/);
-  assert.doesNotMatch(source, /deleteUser|from\("users"\)\.delete/);
+test("account authentication does not create or grant a super administrator identity", () => {
+  const source = read("apps/backend/src/middleware/auth.ts");
+  assert.match(source, /select\([\s\S]*auth_user_id[\s\S]*\)[\s\S]*\.eq\("auth_user_id", authUser\.id\)/);
+  assert.match(source, /\.is\("auth_user_id", null\)/);
+  assert.doesNotMatch(source, /auth\.admin\.createUser|role_permissions|SUPER_ADMIN/);
 });

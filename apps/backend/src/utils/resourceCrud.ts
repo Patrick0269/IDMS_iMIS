@@ -2,6 +2,8 @@
 import { getSupabase } from "../config/database.js";
 import { createAuditLog } from "../services/audit.service.js";
 import { requirePermission } from "../middleware/rbac.js";
+import { projectCrudResponse } from "./crud-response.js";
+export { projectCrudResponse } from "./crud-response.js";
 
 type FieldMap = Record<string, string>;
 
@@ -60,10 +62,6 @@ function responseFields(config: CrudConfig): string[] {
     ...(config.listFields ?? []),
     ...(config.defaultOrderField ? [config.defaultOrderField] : []),
   ])].filter((field) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field));
-}
-
-export function projectCrudResponse(row: Record<string, unknown>, fields: string[]): Record<string, unknown> {
-  return Object.fromEntries(fields.filter(field => Object.prototype.hasOwnProperty.call(row, field)).map(field => [field, row[field]]));
 }
 
 function requireId(req: Request): string {

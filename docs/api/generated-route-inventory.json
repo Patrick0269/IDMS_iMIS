@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-09T18:33:46.500Z",
-  "count": 864,
+  "generated_at": "2026-10-11T06:10:12.007Z",
+  "count": 867,
   "routes": [
     {
       "method": "POST",
@@ -528,6 +528,11 @@
       "source": "apps/backend/src/modules/admissions/admissions.routes.ts"
     },
     {
+      "method": "POST",
+      "path": "/students/photo-matches",
+      "source": "apps/backend/src/modules/admissions/admissions.routes.ts"
+    },
+    {
       "method": "GET",
       "path": "/workspace",
       "source": "apps/backend/src/modules/admissions/admissions.routes.ts"
@@ -844,6 +849,16 @@
     },
     {
       "method": "POST",
+      "path": "/applicant-verification-confirm",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/applicant-verification-resend",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "POST",
       "path": "/change-password",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
@@ -864,17 +879,17 @@
     },
     {
       "method": "POST",
+      "path": "/password-reset",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "POST",
       "path": "/password-setup-complete",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
     {
       "method": "POST",
       "path": "/student-login",
-      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
-    },
-    {
-      "method": "POST",
-      "path": "/student-password-setup",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
     {

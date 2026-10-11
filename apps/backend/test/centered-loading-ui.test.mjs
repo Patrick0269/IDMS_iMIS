@@ -24,16 +24,15 @@ class Element {
   getBoundingClientRect() { return this.rect || { top: 74, bottom: 1000, left: 280, right: 1500 }; }
 }
 
-test("shared operation loading uses one centered overlay for the main workspace and removes duplicate completions", async () => {
-  const body = new Element("body"), head = new Element("head"), main = new Element("main"), header = new Element("header");
-  main.rect = { top: 50, bottom: 1200, left: 280, right: 1600 };
-  header.rect = { top: 0, bottom: 68, left: 280, right: 1600 };
+test("shared operation loading appears inside the active form and clears after its requests finish", async () => {
+  const body = new Element("body"), head = new Element("head"), main = new Element("main"), form = new Element("form");
+  main.append(form);
   const elementsById = new Map();
   const document = {
     body, head, documentElement: { clientHeight: 900 },
     createElement: tag => new Element(tag),
     getElementById: id => elementsById.get(id) || null,
-    querySelector: selector => selector.includes("portalContent") || selector === "main" ? main : selector.includes("portal-header") ? header : null,
+    querySelector: selector => selector.includes("portalContent") || selector === "main" ? main : null,
     addEventListener() {}
   };
   const window = { innerHeight: 900, innerWidth: 1600, fetch: async () => ({}), addEventListener() {} };
@@ -43,25 +42,25 @@ test("shared operation loading uses one centered overlay for the main workspace 
   const context = { window, document, XMLHttpRequest, FileReader, Blob, FormData: class {}, URL, URLSearchParams, Headers, Response, setTimeout, clearTimeout, setInterval() {} };
   vm.runInNewContext(await read("assets/js/action-progress.js"), context);
 
-  const first = window.IDMCProgress.start("Loading Course Registration", { kind: "request", stage: "Waiting for server response" });
-  const second = window.IDMCProgress.start("Loading information", { kind: "request", stage: "Waiting for server response" });
+  const first = window.IDMCProgress.start("Loading Course Registration", { kind: "request", stage: "Waiting for server response", container: form });
+  const second = window.IDMCProgress.start("Loading information", { kind: "request", stage: "Waiting for server response", container: form });
   await new Promise(resolve => setTimeout(resolve, 180));
-  assert.equal(body.children.filter(child => child.className === "idmc-progress-layer").length, 1);
-  const layer = body.children.find(child => child.className === "idmc-progress-layer");
-  assert.equal(layer.style.left, "280px", "loading should be positioned over the content, clear of the left sidebar");
-  assert.equal(layer.style.top, "76px", "loading should be centered below the portal header");
-  assert.match(layer.textContent, /Loading information/);
+  assert.equal(body.children.filter(child => child.className === "idmc-progress-layer").length, 0, "the global page overlay is not used");
+  assert.equal(form.children.filter(child => child.className === "idmc-operation-progress").length, 1);
+  const indicator = form.children.find(child => child.className === "idmc-operation-progress");
+  assert.match(indicator.textContent, /Loading information/);
+  assert.match(indicator.textContent, /2 shughuli zinaendelea/);
 
   window.IDMCProgress.finish(first, true, "Completed.");
   await new Promise(resolve => setTimeout(resolve, 180));
-  assert.equal(body.children.filter(child => child.className === "idmc-progress-layer").length, 1, "one remaining request keeps the same overlay visible");
-  assert.doesNotMatch(layer.textContent, /Completed\./, "individual successful requests must not stack completion banners");
+  assert.equal(form.children.filter(child => child.className === "idmc-operation-progress").length, 1, "one remaining request keeps its form indicator visible");
+  assert.doesNotMatch(indicator.textContent, /Completed\./, "individual successful requests must not stack completion banners");
   window.IDMCProgress.finish(second, true, "Completed.");
-  assert.equal(body.children.filter(child => child.className === "idmc-progress-layer").length, 0, "the shared overlay closes when all work is finished");
+  assert.equal(form.children.filter(child => child.className === "idmc-operation-progress").length, 0, "the form indicator clears when its requests finish");
 });
 
 test("API loader version and service worker cache advance together", async () => {
   const [api, worker] = await Promise.all([read("assets/js/api.js"), read("service-worker.js")]);
-  assert.match(api, /20261010-centered-progress/);
-  assert.match(worker, /idmc-shell-v10-mobile-email-confirm-20261011/);
+  assert.match(api, /20261011-form-progress/);
+  assert.match(worker, /idmc-shell-v11-form-progress-20261011/);
 });
