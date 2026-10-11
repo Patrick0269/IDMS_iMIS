@@ -17,7 +17,7 @@ const { getSupabase } = await import('../dist/config/database.js');
 const { default: authRoutes } = await import('../dist/modules/auth/routes/auth.routes.js');
 const { completePasswordSetup } = await import('../dist/modules/auth/services/auth.service.js');
 const { changeAuthenticatedPassword } = await import('../dist/services/password.service.js');
-const { resolveStudentLoginEmail, requestVerifiedPasswordReset } = await import('../dist/modules/auth/services/student-login.service.js');
+const { resolveStudentLoginEmail, requestVerifiedPasswordReset, normaliseStudentNumber, isValidStudentNumber } = await import('../dist/modules/auth/services/student-login.service.js');
 
 function tableMock(records, onInsert = () => {}) {
   return table => {
@@ -51,6 +51,7 @@ test('student recovery response is non-enumerating and account setup uses an ema
   const originalGetUserById = db.auth.admin.getUserById;
   const originalGenerateLink = db.auth.admin.generateLink;
   const originalUpdateUserById = db.auth.admin.updateUserById;
+  const originalResetPasswordForEmail = db.auth.resetPasswordForEmail;
   const records = { students: [{ id: 'student-1', student_number: 'IDMC/2026/00001', user_id: null, student_status: 'ACTIVE' }] };
   const inserts = [];
   let dbCalls = 0;
@@ -108,6 +109,16 @@ test('student recovery response is non-enumerating and account setup uses an ema
     assert.equal(inserts.at(-1)[0], 'security_logs');
     assert.equal(inserts.at(-1)[1].event_code, 'PASSWORD_RESET_REQUESTED');
 
+    let resetFallback;
+    db.auth.resetPasswordForEmail = async (...args) => { resetFallback = args; return { error: null }; };
+    const fallbackSent = await requestVerifiedPasswordReset(
+      { accountType: 'student', registrationNumber: 'NS1179/0269/2020', formFourYear: 2014, email: 'student@example.edu' },
+      async () => { throw Object.assign(new Error('SMTP unavailable'), { code: 'ECONNECTION' }); },
+    );
+    assert.equal(fallbackSent, true, 'Supabase Auth email is attempted when Worker SMTP fails');
+    assert.equal(resetFallback[0], 'student@example.edu');
+    assert.match(resetFallback[1].redirectTo, /set-password\.html$/);
+
     records.staff = [{ id: 'staff-1', user_id: 'user-1', email: 'student@example.edu', phone: '+255 712 345 678', staff_category: 'ACADEMIC', employment_status: 'ACTIVE', first_name: 'Test', last_name: 'Lecturer' }];
     assert.equal(await requestVerifiedPasswordReset({ accountType: 'lecturer', phone: '0712345670', email: 'student@example.edu' }, async message => sent.push(message)), false, 'wrong staff phone cannot receive a reset link');
     assert.equal(await requestVerifiedPasswordReset({ accountType: 'lecturer', phone: '0712345678', email: 'student@example.edu' }, async message => sent.push(message)), true);
@@ -144,6 +155,7 @@ test('student recovery response is non-enumerating and account setup uses an ema
     db.auth.admin.getUserById = originalGetUserById;
     db.auth.admin.generateLink = originalGenerateLink;
     db.auth.admin.updateUserById = originalUpdateUserById;
+    db.auth.resetPasswordForEmail = originalResetPasswordForEmail;
     await new Promise(resolve => server.close(resolve));
   }
 });
@@ -169,10 +181,14 @@ test('historical student number works as a temporary password only while first-l
     return { data: { user: identity }, error: null };
   };
   try {
+    const spacedNumber = ' NS2929 / 2000 / 2000 ';
+    assert.equal(normaliseStudentNumber(spacedNumber), number, 'spaces around and within the formatted number are ignored');
+    assert.equal(isValidStudentNumber(spacedNumber), true, 'a correctly formatted number remains valid with user-entered spacing');
     assert.equal(await resolveStudentLoginEmail(number.toLowerCase(), number.toLowerCase()), 'student@example.edu');
     assert.equal(initialPassword, number, 'initialization uses the registration number as the temporary password');
     assert.equal(identity.app_metadata.idmc_student_first_login, true, 'first login is marked for a forced password change');
     assert.equal(await resolveStudentLoginEmail(number, number), 'student@example.edu');
+    assert.equal(await resolveStudentLoginEmail(spacedNumber, spacedNumber), 'student@example.edu', 'login accepts the same student number and temporary password with spacing');
 
     identity.app_metadata.idmc_student_first_login = false;
     assert.equal(await resolveStudentLoginEmail(number, number), null, 'the temporary number password stops working after the required change');

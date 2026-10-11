@@ -107,6 +107,19 @@ export async function sendAccountPasswordRecoveryEmail(input: { recipientEmail: 
   });
 }
 
+export async function sendStudentPortalAccessEmail(input: { recipientEmail: string; recipientName: string; studentNumber: string }): Promise<void> {
+  const recipientName = escapeHtml(input.recipientName);
+  const studentNumber = escapeHtml(input.studentNumber);
+  const loginUrl = `${env.FRONTEND_URL.replace(/\/$/, "")}/login.html`;
+  await sendEmail("student_account_created", {
+    from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
+    to: input.recipientEmail,
+    subject: "Your IDMC Student Portal account is ready",
+    text: `Dear ${input.recipientName},\n\nYour IDMC Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.\n\nStudent Number: ${input.studentNumber}\nStudent Portal sign in: ${loginUrl}\n\nIf you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMC Registry.`,
+    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Student Portal access is ready</h2><p>Dear ${recipientName},</p><p>Your IDMC Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.</p><p>Student Number: <strong>${studentNumber}</strong></p><p><a href="${loginUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Open Student Portal sign in</a></p><p>If you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMC Registry.</p></div></body></html>`,
+  });
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")

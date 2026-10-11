@@ -79,7 +79,12 @@ router.post("/workspace/create", requirePermission(MANAGE), async (req, res, nex
     if (student.data.student_status === "PENDING_ACTIVATION") { const activated = await db.from("students").update({ student_status: "ACTIVE", activated_at: now, enrollment_date: now.slice(0,10), updated_at: now }).eq("id", studentId); if (activated.error) throw activated.error; }
     try {
       const portalAccount = await linkStudentPortalAccount(studentId, req.user!.id);
-      res.status(201).json({ success: true, created: true, message: "Student registered and linked to the Student portal. If a new login was needed, an invitation was sent to the student email.", data: saved.data, portalAccount });
+      const emailNotice = portalAccount.invited
+        ? portalAccount.welcomeEmailSent
+          ? " Student Portal sign-in instructions were emailed."
+          : " The portal account is ready, but its sign-in email could not be sent; contact ICT to arrange delivery."
+        : " The existing Student Portal account remains linked.";
+      res.status(201).json({ success: true, created: true, message: `Student registered and linked to the Student portal.${emailNotice}`, data: saved.data, portalAccount });
     } catch (linkError: any) {
       res.status(201).json({ success: true, created: true, portalLinked: false, message: `Student registration succeeded, but portal account linking needs review: ${linkError?.message || "unknown account error"}`, data: saved.data });
     }

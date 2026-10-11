@@ -23,6 +23,16 @@ test("student portal reconciliation escapes email lookup patterns and refuses to
   assert.match(source, /\.ilike\("email", escapeIlikeLiteral\(email\)\)/);
   assert.match(source, /student\.user_id && String\(student\.user_id\) !== String\(account\.id\)/);
   assert.match(source, /Student is already linked to a different IDMC account/);
+  assert.match(source, /if \(invited\)[\s\S]*sendStudentPortalAccessEmail/);
+  const email = read("apps/backend/src/services/email.service.ts");
+  assert.match(email, /student_account_created/);
+  assert.match(email, /temporary password/);
+  const admissions = read("apps/backend/src/modules/admissions/admissions.routes.ts");
+  assert.match(admissions, /sendStudentPortalAccessEmail/);
+  assert.match(admissions, /accessEmailSent/);
+  const registration = read("apps/backend/src/modules/registration/registration.routes.ts");
+  assert.match(registration, /portalAccount\.welcomeEmailSent/);
+  assert.doesNotMatch(registration, /an invitation was sent to the student email/i);
 });
 
 test("login and admissions email lookups escape user supplied ILIKE patterns", () => {

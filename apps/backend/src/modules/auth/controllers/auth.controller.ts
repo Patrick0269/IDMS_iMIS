@@ -120,7 +120,7 @@ export async function requestVerifiedPasswordReset(req: Request, res: Response):
   } catch (error) {
     logError("Verified password reset request failed", error);
   }
-  res.json({ success: true, message: "Kama taarifa ulizoweka zinaendana na akaunti hai ya IDMC, utapokea link salama ya kubadilisha nenosiri kwenye email yako." });
+  res.json({ success: true, message: "Ombi limepokelewa. Ikiwa taarifa zinalingana na akaunti hai, link salama itatumwa kwenye email iliyosajiliwa. Angalia Inbox na Spam/Junk baada ya dakika chache; usipopokea, wasiliana na Ofisi ya ICT." });
 }
 
 export async function passwordSetupComplete(req: Request, res: Response): Promise<void> {

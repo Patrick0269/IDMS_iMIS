@@ -1,6 +1,8 @@
 import { getSupabase } from "../config/database.js";
 import { createStudentFirstLoginIdentity, initialiseStudentFirstLogin } from "./student-first-login.service.js";
+import { sendStudentPortalAccessEmail } from "./email.service.js";
 import { escapeIlikeLiteral } from "../utils/security.js";
+import { logError } from "../utils/logger.js";
 
 type Row = Record<string, any>;
 
@@ -164,5 +166,17 @@ export async function linkStudentPortalAccount(studentId: string, actorUserId: s
     status: "ACTIVE",
   }, { onConflict: "user_id,role_id" });
   if (assigned.error) throw assigned.error;
-  return { userId: account.id, username, studentNumber: student.student_number, registrationNumber: userNumber, email, invited };
+  let welcomeEmailSent = false;
+  if (invited) {
+    try {
+      await sendStudentPortalAccessEmail({ recipientEmail: email, recipientName: displayName, studentNumber: userNumber });
+      welcomeEmailSent = true;
+    } catch (error) {
+      const candidate = error && typeof error === "object" ? error as Record<string, unknown> : {};
+      logError("Student portal account was created but its access email was not accepted", {
+        code: typeof candidate.code === "string" ? candidate.code : "EMAIL_SEND_FAILED",
+      });
+    }
+  }
+  return { userId: account.id, username, studentNumber: student.student_number, registrationNumber: userNumber, email, invited, welcomeEmailSent };
 }

@@ -2,6 +2,7 @@ import { getSupabase } from "../../../config/database.js";
 import { env } from "../../../config/env.js";
 import { sendAccountPasswordRecoveryEmail } from "../../../services/email.service.js";
 import { initialiseStudentFirstLogin, needsStudentPasswordChange, studentInitialNumber } from "../../../services/student-first-login.service.js";
+import { logError } from "../../../utils/logger.js";
 
 const BLOCKED_STUDENT_STATUSES = new Set([
   "PENDING_ACTIVATION",
@@ -27,7 +28,9 @@ function escapeLike(value: string): string {
 }
 
 export function normaliseStudentNumber(value: string): string {
-  return String(value ?? "").trim().toUpperCase();
+  // Student numbers have no meaningful whitespace; accept formatting such as
+  // "NS1425 / 2020 / 2025" while keeping the stored identifier unchanged.
+  return String(value ?? "").replace(/\s+/g, "").toUpperCase();
 }
 
 export function isValidStudentNumber(value: string): boolean {
@@ -149,7 +152,18 @@ export async function requestVerifiedPasswordReset(
     const { error: fallbackError } = await db.auth.resetPasswordForEmail(email, {
       redirectTo: `${frontend}/set-password.html`,
     });
-    if (fallbackError) throw new AggregateError([smtpError, fallbackError], "Password reset delivery failed through both email providers.");
+    if (fallbackError) {
+      const safeCode = (error: unknown) => {
+        const candidate = error && typeof error === "object" ? error as Record<string, unknown> : {};
+        const code = typeof candidate.code === "string" ? candidate.code.toUpperCase() : "";
+        return /^[A-Z0-9_-]{1,40}$/.test(code) ? code : error instanceof Error ? error.name : "EMAIL_PROVIDER_FAILED";
+      };
+      logError("Password reset email delivery failed through Worker SMTP and Supabase Auth", {
+        primaryCode: safeCode(smtpError),
+        fallbackCode: safeCode(fallbackError),
+      });
+      throw new AggregateError([smtpError, fallbackError], "Password reset delivery failed through both email providers.");
+    }
   }
   const { error: auditError } = await db.from("security_logs").insert({
     user_id: profile.data.id, event_code: "PASSWORD_RESET_REQUESTED", success: true,

@@ -7,8 +7,9 @@ import { env } from "../../config/env.js";
 import { privateStorageObjectPath } from "../../utils/private-storage-path.js";
 import { registerCrudResource } from "../../utils/resourceCrud.js";
 import { createAuditLog } from "../../services/audit.service.js";
-import { createStudentFirstLoginIdentity, initialiseStudentFirstLogin } from "../../services/student-first-login.service.js";
-import { sendAdmissionOfferEmail } from "../../services/email.service.js";
+import { createStudentFirstLoginIdentity, initialiseStudentFirstLogin, studentInitialNumber } from "../../services/student-first-login.service.js";
+import { sendAdmissionOfferEmail, sendStudentPortalAccessEmail } from "../../services/email.service.js";
+import { logError } from "../../utils/logger.js";
 import { escapeIlikeLiteral, rolesGrantPermission, rolesGrantRole, scopeRoleAssignments } from "../../utils/security.js";
 
 const router = Router();
@@ -314,6 +315,7 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
   const student = studentResult.data;
   if (!student || !["HISTORICAL_IMPORT", "MANUAL_ENTRY"].includes(student.source_type)) return res.status(409).json({ success: false, message: "This record is not a historical student." });
   try {
+    let shouldSendAccessEmail = false;
     const email = String(student.email || "").trim().toLowerCase();
     if (!email) throw Object.assign(new Error("Student email is required to create a portal account. Update the historical student record and retry."), { statusCode: 409 });
     let publicUser = student.user_id ? await db.from("users").select("id,auth_user_id,email").eq("id", student.user_id).maybeSingle() : { data: null, error: null };
@@ -341,6 +343,7 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
       if (existingProfile.data && String(existingProfile.data.email).toLowerCase() !== email) throw new Error("Student account ownership does not match.");
       const created = existingProfile.data ? existingProfile : await db.from("users").insert({ auth_user_id: authUserId, user_number: student.registration_number || student.student_number, username: String(student.registration_number || student.student_number).toLowerCase(), first_name: student.first_name || "Student", middle_name: student.middle_name || null, last_name: student.last_name || student.student_number, display_name: [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" "), email, phone: student.phone || null, status: "ACTIVE" }).select("id,auth_user_id,email").single();
       if (created.error) throw created.error;
+      shouldSendAccessEmail = !existingProfile.data;
       publicUser = created;
     }
     const linkedUser = publicUser.data;
@@ -361,7 +364,30 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
   if (updated.error) throw updated.error;
   if (!updated.data) return res.status(409).json({ success: false, message: "Another Admissions user completed this review; refresh the queue." });
     await createAuditLog({ actorUserId: req.user!.id, actionCode: "HISTORICAL_STUDENT_ADMISSION_CONFIRM", moduleCode: "admissions", entityType: "student", entityId: student.id, oldValues: { student_status: student.student_status, admission_status: pending.data.admission_status }, newValues: { student_status: "ACTIVE", admission_status: "CONFIRMED", user_id: linkedUser.id }, requestId: req.requestId, ipAddress: req.ip });
-    res.json({ success: true, data: { studentId: student.id, studentNumber: student.student_number, admissionStatus: "CONFIRMED", accountStatus: "CREATED", userId: linkedUser.id }, message: `Historical student ${student.student_number} confirmed, linked to the Student role, and invited to set up portal access.` });
+    let accessEmailSent: boolean | null = null;
+    if (shouldSendAccessEmail) {
+      try {
+        await sendStudentPortalAccessEmail({
+          recipientEmail: email,
+          recipientName: [student.first_name, student.middle_name, student.last_name].filter(Boolean).join(" ") || "Student",
+          studentNumber: studentInitialNumber(student),
+        });
+        accessEmailSent = true;
+      } catch (error) {
+        accessEmailSent = false;
+        const candidate = error && typeof error === "object" ? error as Record<string, unknown> : {};
+        logError("Historical student account was created but its access email was not accepted", {
+          code: typeof candidate.code === "string" ? candidate.code : "EMAIL_SEND_FAILED",
+          requestId: req.requestId,
+        });
+      }
+    }
+    const emailNotice = accessEmailSent === true
+      ? " Student Portal sign-in instructions were emailed."
+      : accessEmailSent === false
+        ? " The account was created, but the sign-in email could not be sent; contact ICT to arrange delivery."
+        : " The existing account remains linked to the Student role.";
+    res.json({ success: true, data: { studentId: student.id, studentNumber: student.student_number, admissionStatus: "CONFIRMED", accountStatus: "CREATED", accessEmailSent, userId: linkedUser.id }, message: `Historical student ${student.student_number} confirmed and linked to the Student role.${emailNotice}` });
   } catch (error: any) {
     await db.from("historical_import_account_results").update({ admission_status: "FAILED", account_status: "FAILED", error_message: String(error?.message || "Account setup failed").slice(0, 1000), updated_at: new Date().toISOString() }).eq("id", pending.data.id);
     throw error;
