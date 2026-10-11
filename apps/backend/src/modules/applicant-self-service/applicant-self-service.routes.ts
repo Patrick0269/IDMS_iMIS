@@ -545,7 +545,7 @@ router.get("/applications/:id/:document.pdf", handler(async (req, res) => {
     academicYear: year.data?.year_code || year.data?.year_name || String(new Date().getUTCFullYear()),
     indexNumber: csee?.index_number || ""
   });
-  const fileName = joining ? `IDMC-Joining-Instructions-${application.application_number.replace(/[^A-Za-z0-9-]/g, "-")}.pdf` : `IDMC-Application-Acknowledgement-${application.application_number.replace(/[^A-Za-z0-9-]/g, "-")}.pdf`;
+  const fileName = joining ? `IDMS-Joining-Instructions-${application.application_number.replace(/[^A-Za-z0-9-]/g, "-")}.pdf` : `IDMS-Application-Acknowledgement-${application.application_number.replace(/[^A-Za-z0-9-]/g, "-")}.pdf`;
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
   res.setHeader("Content-Length", String(pdf.length));

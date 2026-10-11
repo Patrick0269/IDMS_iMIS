@@ -226,7 +226,7 @@
                             const cancellation = response.body?.cancel?.();
                             cancellation?.catch?.(() => undefined);
                         } catch { /* the timeout should still reject if body cancellation is unsupported */ }
-                        reject(new Error(`The IDMC service response timed out after ${Math.ceil(timeoutMs / 1000)} seconds. Please retry.`));
+                        reject(new Error(`The IDMS service response timed out after ${Math.ceil(timeoutMs / 1000)} seconds. Please retry.`));
                     }, timeoutMs);
                 })
             ]);
@@ -299,7 +299,7 @@
         studentNumber = String(studentNumber || "").trim().replace(/\s+/g, "").toUpperCase();
         password = String(password || "");
 
-        if (!/^(?:IDMC\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/.test(studentNumber)) {
+        if (!/^(?:IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/.test(studentNumber)) {
             throw new Error("Enter a valid Student Number or Registration Number.");
         }
         if (!password) {
@@ -407,7 +407,7 @@
                 "Content-Type": "application/json"
             };
             const activeRoleId = sessionStorage.getItem(ACTIVE_ROLE_KEY);
-            if (activeRoleId) headers["X-IDMC-Active-Role"] = activeRoleId;
+            if (activeRoleId) headers["X-IDMS-Active-Role"] = activeRoleId;
             response = await fetchWithTimeout(
                 `${CONFIG.API_BASE_URL}/auth/me`,
                 {
@@ -619,7 +619,7 @@
             user?.user?.displayName ||
             user?.user?.display_name ||
             user?.user?.email ||
-            "IDMC User"
+            "IDMS User"
         );
     }
 

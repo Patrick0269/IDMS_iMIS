@@ -120,7 +120,7 @@ export async function requestVerifiedPasswordReset(req: Request, res: Response):
   } catch (error) {
     logError("Verified password reset request failed", error);
   }
-  res.json({ success: true, message: "Ombi limepokelewa. Ikiwa taarifa zinalingana na akaunti hai, link salama itatumwa kwenye email iliyosajiliwa. Angalia Inbox na Spam/Junk baada ya dakika chache; usipopokea, wasiliana na Ofisi ya ICT." });
+  res.json({ success: true, message: "Your request has been received. If the details match an active account, a secure link will be sent to the registered email address. Check your Inbox and Spam/Junk in a few minutes. If it does not arrive, contact the ICT Office." });
 }
 
 export async function passwordSetupComplete(req: Request, res: Response): Promise<void> {

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#6b1025">
     <base href="/">
 
-<title>IDMC iMIS | Integrated Management Information System</title>
+<title>IDMS iMIS | Integrated Management Information System</title>
 
 <link
     rel="preconnect"
@@ -508,7 +508,7 @@
 <main class="portal-card">
 
 <!-- =========================
-     IDMC HEADER
+     IDMS HEADER
      ========================= -->
 
 <header class="portal-header">
@@ -523,7 +523,7 @@
     </p>
 
     <!--
-        IDMC
+        IDMS
 
         Baadaye tunaweza kuweka logo halisi
         ya taasisi hapa bila kubadilisha layout.
@@ -531,9 +531,9 @@
 
     <div
         class="logo"
-        aria-label="IDMC logo">
+        aria-label="IDMS logo">
 
-        IDMC
+        IDMS
 
     </div>
 
@@ -546,7 +546,7 @@
 
 <section
     class="login-content"
-    aria-label="IDMC iMIS Sign in">
+    aria-label="IDMS iMIS Sign in">
 
     <div
         id="loginMessage"
@@ -645,7 +645,7 @@
 
 
     <p class="footer">
-        IDMC iMIS · Secure Institutional Access
+        IDMS iMIS · Secure Institutional Access
     </p>
 
 </section>
@@ -653,7 +653,7 @@
 </main>
 
 <!-- =========================
-     IDMC CONFIGURATION
+     IDMS CONFIGURATION
      ========================= -->
 
 <script src="assets/js/config.js"></script>
@@ -842,11 +842,11 @@
                  * The backend authentication
                  * layer will then verify the
                  * authenticated user against
-                 * IDMC iMIS public.users.
+                 * IDMS iMIS public.users.
                  */
 
                 /*
-                 * Canonical IDMC iMIS login.
+                 * Canonical IDMS iMIS login.
                  *
                  * The backend resolves the identifier
                  * (email, student number, or staff
@@ -856,7 +856,7 @@
                  * can sign in with their own identifier.
                  */
 
-                const studentNumberPattern = /^(?:IDMC\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/i;
+                const studentNumberPattern = /^(?:IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/i;
                 if (studentNumberPattern.test(username.replace(/\s+/g, ""))) {
                     const studentNumber = username.replace(/\s+/g, "").toUpperCase();
                     await IDMCAuth.studentLogin(studentNumber, password);
@@ -867,7 +867,7 @@
 
                 /*
                  * Verify the authenticated account
-                 * against the IDMC iMIS backend.
+                 * against the IDMS iMIS backend.
                  */
 
                 const userData =
@@ -875,7 +875,7 @@
 
 
                 if (!userData) {
-                    throw new Error("Your account could not be verified in IDMC iMIS.");
+                    throw new Error("Your account could not be verified in IDMS iMIS.");
                 }
 
                 // The backend intentionally returns a compact, flat account
@@ -891,7 +891,7 @@
                 const verifiedUser = userData.user || userData;
                 if (verifiedUser.status !== "ACTIVE") {
                     throw new Error(
-                        `Your IDMC iMIS account is ${verifiedUser.status}. Please contact the ICT Office.`
+                        `Your IDMS iMIS account is ${verifiedUser.status}. Please contact the ICT Office.`
                     );
                 }
 
@@ -934,7 +934,7 @@
             } catch (error) {
 
                 console.error(
-                    "IDMC login error:",
+                    "IDMS login error:",
                     error
                 );
 

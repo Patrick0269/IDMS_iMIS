@@ -130,7 +130,7 @@
   function renderStatistics(data, manual) {
     var section = node("statistics"), host = node("siteStatistics"); if (!section || !host) return;
     host.replaceChildren(); var values = [];
-    if (data) values = [["Academic Programmes", data.programmes, "IDMC iMIS", data.updatedAt], ["Departments", data.departments, "IDMC iMIS", data.updatedAt], ["Campuses", data.campuses, "IDMC iMIS", data.updatedAt]];
+    if (data) values = [["Academic Programmes", data.programmes, "IDMS iMIS", data.updatedAt], ["Departments", data.departments, "IDMS iMIS", data.updatedAt], ["Campuses", data.campuses, "IDMS iMIS", data.updatedAt]];
     (Array.isArray(manual) ? manual : []).filter(function (item) { if (item.visible === false || !item.label || !item.value || !item.source) return false; if (!item.updatedAt) return false; var age = Date.now() - Date.parse(item.updatedAt); return Number.isFinite(age) && age >= 0 && age <= 365 * 86400000; }).forEach(function (item) { values.push([item.label, item.value, item.source, item.updatedAt]); });
     if (!values.length) { section.hidden = true; return; }
     section.hidden = false;

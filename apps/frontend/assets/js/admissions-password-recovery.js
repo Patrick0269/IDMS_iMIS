@@ -13,18 +13,18 @@
       birthYear: Number(form.elements.birthYear.value)
     };
     button.disabled = true;
-    button.textContent = "Inathibitisha taarifa…";
+    button.textContent = "Verifying student details…";
     try {
       var result = await IDMCAPI.post("/admissions/students/password-reset", payload);
-      message.textContent = result.message || "Ombi la kutuma link limepokelewa.";
+      message.textContent = result.message || "The request to send a reset link has been received.";
       message.className = "success-text";
       form.reset();
     } catch (error) {
-      message.textContent = error.message || "Imeshindikana kutuma link. Hakiki taarifa au jaribu tena baadaye.";
+      message.textContent = error.message || "We could not send the link. Check the details or try again later.";
       message.className = "error-text";
     } finally {
       button.disabled = false;
-      button.textContent = "Tuma link ya kubadilisha password";
+      button.textContent = "Send password reset link";
     }
   });
 })();

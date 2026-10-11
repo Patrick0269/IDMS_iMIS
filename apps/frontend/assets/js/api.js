@@ -81,8 +81,8 @@
         }
 
         const activeRoleId = window.IDMCAuth?.getActiveRoleId?.();
-        if (activeRoleId && !headers.has("X-IDMC-Active-Role")) {
-            headers.set("X-IDMC-Active-Role", activeRoleId);
+        if (activeRoleId && !headers.has("X-IDMS-Active-Role")) {
+            headers.set("X-IDMS-Active-Role", activeRoleId);
         }
 
         if (!headers.has("X-Request-Id")) {
@@ -133,8 +133,8 @@
 
         if (status === 401) return "Your sign-in details may be incorrect or your session may have expired. Check them and try again.";
         if (status === 403) {
-            if (/^Four-eyes control:/i.test(raw)) return "Afisa mwingine mwenye ruhusa ya Admissions lazima athibitishe mwanafunzi huyu. Akaunti iliyothibitisha import haiwezi kufanya Verify & Link.";
-            if (/^Permission denied:/i.test(raw)) return "Ruhusa inakosekana: " + raw.replace(/^Permission denied:\s*/i, "") + ". Wasiliana na msimamizi wa roles.";
+            if (/^Four-eyes control:/i.test(raw)) return "Another Admissions officer with the required permission must verify this student. The account that confirmed the import cannot perform Verify & Link.";
+            if (/^Permission denied:/i.test(raw)) return "Missing permission: " + raw.replace(/^Permission denied:\s*/i, "") + ". Contact your system administrator.";
             return "Your account is not permitted to complete this action.";
         }
         if (status === 404) return raw && !generic ? raw : "The requested information was not found.";

@@ -1,4 +1,4 @@
-﻿import nodemailer, {
+import nodemailer, {
   Transporter,
   SendMailOptions,
 } from "nodemailer";
@@ -60,12 +60,11 @@ export async function sendApplicantVerificationEmail(input: { recipientEmail: st
   await sendEmail("applicant_verification", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
-    subject: "Thibitisha akaunti yako ya IDMC",
-    text: `Dear ${input.recipientName},\n\nConfirm your email address to activate your IDMC Applicant Portal account: ${input.actionLink}\n\nAfter confirmation, this browser will open your applicant account automatically.\n\nIDMC Admissions`,
-    html: `<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f5f1f2;font-family:Arial,Helvetica,sans-serif;color:#33272b"><div style="display:none;max-height:0;overflow:hidden;opacity:0">Thibitisha email yako ili umalizie kufungua akaunti ya IDMC Applicant Portal.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f1f2;padding:28px 12px"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#fff;border:1px solid #e7dade;border-radius:14px;overflow:hidden"><tr><td style="height:8px;background:#68172a;font-size:0">&nbsp;</td></tr><tr><td style="padding:30px 32px 10px;text-align:center"><div style="font-size:13px;line-height:20px;font-weight:bold;letter-spacing:2px;color:#68172a">IDMC iMIS</div><h1 style="margin:10px 0 8px;font-size:28px;line-height:36px;color:#42101f">Thibitisha email yako</h1><p style="margin:0;color:#74676c;font-size:16px;line-height:25px">Tumalizie kufungua akaunti yako ya Applicant Portal.</p></td></tr><tr><td style="padding:20px 32px 8px"><p style="margin:0 0 14px;font-size:16px;line-height:25px">Habari ${recipientName},</p><p style="margin:0 0 24px;color:#51464a;font-size:16px;line-height:25px">Bonyeza kitufe hapa chini kuthibitisha anwani hii ya email na kumalizia usajili wako.</p><table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 24px"><tr><td align="center" bgcolor="#68172a" style="border-radius:8px"><a href="${actionLink}" target="_blank" style="display:inline-block;padding:15px 28px;border:1px solid #68172a;border-radius:8px;background:#68172a;color:#fff;text-decoration:none;font-size:16px;line-height:22px;font-weight:bold">Thibitisha email</a></td></tr></table><p style="margin:0 0 8px;color:#74676c;font-size:13px;line-height:21px">Ikiwa kitufe hakifunguki, tumia link hii kwenye browser:</p><p style="margin:0 0 24px;word-break:break-all;font-size:13px;line-height:21px"><a href="${actionLink}" style="color:#68172a">${actionLink}</a></p><div style="padding:14px 16px;border:1px solid #eadfe2;border-radius:8px;background:#faf7f8;color:#675a60;font-size:13px;line-height:21px">Kama hukuomba kufungua akaunti ya IDMC, unaweza kupuuza ujumbe huu.</div></td></tr><tr><td style="padding:24px 32px 28px;text-align:center"><p style="margin:0;color:#766a6f;font-size:13px;line-height:20px">Institute of Development and Medical Sciences</p><p style="margin:5px 0 0;color:#9a8c91;font-size:12px;line-height:19px">IDMC Admissions</p></td></tr></table></td></tr></table></body></html>`,
+    subject: "Confirm your IDMS account",
+    text: `Dear ${input.recipientName},\n\nConfirm your email address to activate your IDMS Applicant Portal account: ${input.actionLink}\n\nAfter confirmation, this browser will open your applicant account automatically.\n\nIDMS Admissions`,
+    html: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f5f1f2;font-family:Arial,Helvetica,sans-serif;color:#33272b"><div style="display:none;max-height:0;overflow:hidden;opacity:0">Confirm your email address to finish creating your IDMS Applicant Portal account.</div><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f5f1f2;padding:28px 12px"><tr><td align="center"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#fff;border:1px solid #e7dade;border-radius:14px;overflow:hidden"><tr><td style="height:8px;background:#68172a;font-size:0">&nbsp;</td></tr><tr><td style="padding:30px 32px 10px;text-align:center"><div style="font-size:13px;line-height:20px;font-weight:bold;letter-spacing:2px;color:#68172a">IDMS iMIS</div><h1 style="margin:10px 0 8px;font-size:28px;line-height:36px;color:#42101f">Confirm your email address</h1><p style="margin:0;color:#74676c;font-size:16px;line-height:25px">Finish setting up your Applicant Portal account.</p></td></tr><tr><td style="padding:20px 32px 8px"><p style="margin:0 0 14px;font-size:16px;line-height:25px">Hello ${recipientName},</p><p style="margin:0 0 24px;color:#51464a;font-size:16px;line-height:25px">Select the button below to confirm this email address and finish signing up.</p><table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 24px"><tr><td align="center" bgcolor="#68172a" style="border-radius:8px"><a href="${actionLink}" target="_blank" style="display:inline-block;padding:15px 28px;border:1px solid #68172a;border-radius:8px;background:#68172a;color:#fff;text-decoration:none;font-size:16px;line-height:22px;font-weight:bold">Confirm email address</a></td></tr></table><p style="margin:0 0 8px;color:#74676c;font-size:13px;line-height:21px">If the button does not work, copy and open this link in your browser:</p><p style="margin:0 0 24px;word-break:break-all;font-size:13px;line-height:21px"><a href="${actionLink}" style="color:#68172a">${actionLink}</a></p><div style="padding:14px 16px;border:1px solid #eadfe2;border-radius:8px;background:#faf7f8;color:#675a60;font-size:13px;line-height:21px">If you did not request an IDMS account, you can safely ignore this message.</div></td></tr><tr><td style="padding:24px 32px 28px;text-align:center"><p style="margin:0;color:#766a6f;font-size:13px;line-height:20px">Institute of Development and Medical Sciences</p><p style="margin:5px 0 0;color:#9a8c91;font-size:12px;line-height:19px">IDMS Admissions</p></td></tr></table></td></tr></table></body></html>`,
   });
 }
-
 function getTransporter(): Transporter {
   if (!transporter) {
     transporter = nodemailer.createTransport({
@@ -101,9 +100,9 @@ export async function sendAccountPasswordRecoveryEmail(input: { recipientEmail: 
   const recoveryUrl = escapeHtml(input.recoveryUrl);
   await sendEmail("password_recovery", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL }, to: input.recipientEmail,
-    subject: "Reset your IDMC account password",
-    text: `Dear ${input.recipientName},\n\nA password reset was requested for your IDMC account. Use this secure, time-limited link to choose a new password: ${input.recoveryUrl}\n\nIf you did not request this, ignore this message.\n\nIDMC ICT Office`,
-    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Reset your IDMC password</h2><p>Dear ${recipientName},</p><p>A password reset was requested for your IDMC account.</p><p><a href="${recoveryUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Choose a new password</a></p><p>This secure link expires. If you did not request a reset, ignore this email.</p><p>IDMC ICT Office</p></div></body></html>`,
+    subject: "Reset your IDMS account password",
+    text: `Dear ${input.recipientName},\n\nA password reset was requested for your IDMS account. Use this secure, time-limited link to choose a new password: ${input.recoveryUrl}\n\nIf you did not request this, ignore this message.\n\nIDMS ICT Office`,
+    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Reset your IDMS password</h2><p>Dear ${recipientName},</p><p>A password reset was requested for your IDMS account.</p><p><a href="${recoveryUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Choose a new password</a></p><p>This secure link expires. If you did not request a reset, ignore this email.</p><p>IDMS ICT Office</p></div></body></html>`,
   });
 }
 
@@ -114,9 +113,9 @@ export async function sendStudentPortalAccessEmail(input: { recipientEmail: stri
   await sendEmail("student_account_created", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
-    subject: "Your IDMC Student Portal account is ready",
-    text: `Dear ${input.recipientName},\n\nYour IDMC Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.\n\nStudent Number: ${input.studentNumber}\nStudent Portal sign in: ${loginUrl}\n\nIf you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMC Registry.`,
-    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Student Portal access is ready</h2><p>Dear ${recipientName},</p><p>Your IDMC Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.</p><p>Student Number: <strong>${studentNumber}</strong></p><p><a href="${loginUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Open Student Portal sign in</a></p><p>If you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMC Registry.</p></div></body></html>`,
+    subject: "Your IDMS Student Portal account is ready",
+    text: `Dear ${input.recipientName},\n\nYour IDMS Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.\n\nStudent Number: ${input.studentNumber}\nStudent Portal sign in: ${loginUrl}\n\nIf you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMS Registry.`,
+    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Student Portal access is ready</h2><p>Dear ${recipientName},</p><p>Your IDMS Student Portal account is ready. Sign in using your Student Number as both your login name and temporary password, then choose a new password when prompted.</p><p>Student Number: <strong>${studentNumber}</strong></p><p><a href="${loginUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Open Student Portal sign in</a></p><p>If you have already changed your temporary password, use your current password. If you did not expect this account, contact the IDMS Registry.</p></div></body></html>`,
   });
 }
 
@@ -144,8 +143,8 @@ export async function sendSmtpTestEmail(recipientEmail: string): Promise<void> {
   await sendEmail("smtp_test", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: recipientEmail,
-    subject: "IDMC email delivery test",
-    text: "This is an authorized test message to verify the IDMC email configuration. No action is required.",
+    subject: "IDMS email delivery test",
+    text: "This is an authorized test message to verify the IDMS email configuration. No action is required.",
   });
 }
 
@@ -158,9 +157,9 @@ export async function sendAdmissionOfferEmail(input: { recipientEmail: string; r
   await sendEmail("admission_offer", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
-    subject: "IDMC admission offer available",
-    text: `Dear ${input.recipientName},\n\nIDMC has issued admission offer ${input.offerNumber} for ${input.programmeName}. Please sign in to the applicant portal to review and accept it by ${expiry}.\n\n${portalUrl}\n\nRegards,\nIDMC Admissions Office`,
-    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">IDMC Admission Offer</h2><p>Dear ${recipientName},</p><p>IDMC has issued an admission offer for <strong>${programmeName}</strong>.</p><p>Offer number: <strong>${offerNumber}</strong><br>Please respond by <strong>${escapeHtml(expiry)}</strong>.</p><p><a href="${portalUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Review offer in applicant portal</a></p><p>Regards,<br>IDMC Admissions Office</p></div></body></html>`
+    subject: "IDMS admission offer available",
+    text: `Dear ${input.recipientName},\n\nIDMS has issued admission offer ${input.offerNumber} for ${input.programmeName}. Please sign in to the applicant portal to review and accept it by ${expiry}.\n\n${portalUrl}\n\nRegards,\nIDMS Admissions Office`,
+    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">IDMS Admission Offer</h2><p>Dear ${recipientName},</p><p>IDMS has issued an admission offer for <strong>${programmeName}</strong>.</p><p>Offer number: <strong>${offerNumber}</strong><br>Please respond by <strong>${escapeHtml(expiry)}</strong>.</p><p><a href="${portalUrl}" style="display:inline-block;padding:12px 18px;background:#68172a;color:#fff;text-decoration:none">Review offer in applicant portal</a></p><p>Regards,<br>IDMS Admissions Office</p></div></body></html>`
   });
 }
 
@@ -171,9 +170,9 @@ export async function sendApplicationReceivedEmail(input: { recipientEmail: stri
   await sendEmail("application_received", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
-    subject: `IDMC application received · ${input.applicationNumber}`,
-    text: `Dear ${input.recipientName},\n\nAdmissions has submitted an application on your behalf. Application number: ${input.applicationNumber}. Programme choice: ${input.programmeName}.\n\nYour application is awaiting Admissions review. Keep this application number for enquiries. You do not need an applicant portal login to have this application recorded.\n\nRegards,\nIDMC Admissions Office`,
-    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Application received</h2><p>Dear ${recipientName},</p><p>Admissions has submitted an application on your behalf. It is now awaiting Admissions review.</p><p>Application number: <strong>${applicationNumber}</strong><br>Programme choice: <strong>${programmeName}</strong></p><p>Keep your application number for enquiries. No applicant portal login was required to record this application.</p><p>Regards,<br>IDMC Admissions Office</p></div></body></html>`
+    subject: `IDMS application received · ${input.applicationNumber}`,
+    text: `Dear ${input.recipientName},\n\nAdmissions has submitted an application on your behalf. Application number: ${input.applicationNumber}. Programme choice: ${input.programmeName}.\n\nYour application is awaiting Admissions review. Keep this application number for enquiries. You do not need an applicant portal login to have this application recorded.\n\nRegards,\nIDMS Admissions Office`,
+    html: `<!doctype html><html lang="en"><body style="font-family:Arial,sans-serif;color:#35111c"><div style="max-width:620px;margin:24px auto;padding:24px;border-top:6px solid #68172a;background:#fff"><h2 style="color:#68172a">Application received</h2><p>Dear ${recipientName},</p><p>Admissions has submitted an application on your behalf. It is now awaiting Admissions review.</p><p>Application number: <strong>${applicationNumber}</strong><br>Programme choice: <strong>${programmeName}</strong></p><p>Keep your application number for enquiries. No applicant portal login was required to record this application.</p><p>Regards,<br>IDMS Admissions Office</p></div></body></html>`
   });
 }
 
@@ -194,14 +193,14 @@ export async function sendWelcomeEmail(
     to: input.recipientEmail,
 
     subject:
-      "Welcome to IDMC Integrated Management Information System",
+      "Welcome to IDMS Integrated Management Information System",
 
     text: `
-Welcome to IDMC Integrated Management Information System.
+Welcome to IDMS Integrated Management Information System.
 
 Dear ${input.recipientName},
 
-Your IDMC system account has been created successfully.
+Your IDMS system account has been created successfully.
 
 User Number:
 ${input.userNumber}
@@ -215,12 +214,12 @@ Please use the secure link below to set your password:
 
 ${input.setupPasswordUrl}
 
-After setting your password, you can sign in to the IDMC system.
+After setting your password, you can sign in to the IDMS system.
 
-If you did not expect this account, please contact the IDMC system administrator.
+If you did not expect this account, please contact the IDMS system administrator.
 
 Regards,
-IDMC System Administration
+IDMS System Administration
 `,
 
     html: `
@@ -229,7 +228,7 @@ IDMC System Administration
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IDMC Welcome</title>
+<title>IDMS Welcome</title>
 </head>
 
 <body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
@@ -250,7 +249,7 @@ IDMC System Administration
 <td style="background:#7a0019;color:#ffffff;padding:28px;text-align:center;">
 
 <h1 style="margin:0;font-size:24px;">
-IDMC iMIS
+IDMS iMIS
 </h1>
 
 <p style="margin:8px 0 0;font-size:14px;">
@@ -268,7 +267,7 @@ Welcome, ${recipientName}
 </h2>
 
 <p style="color:#444;line-height:1.6;">
-Your IDMC system account has been created successfully.
+Your IDMS system account has been created successfully.
 </p>
 
 <table
@@ -333,7 +332,7 @@ ${setupPasswordUrl}
 </p>
 
 <p style="font-size:13px;color:#777;line-height:1.6;">
-If you did not expect this account, please contact the IDMC system
+If you did not expect this account, please contact the IDMS system
 administrator immediately.
 </p>
 
@@ -344,7 +343,7 @@ administrator immediately.
 <td style="background:#f7f7f7;padding:20px;text-align:center;">
 
 <p style="margin:0;font-size:12px;color:#777;">
-IDMC System Administration
+IDMS System Administration
 </p>
 
 </td>

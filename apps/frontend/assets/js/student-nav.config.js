@@ -1,4 +1,4 @@
-/* IDMC student navigation: existing student pages only. */
+/* IDMS student navigation: existing student pages only. */
 export const STUDENT_NAV = [
   { id: "home", label: "Home", icon: "⌂", href: "student-portal.html" },
   { id: "student-info", label: "Student Info", icon: "▣", children: [
@@ -55,6 +55,6 @@ export const STUDENT_NAV = [
 
 export const STUDENT_INSTITUTION = {
   name: "Institute of Development and Medical Sciences",
-  acronym: "IDMC",
+  acronym: "IDMS",
   website: "http://www.idmc.ac.tz"
 };

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Staff Accounts | IDMC iMIS</title>
+  <title>Staff Accounts | IDMS iMIS</title>
   <link rel="stylesheet" href="assets/css/staff-institutional.css">
   <style>
     .section-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}.section-toolbar h2{margin:0 0 5px}.section-toolbar p{margin:0;color:var(--muted)}
@@ -15,7 +15,7 @@
 <script src="assets/js/action-progress.js?v=20261009-single"></script>
 <link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"></head>
 <body>
-<header class="masthead"><div class="brand">IDMC</div><div><strong>Institute of Development and Medical Sciences</strong><span>Integrated Management Information System</span></div><button id="menuButton" class="menu" type="button">Menu</button></header>
+<header class="masthead"><div class="brand">IDMS</div><div><strong>Institute of Development and Medical Sciences</strong><span>Integrated Management Information System</span></div><button id="menuButton" class="menu" type="button">Menu</button></header>
 <div class="layout">
   <aside id="sidebar" class="sidebar">
     <section class="identity"><div class="portrait"><span>AD</span></div><strong>Staff Account Administration</strong><small>Authorized access only</small></section>
@@ -42,8 +42,8 @@
         <h2>Provision Staff Account</h2>
         <p class="notice">Use verified personal or institutional details. A temporary password is sent only to Supabase Auth and is never stored in the staff record.</p>
         <form id="accountForm" class="form-grid" autocomplete="off">
-          <label class="field">Account action<select name="mode" id="mode" required><option value="CREATE">Create new account</option><option value="LINK">Link existing IDMC account</option></select></label>
-          <label class="field link-field" hidden>Find existing IDMC user<input id="existingUserSearch" type="search" placeholder="Search by staff name or email" autocomplete="off"><button class="button secondary" id="findExistingUser" type="button">Search users</button><div id="existingUserResults" class="search-results" role="listbox" aria-label="Matching users"></div><input name="identifier" id="identifier" maxlength="255" placeholder="Select a matching account above"></label>
+          <label class="field">Account action<select name="mode" id="mode" required><option value="CREATE">Create new account</option><option value="LINK">Link existing IDMS account</option></select></label>
+          <label class="field link-field" hidden>Find existing IDMS user<input id="existingUserSearch" type="search" placeholder="Search by staff name or email" autocomplete="off"><button class="button secondary" id="findExistingUser" type="button">Search users</button><div id="existingUserResults" class="search-results" role="listbox" aria-label="Matching users"></div><input name="identifier" id="identifier" maxlength="255" placeholder="Select a matching account above"></label>
           <label class="field create-field">First name<input name="firstName" id="firstName" maxlength="100"></label>
           <label class="field create-field">Middle name<input name="middleName" maxlength="100"></label>
           <label class="field create-field">Last name<input name="lastName" id="lastName" maxlength="100"></label>
@@ -62,7 +62,7 @@
         </form>
       </section>
     </div>
-    <footer>IDMC iMIS · Identity, Staff Profile and Role Control</footer>
+    <footer>IDMS iMIS · Identity, Staff Profile and Role Control</footer>
   </main>
 </div>
 <script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261011-friendly-network-errors"></script><script src="assets/js/staff-account-admin.js?v=20261005-staffhub1"></script>

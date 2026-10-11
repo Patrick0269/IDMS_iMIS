@@ -246,7 +246,7 @@ otp_expiry = 3600
 # Copy the same subject/content into the hosted project's Auth > Email Templates
 # dashboard; config.toml only applies to local Supabase CLI environments.
 [auth.email.template.confirmation]
-subject = "Thibitisha akaunti yako ya IDMC"
+subject = "Confirm your IDMS account"
 content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize notification email template

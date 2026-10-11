@@ -54,7 +54,7 @@ export function scopedAliasPrefix(internalPrefix: string): RequestHandler {
 
 /*
  * ============================================================
- * IDMC iMIS API v1
+ * IDMS iMIS API v1
  * ============================================================
  *
  * Keep existing modules as the source of truth.

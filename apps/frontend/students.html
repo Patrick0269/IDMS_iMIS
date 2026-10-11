@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>IDMC iMIS | Students</title>
+    <title>IDMS iMIS | Students</title>
 
     <link
         rel="stylesheet"
@@ -290,7 +290,7 @@
             <a href="cohorts.html" style="display:inline-block;margin:0 0 8px;color:#641229;font-size:13px;font-weight:700;text-decoration:none;">Manage cohorts →</a>
 
             <div class="subtitle">
-                IDMC iMIS Student Management
+                IDMS iMIS Student Management
             </div>
         </div>
 
@@ -1163,7 +1163,7 @@
         }).join("");
         const popup = window.open("", "_blank");
         if (!popup) return window.alert("Allow pop-ups to print the selected list.");
-        popup.document.write(`<!doctype html><html><head><title>IDMC Student List</title><style>@page{size:landscape}body{font:11px Arial;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:5px;text-align:left}th{background:#eee}</style></head><body><h1>IDMC iMIS · Student List</h1><p>Selected records: ${selected.length}</p><table><thead><tr><th>Student No.</th><th>Registration No.</th><th>Name</th><th>Programme</th><th>Version</th><th>Cohort</th><th>Entry Year</th><th>Registration Year</th><th>Semester</th><th>Registration Status</th><th>Courses</th><th>Email</th><th>Phone</th><th>Student Status</th></tr></thead><tbody>${rows}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
+        popup.document.write(`<!doctype html><html><head><title>IDMS Student List</title><style>@page{size:landscape}body{font:11px Arial;padding:16px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:5px;text-align:left}th{background:#eee}</style></head><body><h1>IDMS iMIS · Student List</h1><p>Selected records: ${selected.length}</p><table><thead><tr><th>Student No.</th><th>Registration No.</th><th>Name</th><th>Programme</th><th>Version</th><th>Cohort</th><th>Entry Year</th><th>Registration Year</th><th>Semester</th><th>Registration Status</th><th>Courses</th><th>Email</th><th>Phone</th><th>Student Status</th></tr></thead><tbody>${rows}</tbody></table><script>window.onload=()=>window.print()<\/script></body></html>`);
         popup.document.close();
     }
 

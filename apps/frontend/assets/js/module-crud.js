@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   "use strict";
 
   const contracts = {
@@ -417,7 +417,7 @@
 
   function apiRequest(path, options = {}) {
     if (!window.IDMCAPI || typeof window.IDMCAPI.request !== "function") {
-      throw new Error("IDMC API client is unavailable.");
+      throw new Error("IDMS API client is unavailable.");
     }
 
     return window.IDMCAPI.request(path, options);

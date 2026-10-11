@@ -25,16 +25,16 @@
     document.body.classList.add('idmc-portal-dashboard');
     main.classList.add('ipd-main');
     const sidebar=el('aside','ipd-sidebar');sidebar.id='idmcPortalSidebar';sidebar.setAttribute('aria-label','Portal navigation');
-    const brand=el('a','ipd-brand');brand.href=returnTarget;brand.append(el('span','ipd-seal','IDMC'));
-    const brandText=el('span','ipd-brand-text');brandText.append(el('strong','','IDMC iMIS'),el('small','','Institutional workspace'));brand.append(brandText);sidebar.append(brand);
+    const brand=el('a','ipd-brand');brand.href=returnTarget;brand.append(el('span','ipd-seal','IDMS'));
+    const brandText=el('span','ipd-brand-text');brandText.append(el('strong','','IDMS iMIS'),el('small','','Institutional workspace'));brand.append(brandText);sidebar.append(brand);
     sidebar.append(el('p','ipd-institution','Institute of Development and Medical Sciences'));
     const home=el('a','ipd-home',returnTarget==='dashboard.html'?'Main dashboard':'Back to portal');home.href=returnTarget;sidebar.append(home);
     sidebar.append(el('p','ipd-nav-label',title));const nav=el('nav','ipd-nav');nav.setAttribute('aria-label',title+' modules');sidebar.append(nav);
-    const sideFoot=el('div','ipd-side-foot');sideFoot.append(el('span','','IDMC · Integrated Management'),el('small','','Academic and administrative services'));sidebar.append(sideFoot);
+    const sideFoot=el('div','ipd-side-foot');sideFoot.append(el('span','','IDMS · Integrated Management'),el('small','','Academic and administrative services'));sidebar.append(sideFoot);
     document.body.prepend(sidebar);
     const backdrop=el('button','ipd-backdrop');backdrop.type='button';backdrop.tabIndex=-1;backdrop.setAttribute('aria-label','Close navigation');backdrop.hidden=true;document.body.append(backdrop);
     const topbar=el('div','ipd-topbar');const toggle=el('button','ipd-menu','Menu');toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');
-    const trail=el('div','ipd-breadcrumb');trail.append(el('span','','IDMC iMIS'),el('span','','/'),el('strong','',title));
+    const trail=el('div','ipd-breadcrumb');trail.append(el('span','','IDMS iMIS'),el('span','','/'),el('strong','',title));
     const date=el('time','ipd-date');date.dateTime=new Date().toISOString().slice(0,10);date.textContent=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
     const back=el('a','ipd-back','Back to portal');back.href=returnTarget;back.setAttribute('aria-label','Return to your role portal');
     const logout=el('button','ipd-logout','Log out');logout.type='button';logout.addEventListener('click',()=>window.IDMCAuth?.logout());
@@ -45,7 +45,7 @@
     const heading=el('div');heading.append(el('h2','','Your workspaces'),el('p','','Choose a module to continue your work.'));
     const label=el('label','ipd-search');label.append(el('span','','Find a module'));const input=el('input');input.type='search';input.placeholder='Search modules…';input.autocomplete='off';input.setAttribute('aria-label','Find a module');label.append(input);tools.append(heading,label);grid.before(tools);
     const empty=el('p','ipd-empty','No matching modules. Try another search.');empty.hidden=true;empty.setAttribute('role','status');grid.after(empty);
-    const footer=el('footer','ipd-footer',title+' · IDMC iMIS');main.append(footer);
+    const footer=el('footer','ipd-footer',title+' · IDMS iMIS');main.append(footer);
     let records=[];
     function permitted(card,link) {
       for(let n=link;n&&n!==document.body;n=n.parentElement){

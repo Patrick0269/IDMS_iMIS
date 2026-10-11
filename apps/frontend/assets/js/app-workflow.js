@@ -47,7 +47,7 @@
         const title =
             document.title
                 .replace(
-                    /\s*[|\-–]\s*IDMC.*$/i,
+                    /\s*[|\-–]\s*IDMS.*$/i,
                     ""
                 )
                 .trim();

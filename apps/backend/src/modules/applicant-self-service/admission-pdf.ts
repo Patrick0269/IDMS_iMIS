@@ -53,7 +53,7 @@ function documentLines(input: AdmissionPdfInput): PdfLine[] {
 
   if (input.kind === "ACKNOWLEDGEMENT") {
     return identity.concat(
-      section("1. APPLICATION RECEIVED", ["Thank you for applying to the Institute of Development and Medical Sciences (IDMC). Your online application has been received and will be reviewed by the Admissions Office.", "This acknowledgement is not an admission offer. Keep the application number above when communicating with the Institute."]),
+      section("1. APPLICATION RECEIVED", ["Thank you for applying to the Institute of Development and Medical Sciences (IDMS). Your online application has been received and will be reviewed by the Admissions Office.", "This acknowledgement is not an admission offer. Keep the application number above when communicating with the Institute."]),
       section("2. VERIFICATION", ["Academic qualifications, examination index details, uploaded certificates and programme eligibility will be verified. The Admissions Office may request corrections through the applicant portal."]),
       section("3. APPLICATION STATUS", ["Sign in to the applicant portal to follow the status of your application. Joining instructions become available only after the application is selected or converted to a student record."]),
       section("4. IMPORTANT NOTICE", ["Do not pay cash to an individual. Official payments must use an institutional invoice or control number displayed in the authorised portal."])
@@ -61,14 +61,14 @@ function documentLines(input: AdmissionPdfInput): PdfLine[] {
   }
 
   return identity.concat(
-    section("1. INTRODUCTION AND WELCOME", ["Congratulations and welcome to the Institute of Development and Medical Sciences (IDMC). Read these joining instructions carefully and retain a copy for registration."]),
+    section("1. INTRODUCTION AND WELCOME", ["Congratulations and welcome to the Institute of Development and Medical Sciences (IDMS). Read these joining instructions carefully and retain a copy for registration."]),
     section("2. REPORTING AND REGISTRATION", ["The Admissions Office will publish the official reporting date, orientation timetable, lecture commencement date and registration deadline in the applicant or student portal. Report within the stated period or request written permission before the deadline."]),
     section("3. MANDATORY REGISTRATION REQUIREMENTS", ["Present original academic certificates and certified copies, a birth certificate or NIDA card/passport, recent passport photographs, a completed medical examination form and official payment evidence."]),
     section("4. FINANCIAL REQUIREMENTS", ["Annual tuition fee: TZS 650,000. The Institute may permit payment by approved instalments. Any registration, examination, identity-card, health-insurance, student-union or accommodation charges must appear on an official invoice before payment.", "Payments must use the official institutional control number or another authorised payment channel shown in the portal. Cash payment to an individual is prohibited."]),
     section("5. ACCOMMODATION", ["Hostel places are limited and allocated according to the approved institutional procedure. Students without a hostel place should use accommodation verified by the Student Welfare Office."]),
     section("6. MEDICAL EXAMINATION", ["A registered medical practitioner should confirm general fitness, visual acuity, hearing, blood group, relevant test results and any chronic illness or disability requiring institutional support.", "Medical Officer: ______________________________  Signature/Stamp: __________________  Date: ____________"]),
-    section("7. STUDENT DECLARATION", ["I confirm that I have read these instructions and agree to comply with academic, financial and conduct requirements of IDMC.", "Student Name: ______________________________  Signature: __________________  Date: ____________", "Parent/Guardian: ___________________________  Phone: _____________________  Signature: ____________"]),
-    section("8. FINAL NOTICE", ["This document must be read together with the formal admission decision and the latest notices in the IDMC portal. Where information differs, a later authorised notice issued by the Institute takes precedence."])
+    section("7. STUDENT DECLARATION", ["I confirm that I have read these instructions and agree to comply with academic, financial and conduct requirements of IDMS.", "Student Name: ______________________________  Signature: __________________  Date: ____________", "Parent/Guardian: ___________________________  Phone: _____________________  Signature: ____________"]),
+    section("8. FINAL NOTICE", ["This document must be read together with the formal admission decision and the latest notices in the IDMS portal. Where information differs, a later authorised notice issued by the Institute takes precedence."])
   );
 }
 
@@ -76,7 +76,7 @@ function pageStream(lines: PdfLine[], pageNumber: number, pageCount: number): st
   const commands: string[] = [
     "q", "0.408 0.09 0.165 rg", "0 785 595 57 re f", "Q",
     "BT", "/F2 14 Tf", "1 1 1 rg", "38 817 Td", `(INSTITUTE OF DEVELOPMENT AND MEDICAL SCIENCES) Tj`, "ET",
-    "BT", "/F1 9 Tf", "1 1 1 rg", "38 800 Td", `(IDMC - INTEGRATED MANAGEMENT INFORMATION SYSTEM) Tj`, "ET"
+    "BT", "/F1 9 Tf", "1 1 1 rg", "38 800 Td", `(IDMS - INTEGRATED MANAGEMENT INFORMATION SYSTEM) Tj`, "ET"
   ];
   let y = 760;
   for (const item of lines) {
@@ -86,7 +86,7 @@ function pageStream(lines: PdfLine[], pageNumber: number, pageCount: number): st
     commands.push("BT", `/${item.bold ? "F2" : "F1"} ${size} Tf`, item.maroon ? "0.408 0.09 0.165 rg" : "0.12 0.10 0.11 rg", `42 ${y.toFixed(1)} Td`, `(${ascii(item.text)}) Tj`, "ET");
     y -= size + 4;
   }
-  commands.push("0.75 0.72 0.73 RG", "42 35 m 553 35 l S", "BT", "/F1 8 Tf", "0.35 0.32 0.33 rg", "42 20 Td", `(Generated by IDMC iMIS - Page ${pageNumber} of ${pageCount}) Tj`, "ET");
+  commands.push("0.75 0.72 0.73 RG", "42 35 m 553 35 l S", "BT", "/F1 8 Tf", "0.35 0.32 0.33 rg", "42 20 Td", `(Generated by IDMS iMIS - Page ${pageNumber} of ${pageCount}) Tj`, "ET");
   return commands.join("\n");
 }
 
@@ -121,7 +121,7 @@ export function buildAdmissionPdf(input: AdmissionPdfInput): Buffer {
   objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
   objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
 
-  let pdf = "%PDF-1.4\n%IDMC\n";
+  let pdf = "%PDF-1.4\n%IDMS\n";
   const offsets: number[] = [0];
   objects.forEach((body, index) => { offsets.push(Buffer.byteLength(pdf, "latin1")); pdf += `${index + 1} 0 obj\n${body}\nendobj\n`; });
   const xref = Buffer.byteLength(pdf, "latin1");

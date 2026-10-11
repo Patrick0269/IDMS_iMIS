@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     "use strict";
 
     const STORAGE_KEY = "idmc_session";
@@ -24,7 +24,7 @@
 
         } catch (error) {
             console.error(
-                "IDMC session read failed:",
+                "IDMS session read failed:",
                 error
             );
 
@@ -50,7 +50,7 @@
 
         } catch (error) {
             console.error(
-                "IDMC session write failed:",
+                "IDMS session write failed:",
                 error
             );
 
@@ -195,7 +195,7 @@
     sync();
 
     console.log(
-        "IDMC session manager loaded:",
+        "IDMS session manager loaded:",
         Boolean(getAccessToken())
     );
 })();

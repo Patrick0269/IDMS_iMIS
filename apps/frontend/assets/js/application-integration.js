@@ -195,7 +195,7 @@
                 }
 
                 console.error(
-                    "[IDMC Application]",
+                    "[IDMS Application]",
                     event.error || event.message
                 );
             }
@@ -208,7 +208,7 @@
                 const reason = event.reason;
 
                 console.error(
-                    "[IDMC Application Promise]",
+                    "[IDMS Application Promise]",
                     reason
                 );
             }
@@ -249,7 +249,7 @@
             );
 
             console.error(
-                "[IDMC Architecture]",
+                "[IDMS Architecture]",
                 "Missing runtime:",
                 missing
             );

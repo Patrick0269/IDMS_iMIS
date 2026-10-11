@@ -309,7 +309,7 @@
                 "function"
         ) {
             throw new Error(
-                "IDMC API client is not available."
+                "IDMS API client is not available."
             );
         }
 

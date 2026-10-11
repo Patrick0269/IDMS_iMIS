@@ -73,7 +73,7 @@
             " " +
             path +
             "\n\n" +
-            "This will modify live IDMC data.\n" +
+            "This will modify live IDMS data.\n" +
             "Continue?"
         );
 

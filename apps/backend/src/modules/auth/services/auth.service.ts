@@ -339,7 +339,7 @@ export async function completePasswordSetup(authUserId: string) {
     .select("id")
     .maybeSingle();
   if (error) throw error;
-  if (!data) throw new Error("IDMC account profile is not linked to this Auth identity.");
+  if (!data) throw new Error("IDMS account profile is not linked to this Auth identity.");
 
   const { error: logError } = await supabase.from("security_logs").insert({
     user_id: data.id,
@@ -388,7 +388,7 @@ export async function getCurrentUser(userId: string) {
     .maybeSingle();
 
   if (userError) throw userError;
-  if (!user) throw new Error("IDMC user account was not found");
+  if (!user) throw new Error("IDMS user account was not found");
 
   const { data: userRoles, error: rolesError } = await supabase
     .from("user_roles")

@@ -10,7 +10,7 @@ type Row = Record<string, any>;
 const router = Router();
 
 function actor(req: Request): string {
-  if (!req.user?.id) throw new Error("Authenticated IDMC identity is unavailable.");
+  if (!req.user?.id) throw new Error("Authenticated IDMS identity is unavailable.");
   return req.user.id;
 }
 function param(req: Request, name: string): string {
@@ -260,7 +260,7 @@ router.post("/payment-requests/:id/control-number", requirePermission("finance.p
   const current = await db.from("student_payment_requests").select("*").eq("id",id).maybeSingle();
   if (current.error || !current.data) throw new Error("Payment request was not found.");
   if (!["PENDING_PROVIDER","FAILED"].includes(current.data.request_status)) throw new Error("Control number can only be issued for a pending request.");
-  const controlNumber = text(req.body?.controlNumber,100) || `IDMC${Date.now()}${Math.floor(Math.random()*900+100)}`;
+  const controlNumber = text(req.body?.controlNumber,100) || `IDMS${Date.now()}${Math.floor(Math.random()*900+100)}`;
   const updated = await db.from("student_payment_requests").update({ control_number: controlNumber, provider_reference: code("CN"), request_status: "ISSUED", provider_message: "Control number issued by the Finance Office.", issued_at: new Date().toISOString(), reviewed_by: by, reviewed_at: new Date().toISOString(), finance_notes: text(req.body?.notes,2000), updated_at: new Date().toISOString() }).eq("id",id).select().single();
   if (updated.error) throw updated.error;
   await history("PAYMENT_REQUEST",id,"ISSUE_CONTROL_NUMBER",current.data.request_status,"ISSUED",by,text(req.body?.notes,2000));

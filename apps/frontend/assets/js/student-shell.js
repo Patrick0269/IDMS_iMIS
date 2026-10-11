@@ -211,8 +211,8 @@ function ensurePortalSidebarChrome(sidebar) {
     const brand = document.createElement("a");
     brand.className = "sidebar-brand";
     brand.href = "student-portal.html";
-    brand.setAttribute("aria-label", "IDMC Student Panel home");
-    brand.innerHTML = '<span class="institution-mark">IDMC</span><span><strong>Institute of Development and Medical Sciences</strong><small>Student Information System</small></span>';
+    brand.setAttribute("aria-label", "IDMS Student Panel home");
+    brand.innerHTML = '<span class="institution-mark">IDMS</span><span><strong>Institute of Development and Medical Sciences</strong><small>Student Information System</small></span>';
     sidebar.prepend(brand);
   }
   if (!sidebar.querySelector("#sidebarCollapseButton")) {

@@ -14,7 +14,7 @@ function clean(value: unknown, max = 2000): string | null {
 }
 
 function publicUserId(req: Request): string {
-    if (!req.user?.id) throw new Error("Authenticated IDMC user identity is unavailable.");
+    if (!req.user?.id) throw new Error("Authenticated IDMS user identity is unavailable.");
     return String(req.user.id);
 }
 

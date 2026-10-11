@@ -397,7 +397,7 @@
         if (subtitle) {
             subtitle.textContent =
                 config.description ||
-                "IDMC iMIS workspace";
+                "IDMS iMIS workspace";
         }
 
         if (badge) {
@@ -408,7 +408,7 @@
 
         document.title =
             (config.title || "Module") +
-            " | IDMC iMIS";
+            " | IDMS iMIS";
     }
 
     function wireSearch() {

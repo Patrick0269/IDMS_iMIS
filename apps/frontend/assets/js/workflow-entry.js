@@ -40,7 +40,7 @@
           document.body.append(frame);
           const title = area === 'timetable' ? 'Teaching timetable' : 'Student attendance';
           frame.contentDocument.open();
-          frame.contentDocument.write('<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title><style>body{font:12px Arial,sans-serif;color:#222}h1{font-size:18px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #999;padding:7px;text-align:left}button{display:none}@media print{body{margin:12mm}}</style></head><body><h1>IDMC iMIS · ' + title + '</h1>' + table.outerHTML + '</body></html>');
+          frame.contentDocument.write('<!doctype html><html><head><meta charset="utf-8"><title>' + title + '</title><style>body{font:12px Arial,sans-serif;color:#222}h1{font-size:18px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #999;padding:7px;text-align:left}button{display:none}@media print{body{margin:12mm}}</style></head><body><h1>IDMS iMIS · ' + title + '</h1>' + table.outerHTML + '</body></html>');
           frame.contentDocument.close();
           window.setTimeout(() => {
             frame.contentWindow.focus();

@@ -75,7 +75,7 @@ async function findExistingUser(identifier: string): Promise<Row> {
     if (result.error) throw result.error;
     if (result.data) return result.data;
   }
-  throw httpError("No IDMC user matches the supplied email, username or user number.", 404);
+  throw httpError("No IDMS user matches the supplied email, username or user number.", 404);
 }
 
 async function resolveInstitution(institutionId?: unknown): Promise<string> {

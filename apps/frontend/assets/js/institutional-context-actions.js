@@ -34,7 +34,7 @@
     let dialog = $("#idmcContextDialog");
     if (!dialog) {
       dialog = document.createElement("dialog"); dialog.id = "idmcContextDialog"; dialog.className = "iw-context-dialog";
-      dialog.innerHTML = '<form method="dialog" id="idmcContextForm"><header><div><span class="eyebrow">IDMC iMIS</span><h2 id="idmcContextTitle"></h2><p id="idmcContextHint"></p></div><button type="button" id="idmcContextClose" aria-label="Close">×</button></header><div class="iw-context-fields" id="idmcContextFields"></div><div class="iw-context-status" id="idmcContextStatus" role="status" aria-live="polite"></div><footer><button type="button" class="btn" id="idmcContextCancel">Cancel</button><button type="submit" class="btn primary">Submit</button></footer></form>';
+      dialog.innerHTML = '<form method="dialog" id="idmcContextForm"><header><div><span class="eyebrow">IDMS iMIS</span><h2 id="idmcContextTitle"></h2><p id="idmcContextHint"></p></div><button type="button" id="idmcContextClose" aria-label="Close">×</button></header><div class="iw-context-fields" id="idmcContextFields"></div><div class="iw-context-status" id="idmcContextStatus" role="status" aria-live="polite"></div><footer><button type="button" class="btn" id="idmcContextCancel">Cancel</button><button type="submit" class="btn primary">Submit</button></footer></form>';
       document.body.append(dialog);
       $("#idmcContextClose").onclick = $("#idmcContextCancel").onclick = () => dialog.close();
     }
@@ -121,7 +121,7 @@
         $("#downloadTimetableCsv").onclick = () => {
           const timetable = $("#idmcContextForm").elements.timetableId.value; if (!timetable) { $("#idmcContextStatus").textContent = "Select a timetable first."; return; }
           const chosen = editable.find((x) => x.id === timetable); const selectedOffers = offers.filter((o) => o.academic_year_id === chosen.academic_year_id && o.semester_id === chosen.semester_id);
-          downloadCsv("IDMC-timetable-template.csv", [["offeringCode", "courseCode", "courseName", "programmeName", "dayOfWeek", "startTime", "endTime", "roomCode"], ...selectedOffers.map((o) => [o.offering_code, o.course?.course_code || "", o.course?.course_name || "", programmes.find(p=>p.id===o.programme_id)?.programme_name || "", "", "", "", ""])]);
+          downloadCsv("IDMS-timetable-template.csv", [["offeringCode", "courseCode", "courseName", "programmeName", "dayOfWeek", "startTime", "endTime", "roomCode"], ...selectedOffers.map((o) => [o.offering_code, o.course?.course_code || "", o.course?.course_name || "", programmes.find(p=>p.id===o.programme_id)?.programme_name || "", "", "", "", ""])]);
         };
       } catch (error) { message(error.message || "Could not load timetable options.", "error"); }
     }, "timetable.manage");
@@ -180,7 +180,7 @@
               if (!record.auth_user_id) throw new Error("This user has no login identity. Complete account setup in User Management first.");
               user = { id:record.id,email:record.email,firstName:record.first_name,middleName:record.middle_name,lastName:record.last_name,phone:record.phone };
             }
-            if (!user?.id) throw new Error("The matching user account has no IDMC user record.");
+            if (!user?.id) throw new Error("The matching user account has no IDMS user record.");
             if (!verifiedByLookup && String(user.email || "").trim().toLowerCase() !== email.toLowerCase()) throw new Error("The returned user email does not match the requested email.");
             form.elements.userId.value = user.id;
             form.elements.email.value = user.email || email;
@@ -208,14 +208,14 @@
     $("#downloadCurriculum").onclick = async () => {
       const id = $("#lecturerOffering").value; if (!id) return message("Choose your assigned course first.", "error");
       const result = await get(`/improvements/lecturer/curriculum/${encodeURIComponent(id)}`);
-      downloadCsv("IDMC-my-curriculum.csv", [["Curriculum", "Course Code", "Course Name", "Year", "Semester", "Credits"], ...(result || []).map((r) => [r.curriculum, r.course?.course_code, r.course?.course_name, r.year_number, r.semester_number, r.credit_units])]);
+      downloadCsv("IDMS-my-curriculum.csv", [["Curriculum", "Course Code", "Course Name", "Year", "Semester", "Credits"], ...(result || []).map((r) => [r.curriculum, r.course?.course_code, r.course?.course_name, r.year_number, r.semester_number, r.credit_units])]);
       message("Curriculum downloaded.", "success");
     };
     $("#downloadRoster").onclick = async () => {
       const id = $("#lecturerOffering").value; if (!id) return message("Choose your assigned course first.", "error");
       const result = await get(`/improvements/offerings/${encodeURIComponent(id)}/export`);
       const students = result.students || [];
-      downloadCsv("IDMC-course-roster.csv", [["Student Number", "Student Name", "Programme", "Credits"], ...students.map((s) => [s.student_number, [s.first_name, s.middle_name, s.last_name].filter(Boolean).join(" "), s.programme_name || s.programme_code, s.credits])]);
+      downloadCsv("IDMS-course-roster.csv", [["Student Number", "Student Name", "Programme", "Credits"], ...students.map((s) => [s.student_number, [s.first_name, s.middle_name, s.last_name].filter(Boolean).join(" "), s.programme_name || s.programme_code, s.credits])]);
       const host = $("#lecturerRosterPreview");
       host.innerHTML = `<h3>${result.sharedRoster ? "Combined cross-cutting roster" : "Registered class roster"} · ${students.length} student(s)</h3>` + (students.length ? '<div class="iw-roster-table-wrap"><table class="iw-roster-table"><thead><tr><th>No.</th><th>Student No.</th><th>Student Name</th><th>Programme</th><th>Credits</th></tr></thead><tbody>' + students.map((s, i) => `<tr><td>${i + 1}</td><td>${esc(s.student_number)}</td><td>${esc([s.first_name, s.middle_name, s.last_name].filter(Boolean).join(" "))}</td><td>${esc(s.programme_name || s.programme_code || "—")}</td><td>${esc(s.credits ?? "—")}</td></tr>`).join("") + '</tbody></table></div>' : '<p>No APPROVED or REGISTERED students are enrolled yet.</p>');
       message(result.sharedRoster ? `Combined roster downloaded for ${students.length} registered students across ${result.offeringCount} programme offering(s).` : `Roster downloaded for ${students.length} registered students.`, "success");

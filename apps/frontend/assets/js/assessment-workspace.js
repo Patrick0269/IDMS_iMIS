@@ -145,7 +145,7 @@
 
   function downloadMarksTemplate() {
     if (!state.selected || !state.roster.length) return;
-    downloadCsv("IDMC-marks-template.csv", [
+    downloadCsv("IDMS-marks-template.csv", [
       ["registrationNumber", "studentName", "marks", "remarks"],
       ...state.roster.map((student) => [student.studentNumber, student.studentName, student.marks ?? "", student.remarks ?? ""])
     ]);

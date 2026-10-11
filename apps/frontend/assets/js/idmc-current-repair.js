@@ -9,8 +9,8 @@
       if (/blue[\s-]*print/i.test(t)) {
         el.textContent=t.replace(/blue[\s-]*print/ig,"").replace(/\s{2,}/g," ").trim();
       }
-      if (/IDMC LOGO PLACEHOLDER/i.test(t)) {
-        el.textContent=t.replace(/IDMC LOGO PLACEHOLDER/ig,"IDMC");
+      if (/IDMS LOGO PLACEHOLDER/i.test(t)) {
+        el.textContent=t.replace(/IDMS LOGO PLACEHOLDER/ig,"IDMS");
       }
     });
   }
@@ -74,7 +74,7 @@
     document.querySelectorAll("h1,h2,h3,p,span,strong").forEach(function (node) {
       if (node.children.length) return;
       var label = (node.textContent || "").trim();
-      if (/^(WELCOME TO IDMC iMIS|Available Modules|Permission Based|Today's Operations|System Status)$/i.test(label)) {
+      if (/^(WELCOME TO IDMS iMIS|Available Modules|Permission Based|Today's Operations|System Status)$/i.test(label)) {
         var section = node.closest("section,article,.card,.dashboard-section");
         if (section) section.remove();
       }

@@ -13,10 +13,10 @@
 
 <meta
     name="description"
-    content="IDMC iMIS User Profile"
+    content="IDMS iMIS User Profile"
 >
 
-<title>IDMC iMIS | My Profile</title>
+<title>IDMS iMIS | My Profile</title>
 
 
 <!-- =========================================================
@@ -1304,13 +1304,13 @@
     <div class="topbar-brand">
 
         <div class="brand-logo">
-            IDMC
+            IDMS
         </div>
 
         <div class="brand-copy">
 
             <strong>
-                IDMC iMIS
+                IDMS iMIS
             </strong>
 
             <span>
@@ -1377,7 +1377,7 @@
         <div class="page-intro-left">
 
             <span>
-                IDMC iMIS / ACCOUNT
+                IDMS iMIS / ACCOUNT
             </span>
 
             <h1>
@@ -1393,7 +1393,7 @@
 
         <div class="breadcrumb">
 
-            IDMC iMIS
+            IDMS iMIS
             /
             <strong>
                 My Profile
@@ -1676,7 +1676,7 @@
     <div class="profile-footer">
 
         <strong>
-            IDMC iMIS
+            IDMS iMIS
         </strong>
 
         &nbsp;•&nbsp;
@@ -1739,7 +1739,7 @@
         } catch (error) {
 
             console.error(
-                "Failed to read IDMC account:",
+                "Failed to read IDMS account:",
                 error
             );
 
@@ -1759,7 +1759,7 @@
 
         if (!user) {
 
-            return "IDMC User";
+            return "IDMS User";
 
         }
 
@@ -1786,7 +1786,7 @@
 
             user.email ||
 
-            "IDMC User"
+            "IDMS User"
 
         );
 
@@ -1932,7 +1932,7 @@
     function getInitials(name) {
 
         const parts =
-            String(name || "IDMC")
+            String(name || "IDMS")
                 .trim()
                 .split(/\s+/)
                 .filter(Boolean);

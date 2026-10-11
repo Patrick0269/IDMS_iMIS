@@ -29,12 +29,12 @@ router.post("/students/password-reset", rateLimit({
   const registrationNumber = String(req.body?.registrationNumber ?? "").trim();
   const birthYear = Number(req.body?.birthYear);
   if (!registrationNumber || !Number.isInteger(birthYear) || birthYear < 1900 || birthYear > new Date().getFullYear()) {
-    return res.status(400).json({ success: false, message: "Weka namba ya usajili na mwaka sahihi wa kuzaliwa." });
+    return res.status(400).json({ success: false, message: "Enter a valid registration number and birth year." });
   }
   const sent = await requestVerifiedPasswordReset({ accountType: "student", registrationNumber, birthYear });
-  if (!sent) return res.status(422).json({ success: false, message: "Taarifa hazijalingana au akaunti haina email inayotumika. Hakiki namba, mwaka wa kuzaliwa na email kwenye rekodi za mwanafunzi." });
+  if (!sent) return res.status(422).json({ success: false, message: "The details could not be verified or the account has no usable email address. Check the registration number, birth year, and student email record." });
   await createAuditLog({ actorUserId: req.user!.id, actionCode: "STUDENT_PASSWORD_RESET_EMAIL_REQUESTED", moduleCode: "ADMISSIONS", entityType: "student", newValues: { registrationNumber } });
-  res.json({ success: true, message: "Link salama ya kubadilisha password imetumwa kwenye email iliyosajiliwa na mwanafunzi. Amwombe mwanafunzi aangalie Inbox na Spam/Junk." });
+  res.json({ success: true, message: "A secure password reset link has been sent to the student's registered email address. Ask the student to check their Inbox and Spam/Junk." });
 }));
 
 router.get("/programme-requirements", requirePermission("admissions.view"), async (_req, res, next) => {
@@ -113,12 +113,12 @@ async function reconcileConvertedApplication(applicationId: string, actorUserId:
   let publicUser = await db.from("users").select("*").eq("auth_user_id", applicant.data.auth_user_id).maybeSingle();
   if (publicUser.error) throw publicUser.error;
   if (publicUser.data && String(publicUser.data.email || "").trim().toLowerCase() !== verifiedEmail) {
-    throw Object.assign(new Error("IDMC profile email does not match the verified Auth email. Reconcile the account before linking it to a student."), { statusCode: 409 });
+    throw Object.assign(new Error("IDMS profile email does not match the verified Auth email. Reconcile the account before linking it to a student."), { statusCode: 409 });
   }
   if (!publicUser.data) {
     const emailOwner = await db.from("users").select("id,auth_user_id").ilike("email", escapeIlikeLiteral(verifiedEmail)).maybeSingle();
     if (emailOwner.error) throw emailOwner.error;
-    if (emailOwner.data && emailOwner.data.auth_user_id !== applicant.data.auth_user_id) throw Object.assign(new Error("Applicant email already belongs to another IDMC user."), { statusCode: 409 });
+    if (emailOwner.data && emailOwner.data.auth_user_id !== applicant.data.auth_user_id) throw Object.assign(new Error("Applicant email already belongs to another IDMS user."), { statusCode: 409 });
     const created = await db.from("users").insert({
       auth_user_id: applicant.data.auth_user_id,
       user_number: student.data.student_number,
@@ -134,7 +134,7 @@ async function reconcileConvertedApplication(applicationId: string, actorUserId:
   }
 
   if (student.data.user_id && student.data.user_id !== publicUser.data.id) {
-    throw Object.assign(new Error("Student is already linked to a different IDMC account. Resolve the ownership conflict before reconciliation."), { statusCode: 409 });
+    throw Object.assign(new Error("Student is already linked to a different IDMS account. Resolve the ownership conflict before reconciliation."), { statusCode: 409 });
   }
 
   if (student.data.user_id !== publicUser.data.id) {
@@ -349,7 +349,7 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
       if (!authUserId) {
         const duplicate = await db.from("users").select("id,auth_user_id,email").ilike("email", escapeIlikeLiteral(email)).maybeSingle();
         if (duplicate.error) throw duplicate.error;
-        if (duplicate.data) throw Object.assign(new Error("This email is already linked to another IDMC account. Resolve the account ownership before confirming the student."), { statusCode: 409 });
+        if (duplicate.data) throw Object.assign(new Error("This email is already linked to another IDMS account. Resolve the account ownership before confirming the student."), { statusCode: 409 });
         const invited = await createStudentFirstLoginIdentity(email, student, { first_name: student.first_name, middle_name: student.middle_name, last_name: student.last_name, student_number: student.student_number });
         if (invited.error || !invited.data.user) throw invited.error || new Error("Could not invite student to the portal.");
         authUserId = invited.data.user.id;
@@ -470,7 +470,7 @@ router.post("/review/bulk", bulkAdmissionsAccess, wrap(async (req: any, res: any
 
 router.post("/reconcile-converted/:id", requirePermission("admissions.manage"), wrap(async (req: any, res: any) => {
   const result = await reconcileConvertedApplication(String(req.params.id), req.user!.id);
-  res.json({ success: true, data: result, message: `Student ${result.studentNumber} is linked to an active IDMC user and STUDENT role.` });
+  res.json({ success: true, data: result, message: `Student ${result.studentNumber} is linked to an active IDMS user and STUDENT role.` });
 }));
 
 router.post("/review/:id/issue-offer", requirePermission("admissions.manage"), wrap(async (req: any, res: any) => {

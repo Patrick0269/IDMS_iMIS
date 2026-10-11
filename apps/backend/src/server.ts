@@ -15,7 +15,7 @@ const academicTimer = setInterval(academicTick, 60_000); academicTimer.unref();
 const server = app.listen(env.PORT, () => {
   void academicTick();
   logInfo(
-    `IDMC iMIS API running on http://localhost:${env.PORT}`
+    `IDMS iMIS API running on http://localhost:${env.PORT}`
   );
 
   logInfo(

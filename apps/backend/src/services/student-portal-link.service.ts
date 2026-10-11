@@ -6,7 +6,7 @@ import { logError } from "../utils/logger.js";
 
 type Row = Record<string, any>;
 
-/** Ensures a student has an IDMC user profile and the active STUDENT role. */
+/** Ensures a student has an IDMS user profile and the active STUDENT role. */
 export async function linkStudentPortalAccount(studentId: string, actorUserId: string | null = null) {
   const db = getSupabase();
   const studentResult = await db.from("students")
@@ -76,17 +76,17 @@ export async function linkStudentPortalAccount(studentId: string, actorUserId: s
     account = linkedAccount;
   }
   if (account && applicant?.auth_user_id && String(account.auth_user_id) !== String(applicant.auth_user_id)) {
-    throw new Error("The applicant and IDMC user email point to different login identities. An administrator must reconcile the duplicate account before student access can be repaired.");
+    throw new Error("The applicant and IDMS user email point to different login identities. An administrator must reconcile the duplicate account before student access can be repaired.");
   }
   if (account && !account.auth_user_id) {
     throw new Error("A user profile already uses this email but has no login identity. Resolve that account before linking the student.");
   }
   if (account && String(account.status || "").toUpperCase() !== "ACTIVE") {
-    throw new Error("The matching IDMC user account is inactive. An administrator must reactivate it before portal access can be linked.");
+    throw new Error("The matching IDMS user account is inactive. An administrator must reactivate it before portal access can be linked.");
   }
 
   if (account && student.user_id && String(student.user_id) !== String(account.id)) {
-    throw new Error("Student is already linked to a different IDMC account. An administrator must reconcile the account ownership before portal access can be repaired.");
+    throw new Error("Student is already linked to a different IDMS account. An administrator must reconcile the account ownership before portal access can be repaired.");
   }
 
   const firstName = String(student.first_name || applicant?.first_name || "Student").trim();
@@ -98,7 +98,7 @@ export async function linkStudentPortalAccount(studentId: string, actorUserId: s
   if (account) {
     const emailOwner = await db.from("users").select("id").ilike("email", escapeIlikeLiteral(email)).neq("id", account.id).maybeSingle();
     if (emailOwner.error) throw emailOwner.error;
-    if (emailOwner.data) throw new Error("The applicant email is linked to another IDMC account. Resolve account ownership before linking this student.");
+    if (emailOwner.data) throw new Error("The applicant email is linked to another IDMS account. Resolve account ownership before linking this student.");
   }
 
   let invited = false;

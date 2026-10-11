@@ -35,7 +35,7 @@ self.addEventListener("fetch", event => {
     }
     try { return await update; }
     catch {
-      if (request.destination === "document") return new Response("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><title>IDMC iMIS</title><main style='font:16px system-ui;max-width:38rem;margin:12vh auto;padding:1rem'><h1>Uko nje ya mtandao</h1><p>Ukurasa huu haujafunguliwa awali kwenye kifaa hiki. Unganisha intaneti kisha ujaribu tena.</p><button onclick='location.reload()'>Jaribu tena</button></main>", { headers: { "Content-Type": "text/html; charset=utf-8" } });
+      if (request.destination === "document") return new Response("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><title>IDMS iMIS</title><main style='font:16px system-ui;max-width:38rem;margin:12vh auto;padding:1rem'><h1>You are offline</h1><p>This page has not been opened on this device yet. Connect to the internet and try again.</p><button onclick='location.reload()'>Try again</button></main>", { headers: { "Content-Type": "text/html; charset=utf-8" } });
       return Response.error();
     }
   })());

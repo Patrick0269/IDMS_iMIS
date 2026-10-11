@@ -46,7 +46,7 @@ export async function changeAuthenticatedPassword(
     .select("id")
     .maybeSingle();
   if (profileError || !profile) {
-    throw passwordError("Password changed, but the IDMC security record could not be updated. Contact the Registry.", 500);
+    throw passwordError("Password changed, but the IDMS security record could not be updated. Contact the Registry.", 500);
   }
 
   const { error: auditError } = await supabase.from("security_logs").insert({

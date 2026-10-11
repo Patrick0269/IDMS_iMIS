@@ -15,7 +15,7 @@
   }
   $("studentRequestForm").addEventListener("submit", async event => {
     event.preventDefault(); const form = event.currentTarget, button = $("submitRequest"); button.disabled = true; message("Submitting your request…");
-    try { await IDMCAPI.post("/students/me/requests", Object.fromEntries(new FormData(form).entries())); form.reset(); message("Your request has been submitted to IDMC."); await load(); }
+    try { await IDMCAPI.post("/students/me/requests", Object.fromEntries(new FormData(form).entries())); form.reset(); message("Your request has been submitted to IDMS."); await load(); }
     catch (error) { message(error.message || "Unable to submit your request.", true); }
     finally { button.disabled = false; }
   });

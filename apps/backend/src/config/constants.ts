@@ -1,4 +1,4 @@
-﻿export const APP_NAME = "IDMC Integrated Management Information System";
+export const APP_NAME = "IDMS Integrated Management Information System";
 
 export const API_PREFIX = "/api";
 

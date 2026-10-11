@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admissions Office | IDMC iMIS</title><link rel="stylesheet" href="assets/css/admissions-workspace.css?v=20261011-admission-pages"><link rel="stylesheet" href="assets/css/admissions-enhancements.css?v=20261011-admission-pages"><script src="assets/js/action-progress.js?v=20261009-single"></script>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admissions Office | IDMS iMIS</title><link rel="stylesheet" href="assets/css/admissions-workspace.css?v=20261011-admission-pages"><link rel="stylesheet" href="assets/css/admissions-enhancements.css?v=20261011-admission-pages"><script src="assets/js/action-progress.js?v=20261009-single"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/hr-staff-layout.css?v=20261008-offering-hr"><link rel="stylesheet" href="assets/css/admissions-reference.css?v=20261011-a"></head>
 <body class="admission-body staff-view">
 <header class="portal-header"><div class="brand-mark" aria-hidden="true">ID</div><div class="admissions-heading"><strong>Admission Applications</strong><span>Admissions Office</span></div><label class="admissions-quick-search"><span class="sr-only">Search applicants and applications</span><input id="admissionsQuickSearch" type="search" placeholder="Search applicant or application number" autocomplete="off"><kbd>Ctrl K</kbd></label><nav><a href="dashboard.html">Home</a><button class="link-button" id="logoutButton" type="button">Log out</button></nav></header>
@@ -31,11 +31,11 @@
   <section class="admission-workspace-page" role="tabpanel" id="page-account-recovery" aria-labelledby="tab-account-recovery" data-admission-page="account-recovery" hidden>
     <section class="bulk-workspace" aria-labelledby="studentRecoveryHeading">
       <h2 id="studentRecoveryHeading">Student account recovery</h2>
-      <p>Thibitisha mwanafunzi kwa namba ya usajili na mwaka wa kuzaliwa uliopo kwenye rekodi. Mfumo utatuma link ya password kwenye email iliyosajiliwa; Admissions haiweki wala haioni password mpya.</p>
+      <p>Verify the student using the registration number and birth year on their record. The system will send a password reset link to the registered email address. Admissions staff cannot set or view the new password.</p>
       <form id="admissionsRecoveryForm" class="admission-form-grid" novalidate>
-        <label>Namba ya usajili ya mwanafunzi<input name="registrationNumber" required maxlength="50" autocomplete="off" placeholder="Mfano: NS1179/0269/2020"></label>
-        <label>Mwaka wa kuzaliwa<input name="birthYear" required type="number" min="1950" max="2100" inputmode="numeric" placeholder="Mfano: 2002"></label>
-        <div class="wide"><button class="primary" id="sendStudentResetLink" type="submit">Tuma link ya kubadilisha password</button><p id="admissionsRecoveryMessage" role="status" aria-live="polite"></p><small>Kikomo cha maombi haya ni majaribio 2 kwa siku kwa kila namba ya usajili.</small></div>
+        <label>Student registration number<input name="registrationNumber" required maxlength="50" autocomplete="off" placeholder="e.g. NS1179/0269/2020"></label>
+        <label>Birth year<input name="birthYear" required type="number" min="1950" max="2100" inputmode="numeric" placeholder="e.g. 2002"></label>
+        <div class="wide"><button class="primary" id="sendStudentResetLink" type="submit">Send password reset link</button><p id="admissionsRecoveryMessage" role="status" aria-live="polite"></p><small>Requests are limited to two per day for each registration number.</small></div>
       </form>
     </section>
   </section>

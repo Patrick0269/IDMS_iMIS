@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
 
     "use strict";
 
@@ -203,7 +203,7 @@
             ) {
 
                 throw new Error(
-                    "IDMC frontend RBAC API is not available."
+                    "IDMS frontend RBAC API is not available."
                 );
 
             }

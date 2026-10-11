@@ -25,7 +25,7 @@
     );
 
     if (!/^https?:\/\//i.test(apiBase) && !apiBase.startsWith("/")) {
-        throw new Error("IDMC API_BASE_URL must be an absolute HTTP(S) URL or a same-origin path.");
+        throw new Error("IDMS API_BASE_URL must be an absolute HTTP(S) URL or a same-origin path.");
     }
 
     window.IDMC_CONFIG = Object.freeze({

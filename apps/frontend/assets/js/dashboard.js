@@ -338,7 +338,7 @@ function getCurrentPage() {
 function getInitials(name) {
 
     const parts =
-        String(name || "IDMC")
+        String(name || "IDMS")
             .trim()
             .split(/\s+/);
 
@@ -447,7 +447,7 @@ function renderUser() {
         user.display_name ||
         user.username ||
         user.email ||
-        "IDMC User";
+        "IDMS User";
 
 
     const roles =

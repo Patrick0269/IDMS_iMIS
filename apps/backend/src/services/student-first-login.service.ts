@@ -2,7 +2,7 @@ import { getSupabase } from "../config/database.js";
 
 export function studentInitialNumber(student: { registration_number?: unknown; student_number?: unknown }): string {
   const value = String(student.registration_number || student.student_number || "").replace(/\s+/g, "").toUpperCase();
-  if (!/^(?:N[A-Z]\d{4}\/\d{4}\/\d{4}|IDMC\/\d{4}\/\d{5})$/.test(value)) {
+  if (!/^(?:N[A-Z]\d{4}\/\d{4}\/\d{4}|IDMS\/\d{4}\/\d{5})$/.test(value)) {
     throw new Error("A valid student registration number is required before first-login setup.");
   }
   return value;

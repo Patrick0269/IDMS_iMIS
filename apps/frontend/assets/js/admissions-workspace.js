@@ -162,7 +162,7 @@
   function downloadPhotoReport(rows){
     if(!rows.length)return;
     var csv='File,Student Number,Result,Details\r\n'+rows.map(function(row){return [row.file,row.student||'',row.result,row.details].map(function(value){return '"'+String(value||'').replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
-    var link=document.createElement('a'),url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));link.href=url;link.download='IDMC-student-photo-report.csv';link.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    var link=document.createElement('a'),url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));link.href=url;link.download='IDMS-student-photo-report.csv';link.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
   }
   $('#uploadStudentPhotos').onclick=async function(){
     (state.photoUrls||[]).forEach(function(url){URL.revokeObjectURL(url);});state.photoUrls=[];

@@ -41,13 +41,13 @@
     }
     if (newPassword === currentPassword || newPassword.length < 10 ||
         !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      showMessage("Tumia password tofauti yenye angalau herufi 10, herufi kubwa, ndogo na namba.", "error");
+      showMessage("Use a different password with at least 10 characters, including uppercase, lowercase, and a number.", "error");
       return;
     }
 
     submitting = true;
     showMessage("");
-    setProgress(true, "Tunabadilisha password yako…");
+    setProgress(true, "Changing your password…");
     try {
       await IDMCAPI.post("/auth/change-password", { currentPassword, newPassword });
       await IDMCAuth.refreshSession();
@@ -57,14 +57,14 @@
     } catch (error) {
       submitting = false;
       setProgress(false);
-      showMessage(error.message || "Password haijabadilishwa. Tafadhali jaribu tena.", "error");
+      showMessage(error.message || "Your password was not changed. Please try again.", "error");
     }
   });
 
   async function initialize() {
     retry.hidden = true;
     retry.disabled = true;
-    setProgress(true, "Tunathibitisha akaunti yako…");
+    setProgress(true, "Verifying your account…");
     try {
       // A successful login has just created this session. Validate it once on
       // this page; requireAuth() silently refreshes and retries, which hides a
@@ -80,8 +80,8 @@
     } catch (error) {
       setProgress(false);
       button.disabled = true;
-      logout.textContent = "Rudi kwenye login";
-      showMessage((error.message || "Imeshindikana kuthibitisha akaunti.") + " Ingia tena kwa namba yako ya usajili na password ya muda, kisha ujaribu tena.", "error");
+      logout.textContent = "Back to login";
+      showMessage((error.message || "We could not verify your account.") + " Sign in again with your registration number and temporary password, then try again.", "error");
       retry.hidden = false;
     } finally {
       retry.disabled = false;

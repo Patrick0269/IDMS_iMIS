@@ -10,7 +10,7 @@
 
   /*
    * ============================================================
-   * IDMC iMIS FRONTEND RBAC
+   * IDMS iMIS FRONTEND RBAC
    * ============================================================
    *
    * Backend RBAC remains the REAL security layer.
@@ -1507,7 +1507,7 @@
             true;
 
           console.log(
-            "IDMC frontend RBAC loaded:",
+            "IDMS frontend RBAC loaded:",
             {
               user:
                 currentUser,

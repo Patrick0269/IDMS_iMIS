@@ -35,7 +35,7 @@ export function normaliseStudentNumber(value: string): string {
 
 export function isValidStudentNumber(value: string): boolean {
   const number = normaliseStudentNumber(value);
-  return /^N[A-Z]\d{4}\/\d{4}\/\d{4}$/.test(number) || /^IDMC\/\d{4}\/\d{5}$/.test(number);
+  return /^N[A-Z]\d{4}\/\d{4}\/\d{4}$/.test(number) || /^IDMS\/\d{4}\/\d{5}$/.test(number);
 }
 
 async function findStudentByIdentifier(value: string): Promise<StudentRow | null> {
@@ -97,7 +97,7 @@ export async function requestVerifiedPasswordReset(
   const db = getSupabase();
   let email = suppliedEmail;
   let userId: string | null = null;
-  let recoveryName = "IDMC account holder";
+  let recoveryName = "IDMS account holder";
 
   if (input.accountType === "student") {
     const number = normalizeRecoveryIdentifier(input.registrationNumber);

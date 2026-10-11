@@ -71,7 +71,7 @@
   function downloadRegistered() {
     const sm = map(state.students), pm = map(state.programmes), ym = map(state.years), sem = map(state.semesters), rows = [["Student Number", "Student Name", "Programme", "Academic Year", "Semester", "Registration Number", "Credits", "Status"]];
     state.registrations.filter((r) => r.registration_status === "REGISTERED").forEach((r) => { const s = sm.get(r.student_id) || {}, p = pm.get(r.programme_id) || {}, y = ym.get(r.academic_year_id) || {}, x = sem.get(r.semester_id) || {}; rows.push([s.student_number || "", name(s), p.programme_code || p.programme_name || "", y.year_code || y.year_name || "", x.semester_name || x.semester_code || "", r.registration_number || "", r.total_registered_credits || 0, r.registration_status || ""]); });
-    const csv = rows.map((row) => row.map((v) => '"' + String(v ?? "").replaceAll('"', '""') + '"').join(",")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = `IDMC-registered-students-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    const csv = rows.map((row) => row.map((v) => '"' + String(v ?? "").replaceAll('"', '""') + '"').join(",")).join("\r\n"), a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = `IDMS-registered-students-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
   }
   async function init() { if (!await window.IDMCAuth.requireAuth()) return; await load(); }
   $("studentSearch").oninput = renderStudentChoices;

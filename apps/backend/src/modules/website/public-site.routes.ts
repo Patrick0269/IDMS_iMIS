@@ -183,7 +183,7 @@ router.get("/public/statistics", handler(async (_req, res) => {
   const errors = [programmes.error, departments.error, campuses.error].filter(Boolean);
   if (errors.length) throw errors[0];
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=900");
-  res.json({ success: true, data: { source: "IDMC iMIS database", updatedAt: new Date().toISOString(), programmes: programmes.count ?? 0, departments: departments.count ?? 0, campuses: campuses.count ?? 0 } });
+  res.json({ success: true, data: { source: "IDMS iMIS database", updatedAt: new Date().toISOString(), programmes: programmes.count ?? 0, departments: departments.count ?? 0, campuses: campuses.count ?? 0 } });
 }));
 
 router.get("/website/content", authenticate, requirePermission("website.content.manage"), handler(async (_req, res) => {

@@ -58,7 +58,7 @@
     $("applicationMessage").hidden = true;
     $("applicationFormView").hidden = false;
     $("applicationFormView").innerHTML = `<div class="registration-toolbar"><div><span><strong>Current Year:</strong> ${esc(currentYear)}</span><span><strong>Last Login:</strong> ${esc(dateTime(lastLogin))}</span><span><strong>Today:</strong> ${esc(today)}</span></div><button id="printRegistrationForm" type="button">Print Registration Form</button></div>
-      <article class="student-registration-form"><header class="registration-title"><h2>Student Registration Form</h2><p>Institute of Development and Medical Sciences · IDMC iMIS</p></header>
+      <article class="student-registration-form"><header class="registration-title"><h2>Student Registration Form</h2><p>Institute of Development and Medical Sciences · IDMS iMIS</p></header>
       <section class="registration-section"><h3>Study Programme Information</h3>${fields([
         ["Year of Admission", yearOfAdmission],
         ["Admission No.", admissionNumber],

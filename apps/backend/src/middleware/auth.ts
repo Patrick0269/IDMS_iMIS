@@ -119,13 +119,13 @@ export async function authenticate(
       if (emailMatches?.length === 1) {
         const candidate = emailMatches[0];
         if (!candidate) {
-          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMC iMIS" });
+          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMS iMIS" });
           return;
         }
         // A verified email must never take over a profile already linked to a
         // different Auth identity. Only unclaimed legacy profiles are healable.
         if (candidate.auth_user_id && candidate.auth_user_id !== authUser.id) {
-          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMC iMIS" });
+          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMS iMIS" });
           return;
         }
         const { data: repaired, error: repairError } = await supabase
@@ -149,7 +149,7 @@ export async function authenticate(
           return;
         }
         if (!repaired) {
-          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMC iMIS" });
+          res.status(403).json({ success: false, message: "Authenticated account is not registered in IDMS iMIS" });
           return;
         }
         applicationUser = repaired;
@@ -159,7 +159,7 @@ export async function authenticate(
     if (!applicationUser) {
       res.status(403).json({
         success: false,
-        message: "Authenticated account is not registered in IDMC iMIS"
+        message: "Authenticated account is not registered in IDMS iMIS"
       });
       return;
     }

@@ -65,7 +65,7 @@ const envSchema = z.object({
 
   SMTP_FROM_NAME: z
     .string()
-    .default("IDMC Integrated Management Information System"),
+    .default("IDMS Integrated Management Information System"),
 
   SMTP_FROM_EMAIL: z
     .string()
