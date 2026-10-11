@@ -129,7 +129,7 @@
 
     function landingPage() {
         const user = getUser();
-        if (user?.mustChangePassword) return "student-first-password.html";
+        if (user?.mustChangePassword) return "student-portal.html?panel=student-security.html%23passwordForm";
         const roles = (user?.roles || []).filter(role => role && role.id);
         if (!roles.length) return "access-denied.html";
         const activeId = user.activeRoleId || sessionStorage.getItem(ACTIVE_ROLE_KEY);
@@ -206,7 +206,7 @@
     }
 
     function redirectAfterLogin() {
-        if (getUser()?.mustChangePassword) { window.location.replace("student-first-password.html"); return; }
+        if (getUser()?.mustChangePassword) { window.location.replace("student-portal.html?panel=student-security.html%23passwordForm"); return; }
         sessionStorage.removeItem(REDIRECT_KEY);
         const user = getUser();
         const defaultActive = (user?.roles || []).find(role => String(role.id) === String(user?.activeRoleId)) || defaultRole(user?.roles || []);
@@ -323,6 +323,10 @@
             throw new Error(httpErrorMessage(response, data, "Student sign-in failed. Check your details and try again."));
         }
 
+        // A student may sign in from a browser tab that previously held a
+        // staff/admin role. Avoid sending that stale role during Security setup.
+        sessionStorage.removeItem(USER_KEY);
+        sessionStorage.removeItem(ACTIVE_ROLE_KEY);
         saveSession(data.data);
         return data.data;
     }
@@ -432,8 +436,12 @@
         }
 
         saveUser(data.data);
-        if (data.data.mustChangePassword && !window.location.pathname.endsWith("/student-first-password.html")) {
-            window.location.replace("student-first-password.html");
+        const selectedPanel = new URLSearchParams(window.location.search).get("panel") || "";
+        const isPasswordSetupScreen = window.location.pathname.endsWith("/student-first-password.html") ||
+            window.location.pathname.endsWith("/student-security.html") ||
+            (window.location.pathname.endsWith("/student-portal.html") && selectedPanel.startsWith("student-security.html"));
+        if (data.data.mustChangePassword && !isPasswordSetupScreen) {
+            window.location.replace("student-portal.html?panel=student-security.html%23passwordForm");
         }
 
         return data.data;

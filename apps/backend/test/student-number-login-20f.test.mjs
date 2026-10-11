@@ -19,11 +19,19 @@ test("student authentication has a dedicated endpoint", () => {
   assert.doesNotMatch(controller, /logError\(`(?:Student )?login failed.*\$\{(?:identifier|studentNumber)\}/i);
 });
 
-test("legacy first-login metadata no longer blocks student portal access", () => {
+test("first-login student accounts are routed to Security and other API access stays gated", () => {
   const middleware = read("apps/backend/src/middleware/auth.ts");
-  assert.match(middleware, /mustChangePassword:\s*false/);
-  assert.doesNotMatch(middleware, /PASSWORD_CHANGE_REQUIRED/);
-  assert.doesNotMatch(middleware, /app_metadata\?\.idmc_student_first_login/);
+  assert.match(middleware, /mustChangePassword\s*=\s*authUser\.app_metadata\?\.idmc_student_first_login\s*===\s*true/);
+  assert.match(middleware, /PASSWORD_CHANGE_REQUIRED/);
+  assert.match(middleware, /"\/auth\/me"/);
+  assert.match(middleware, /"\/auth\/change-password"/);
+  const auth = read("apps/frontend/assets/js/auth.js");
+  const login = read("apps/frontend/login.html");
+  assert.match(auth, /student-portal\.html\?panel=student-security\.html%23passwordForm/);
+  assert.match(login, /student-portal\.html\?panel=student-security\.html%23passwordForm/);
+  const security = read("apps/frontend/assets/js/student-security.js");
+  assert.match(security, /firstLoginSetup\s*\?\s*"\/auth\/change-password"/);
+  assert.match(security, /window\.top\.location\.replace\("student-portal\.html"\)/);
 });
 
 test("student number has an exact institutional format", () => {
