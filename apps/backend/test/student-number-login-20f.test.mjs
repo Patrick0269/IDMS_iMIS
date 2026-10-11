@@ -19,6 +19,13 @@ test("student authentication has a dedicated endpoint", () => {
   assert.doesNotMatch(controller, /logError\(`(?:Student )?login failed.*\$\{(?:identifier|studentNumber)\}/i);
 });
 
+test("legacy first-login metadata no longer blocks student portal access", () => {
+  const middleware = read("apps/backend/src/middleware/auth.ts");
+  assert.match(middleware, /mustChangePassword:\s*false/);
+  assert.doesNotMatch(middleware, /PASSWORD_CHANGE_REQUIRED/);
+  assert.doesNotMatch(middleware, /app_metadata\?\.idmc_student_first_login/);
+});
+
 test("student number has an exact institutional format", () => {
   const service = read("apps/backend/src/modules/auth/services/student-login.service.ts");
   assert.match(service, /\^IDMC\\\/\\d\{4\}\\\/\\d\{5\}\$/);

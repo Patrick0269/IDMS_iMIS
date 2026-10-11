@@ -67,12 +67,6 @@ export async function authenticate(
     }
 
     const authUser = authData.user;
-    const passwordChangeRequired = authUser.app_metadata?.idmc_student_first_login === true;
-    const safePath = req.originalUrl.split("?")[0]?.replace(/\/+$/, "");
-    if (passwordChangeRequired && !((req.method === "GET" && /\/auth\/me$/.test(safePath || "")) || (req.method === "POST" && /\/auth\/change-password$/.test(safePath || "")))) {
-      res.status(403).json({ success: false, code: "PASSWORD_CHANGE_REQUIRED", message: "Change your temporary student password before continuing." });
-      return;
-    }
 
     let {
       data: applicationUser,
@@ -184,7 +178,10 @@ export async function authenticate(
       id: authUser.id,
       email: authUser.email,
       emailVerified: Boolean(authUser.email_confirmed_at),
-      mustChangePassword: passwordChangeRequired
+      // Student registration-number passwords remain usable under the current
+      // institution policy. Older Auth accounts may still carry the legacy
+      // idmc_student_first_login marker; it no longer blocks portal access.
+      mustChangePassword: false
     };
 
     req.user = {
