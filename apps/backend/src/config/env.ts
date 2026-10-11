@@ -44,12 +44,15 @@ const envSchema = z.object({
 
   SMTP_PORT: z.coerce
     .number()
-    .default(465),
+    .int()
+    .min(1)
+    .max(65535)
+    .default(587),
 
-  SMTP_SECURE: z
-    .string()
-    .default("true")
-    .transform((value) => value === "true"),
+  SMTP_SECURE: z.preprocess(
+    (value) => typeof value === "string" ? value.trim().toLowerCase() : value,
+    z.enum(["true", "false"]).optional()
+  ),
 
   SMTP_USER: z
     .string()
@@ -79,6 +82,12 @@ const envSchema = z.object({
 
   NATIONAL_RESULTS_PROVIDER_URL: optionalUrl,
   NATIONAL_RESULTS_PROVIDER_API_KEY: optionalText,
-});
+}).transform((settings) => ({
+  ...settings,
+  // Brevo 587 uses STARTTLS. Only port 465 should default to implicit TLS.
+  SMTP_SECURE: settings.SMTP_SECURE === undefined
+    ? settings.SMTP_PORT === 465
+    : settings.SMTP_SECURE === "true",
+}));
 
 export const env = envSchema.parse(process.env);

@@ -672,10 +672,10 @@ export async function createUser(
         newValues: {
           email,
           user_number: userNumber,
-          reason:
-            emailError instanceof Error
-              ? emailError.message
-              : "Unknown email error",
+          error_code:
+            emailError && typeof emailError === "object" && "code" in emailError && typeof emailError.code === "string"
+              ? emailError.code
+              : "EMAIL_SEND_FAILED",
         },
 
         ipAddress,
@@ -684,29 +684,34 @@ export async function createUser(
 
         // The account already has the administrator-supplied password. A mail transport failure
         // must not roll back the account and its role; report delivery status to the UI instead.
-        console.error("User account created, but welcome email delivery failed.", emailError);
+        console.error("User account created, but welcome email was not accepted by SMTP.", {
+          code: emailError && typeof emailError === "object" && "code" in emailError ? emailError.code : "EMAIL_SEND_FAILED",
+          requestId,
+        });
         setupPasswordUrl = null;
       }
 
-      await createAuditLog({
-        actorUserId,
+      if (welcomeEmailSent) {
+        await createAuditLog({
+          actorUserId,
 
-      actionCode:
-        "USER_WELCOME_EMAIL_SENT",
+          actionCode:
+            "USER_WELCOME_EMAIL_SENT",
 
-      moduleCode: "users",
+          moduleCode: "users",
 
-      entityType: "user",
-      entityId: publicUserId,
+          entityType: "user",
+          entityId: publicUserId,
 
-      newValues: {
-        email,
-        user_number: userNumber,
-      },
+          newValues: {
+            email,
+            user_number: userNumber,
+          },
 
-      ipAddress,
-        requestId,
-      });
+          ipAddress,
+          requestId,
+        });
+      }
     }
 
     /*

@@ -4,13 +4,60 @@
 } from "nodemailer";
 
 import { env } from "../config/env.js";
+import { logError, logInfo } from "../utils/logger.js";
 
 let transporter: Transporter | null = null;
+
+const SAFE_SMTP_CODES = new Set([
+  "EAUTH", "EENVELOPE", "ECONNECTION", "ETIMEDOUT", "ESOCKET", "ETLS", "EMESSAGE", "EDNS",
+]);
+
+function smtpErrorDetails(error: unknown) {
+  const candidate = error && typeof error === "object" ? error as Record<string, unknown> : {};
+  const rawCode = typeof candidate.code === "string" ? candidate.code.toUpperCase() : "";
+  const code = SAFE_SMTP_CODES.has(rawCode) ? rawCode : "ESMTP";
+  const responseCode = typeof candidate.responseCode === "number" ? candidate.responseCode : undefined;
+  return { code, ...(responseCode === undefined ? {} : { responseCode }) };
+}
+
+class EmailTransportError extends Error {
+  readonly code: string;
+  readonly responseCode: number | undefined;
+
+  constructor(details: ReturnType<typeof smtpErrorDetails>) {
+    super("The email could not be accepted by the configured SMTP server.");
+    this.name = "EmailTransportError";
+    this.code = details.code;
+    this.responseCode = details.responseCode;
+  }
+}
+
+async function sendEmail(emailType: string, mail: SendMailOptions): Promise<void> {
+  logInfo("email_smtp_attempt", { emailType });
+  try {
+    const result = await getTransporter().sendMail(mail);
+    const acceptedCount = result.accepted?.length ?? 0;
+    const rejectedCount = result.rejected?.length ?? 0;
+    if (acceptedCount === 0 || rejectedCount > 0) {
+      throw new EmailTransportError({ code: "EENVELOPE" });
+    }
+    const responseCode = /^([1-5][0-9]{2})\b/.exec(result.response ?? "")?.[1];
+    logInfo("email_smtp_accepted", {
+      emailType,
+      acceptedCount,
+      responseCode: responseCode ? Number(responseCode) : undefined,
+    });
+  } catch (error) {
+    const details = smtpErrorDetails(error);
+    logError("email_smtp_failed", { emailType, ...details });
+    throw error instanceof EmailTransportError ? error : new EmailTransportError(details);
+  }
+}
 
 export async function sendApplicantVerificationEmail(input: { recipientEmail: string; recipientName: string; actionLink: string }): Promise<void> {
   const recipientName = escapeHtml(input.recipientName);
   const actionLink = escapeHtml(input.actionLink);
-  await getTransporter().sendMail({
+  await sendEmail("applicant_verification", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
     subject: "Verify your IDMC applicant account",
@@ -25,6 +72,7 @@ function getTransporter(): Transporter {
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_SECURE,
+      requireTLS: !env.SMTP_SECURE,
 
       auth: {
         user: env.SMTP_USER,
@@ -51,7 +99,7 @@ export interface WelcomeEmailInput {
 export async function sendAccountPasswordRecoveryEmail(input: { recipientEmail: string; recipientName: string; recoveryUrl: string }): Promise<void> {
   const recipientName = escapeHtml(input.recipientName);
   const recoveryUrl = escapeHtml(input.recoveryUrl);
-  await getTransporter().sendMail({
+  await sendEmail("password_recovery", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL }, to: input.recipientEmail,
     subject: "Reset your IDMC account password",
     text: `Dear ${input.recipientName},\n\nA password reset was requested for your IDMC account. Use this secure, time-limited link to choose a new password: ${input.recoveryUrl}\n\nIf you did not request this, ignore this message.\n\nIDMC ICT Office`,
@@ -69,7 +117,14 @@ function escapeHtml(value: string): string {
 }
 
 export async function verifyEmailConnection(): Promise<void> {
-  await getTransporter().verify();
+  try {
+    await getTransporter().verify();
+    logInfo("email_smtp_connection_verified", { host: env.SMTP_HOST, port: env.SMTP_PORT });
+  } catch (error) {
+    const details = smtpErrorDetails(error);
+    logError("email_smtp_connection_failed", details);
+    throw new EmailTransportError(details);
+  }
 }
 
 export async function sendAdmissionOfferEmail(input: { recipientEmail: string; recipientName: string; offerNumber: string; programmeName: string; expiryDate: string | null }): Promise<void> {
@@ -78,7 +133,7 @@ export async function sendAdmissionOfferEmail(input: { recipientEmail: string; r
   const programmeName = escapeHtml(input.programmeName);
   const expiry = input.expiryDate ? new Date(`${input.expiryDate}T00:00:00Z`).toLocaleDateString("en-GB", { timeZone: "UTC" }) : "as shown in your portal";
   const portalUrl = `${env.FRONTEND_URL.replace(/\/$/, "")}/applicant-portal.html`;
-  await getTransporter().sendMail({
+  await sendEmail("admission_offer", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
     subject: "IDMC admission offer available",
@@ -91,7 +146,7 @@ export async function sendApplicationReceivedEmail(input: { recipientEmail: stri
   const recipientName = escapeHtml(input.recipientName);
   const applicationNumber = escapeHtml(input.applicationNumber);
   const programmeName = escapeHtml(input.programmeName);
-  await getTransporter().sendMail({
+  await sendEmail("application_received", {
     from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
     to: input.recipientEmail,
     subject: `IDMC application received · ${input.applicationNumber}`,
@@ -284,5 +339,5 @@ IDMC System Administration
 `,
   };
 
-  await getTransporter().sendMail(mail);
+  await sendEmail("welcome", mail);
 }
