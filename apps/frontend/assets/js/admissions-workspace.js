@@ -6,6 +6,20 @@
   var data = function (r) { return r && Object.prototype.hasOwnProperty.call(r, "data") ? r.data : r; };
   function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function message(text, type) { var box = $("#pageMessage"); box.className = "message" + (text ? " show " + (type || "info") : ""); box.textContent = text || ""; }
+  function activateWorkspace(name, updateAddress) {
+    var allowed = ["pending", "applications", "offers", "registration", "photos"];
+    if (!allowed.includes(name)) name = "pending";
+    $$('[data-admission-page]').forEach(function (page) { var active = page.dataset.admissionPage === name; page.hidden = !active; page.classList.toggle("active", active); });
+    $$('[data-admission-tab]').forEach(function (tab) { var active = tab.dataset.admissionTab === name; tab.setAttribute("aria-selected", String(active)); tab.tabIndex = active ? 0 : -1; });
+    if (updateAddress && location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    var activeTab = $('[data-admission-tab="' + name + '"]');
+    if (activeTab && activeTab.scrollIntoView) activeTab.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+  $$('[data-admission-tab]').forEach(function (tab, index, tabs) {
+    tab.addEventListener("click", function () { activateWorkspace(tab.dataset.admissionTab, true); });
+    tab.addEventListener("keydown", function (event) { if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return; event.preventDefault(); var next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length; tabs[next].focus(); tabs[next].click(); });
+  });
+  activateWorkspace(location.hash.slice(1), false);
   ["post","patch"].forEach(function(method){var original=IDMCAPI[method];if(typeof original!=="function")return;IDMCAPI[method]=function(){if(!state.busy)message("Saving admission changes...","info");return original.apply(IDMCAPI,arguments);};});
   function applicant(id) { return state.applicants.find(function (x) { return x.id === id; }) || {}; }
   function choices(id) { return state.choices.filter(function (x) { return x.application_id === id; }); }

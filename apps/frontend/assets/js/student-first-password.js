@@ -7,6 +7,7 @@
   const progress = document.getElementById("progress");
   const progressText = document.getElementById("progressText");
   const logout = document.getElementById("logout");
+  const retry = document.getElementById("retryValidation");
   let ready = false;
   let submitting = false;
 
@@ -60,7 +61,9 @@
     }
   });
 
-  (async function initialize() {
+  async function initialize() {
+    retry.hidden = true;
+    retry.disabled = true;
     setProgress(true, "Tunathibitisha akaunti yako…");
     try {
       // A successful login has just created this session. Validate it once on
@@ -73,11 +76,18 @@
       }
       ready = true;
       setProgress(false);
+      showMessage("");
     } catch (error) {
       setProgress(false);
       button.disabled = true;
       logout.textContent = "Rudi kwenye login";
       showMessage((error.message || "Imeshindikana kuthibitisha akaunti.") + " Ingia tena kwa namba yako ya usajili na password ya muda, kisha ujaribu tena.", "error");
+      retry.hidden = false;
+    } finally {
+      retry.disabled = false;
     }
-  })();
+  }
+
+  retry.addEventListener("click", initialize);
+  initialize();
 })();

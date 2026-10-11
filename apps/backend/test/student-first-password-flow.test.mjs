@@ -17,6 +17,7 @@ test("first-time student can verify session, submit a new password and continue 
   const elements = new Map([
     ["form", new Element()], ["message", new Element()], ["save", new Element()],
     ["progress", new Element()], ["progressText", new Element()], ["logout", new Element()],
+    ["retryValidation", new Element()],
     ["current", new Element("NS1234/2020/2000")], ["next", new Element("SafePassword123")],
     ["confirm", new Element("SafePassword123")],
   ]);
@@ -51,7 +52,7 @@ test("first-time student can verify session, submit a new password and continue 
 });
 
 test("failed account validation ends the form loader and explains how to retry", async () => {
-  const elements = new Map(["form", "message", "save", "progress", "progressText", "logout", "current", "next", "confirm"].map(id => [id, new Element()]));
+  const elements = new Map(["form", "message", "save", "progress", "progressText", "logout", "retryValidation", "current", "next", "confirm"].map(id => [id, new Element()]));
   const context = {
     document: { getElementById: id => elements.get(id) },
     window: { location: { replace() {} } },
@@ -68,4 +69,5 @@ test("failed account validation ends the form loader and explains how to retry",
   assert.equal(elements.get("save").disabled, true);
   assert.match(elements.get("message").textContent, /Session was rejected by \/auth\/me/);
   assert.equal(elements.get("logout").textContent, "Rudi kwenye login");
+  assert.equal(elements.get("retryValidation").hidden, false);
 });

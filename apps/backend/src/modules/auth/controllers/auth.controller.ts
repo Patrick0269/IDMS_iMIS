@@ -163,6 +163,26 @@ export async function me(req: Request, res: Response): Promise<void> {
     return;
   }
 
+  // First-login students only need the gate state to enter the password form.
+  // Avoid loading the full staff profile and nested role-permission graph here;
+  // that work is unnecessary while the account is restricted and can make the
+  // first-login screen appear to hang on slow mobile connections.
+  if (req.authUser?.mustChangePassword) {
+    res.json({ success: true, data: {
+      id: req.user.id,
+      userNumber: req.user.userNumber,
+      email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      status: req.user.status,
+      roles: [],
+      permissions: [],
+      activeRoleId: null,
+      mustChangePassword: true,
+    } });
+    return;
+  }
+
   const data = await authService.getCurrentUser(req.user.id);
   const requestedRoleId = req.user.activeRoleId;
   const requestedRole = requestedRoleId ? data.roles.find(role => String(role.id) === String(requestedRoleId)) : undefined;

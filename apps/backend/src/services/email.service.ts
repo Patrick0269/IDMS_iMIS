@@ -127,6 +127,15 @@ export async function verifyEmailConnection(): Promise<void> {
   }
 }
 
+export async function sendSmtpTestEmail(recipientEmail: string): Promise<void> {
+  await sendEmail("smtp_test", {
+    from: { name: env.SMTP_FROM_NAME, address: env.SMTP_FROM_EMAIL },
+    to: recipientEmail,
+    subject: "IDMC email delivery test",
+    text: "This is an authorized test message to verify the IDMC email configuration. No action is required.",
+  });
+}
+
 export async function sendAdmissionOfferEmail(input: { recipientEmail: string; recipientName: string; offerNumber: string; programmeName: string; expiryDate: string | null }): Promise<void> {
   const recipientName = escapeHtml(input.recipientName);
   const offerNumber = escapeHtml(input.offerNumber);

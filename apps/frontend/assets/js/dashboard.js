@@ -60,15 +60,9 @@ const navigation = [
         section: "ADMISSIONS",
         items: [
             {
-                title: "Applications",
-                page: "applications.html",
-                permission: "applications.view",
-                icon: "▤"
-            },
-            {
-                title: "Admissions",
+                title: "Admissions & Applications",
                 page: "admissions.html",
-                permission: "admissions.view",
+                permissionsAny: ["admissions.view", "applications.view"],
                 icon: "✓"
             }
         ]
@@ -720,6 +714,10 @@ function renderNavigation() {
             const allowed =
                 group.items.filter(
                     item => {
+
+                        if (Array.isArray(item.permissionsAny)) {
+                            return item.permissionsAny.some(hasPermission);
+                        }
 
                         if (
                             !item.permission

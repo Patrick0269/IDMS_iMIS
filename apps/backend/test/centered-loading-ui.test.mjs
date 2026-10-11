@@ -62,5 +62,5 @@ test("shared operation loading appears inside the active form and clears after i
 test("API loader version and service worker cache advance together", async () => {
   const [api, worker] = await Promise.all([read("assets/js/api.js"), read("service-worker.js")]);
   assert.match(api, /20261011-form-progress/);
-  assert.match(worker, /idmc-shell-v14-fullscreen-workspaces-20261011/);
+  assert.match(worker, /idmc-shell-v15-intake-password-fixes-20261011/);
 });

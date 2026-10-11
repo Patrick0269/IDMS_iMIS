@@ -258,8 +258,10 @@
             );
         } catch (error) {
             console.error("Backend connection error:", error);
-
-            throw new Error(error?.message || "Unable to connect to the configured IDMC backend.");
+            const networkFailure = error?.name === "TypeError" || /failed to fetch|networkerror/i.test(String(error?.message || ""));
+            throw new Error(networkFailure
+                ? `Imeshindikana kufikia huduma ya IDMC (${CONFIG.API_BASE_URL}). Angalia intaneti, kisha ujaribu tena.`
+                : error?.message || "Unable to connect to the configured IDMC backend.");
         }
 
         const data = await parseResponse(response);
@@ -394,8 +396,11 @@
             );
         } catch (error) {
             console.error("Backend connection error:", error);
-
-            throw new Error(error?.message || "Unable to connect to the configured IDMC backend.");
+            const detail = String(error?.message || "");
+            if (/failed to fetch|networkerror|load failed/i.test(detail)) {
+                throw new Error(`Imeshindikana kuwasiliana na seva ya IDMC (${CONFIG.API_BASE_URL}). Hakikisha intaneti inafanya kazi, kisha bonyeza “Jaribu tena kuthibitisha akaunti”.`);
+            }
+            throw new Error(detail || "Unable to connect to the configured IDMC backend.");
         }
 
         const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);

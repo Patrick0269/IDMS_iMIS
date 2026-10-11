@@ -137,7 +137,16 @@ router.get("/lookups/programmes", handler(async (_req, res) => {
 
 router.get("/online-status", handler(async (_req, res) => {
   const r=await getSupabase().from('idmc_intakes').select('id,code,academic_year_id,state,opens_at,closes_at,academic_years(year_name)');if(r.error)throw r.error;
- const intakes=[];for(const i of r.data||[]){const state=await getSupabase().rpc('idmc_intake_state',{p_id:i.id});if(state.error)throw state.error;intakes.push({...i,effective_state:state.data});}
+  const now = Date.now();
+  const intakes=(r.data||[]).map((i:any)=>{
+    const state=String(i.state||'').toUpperCase();
+    const opens=Date.parse(i.opens_at||'');
+    const closes=Date.parse(i.closes_at||'');
+    const effectiveState=['DRAFT','CLOSED'].includes(state)?state:
+      !Number.isFinite(opens)||!Number.isFinite(closes)||closes<=opens?'CLOSED':
+      now<opens?'SCHEDULED':now>=closes?'CLOSED':'OPEN';
+    return {...i,effective_state:effectiveState};
+  });
  send(res,{open:intakes.some(i=>i.effective_state==='OPEN'),intakes});
 }));
 

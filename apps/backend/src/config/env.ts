@@ -58,9 +58,10 @@ const envSchema = z.object({
     .string()
     .email(),
 
-  SMTP_PASSWORD: z
-    .string()
-    .min(1),
+  SMTP_PASSWORD: optionalText,
+
+  // Legacy alias accepted for existing deployments that still set SMTP_PASS.
+  SMTP_PASS: optionalText,
 
   SMTP_FROM_NAME: z
     .string()
@@ -82,8 +83,14 @@ const envSchema = z.object({
 
   NATIONAL_RESULTS_PROVIDER_URL: optionalUrl,
   NATIONAL_RESULTS_PROVIDER_API_KEY: optionalText,
-}).transform((settings) => ({
+}).superRefine((settings, context) => {
+  if (!settings.SMTP_PASSWORD && !settings.SMTP_PASS) {
+    context.addIssue({ code: "custom", path: ["SMTP_PASSWORD"], message: "Set SMTP_PASSWORD or SMTP_PASS." });
+  }
+}).transform(({ SMTP_PASS, SMTP_PASSWORD, ...settings }) => ({
   ...settings,
+  // Prefer the canonical name if both are set; accept the legacy alias otherwise.
+  SMTP_PASSWORD: SMTP_PASSWORD ?? SMTP_PASS ?? "",
   // Brevo 587 uses STARTTLS. Only port 465 should default to implicit TLS.
   SMTP_SECURE: settings.SMTP_SECURE === undefined
     ? settings.SMTP_PORT === 465

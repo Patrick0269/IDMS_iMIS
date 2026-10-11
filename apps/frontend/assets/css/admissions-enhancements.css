@@ -23,3 +23,62 @@
 .bulk-actions button{font-size:14px;min-height:38px;padding:7px 11px}
 .bulk-bar #selectedApplicationCount{color:var(--maroon);font-size:18px}
 td input[type="checkbox"],th input[type="checkbox"]{width:18px;height:18px;accent-color:var(--maroon);cursor:pointer}
+
+/* Admissions workspace navigation and focused, uncluttered work pages. */
+.admissions-sidebar{display:none!important}
+.admission-shell{width:min(1540px,calc(100% - 48px));margin:24px auto 48px}
+.admission-workspace-tabs{position:sticky;top:0;z-index:15;display:flex;gap:8px;overflow-x:auto;padding:10px 12px;margin:0 0 20px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 22px #32141b12;scrollbar-width:thin}
+.admission-workspace-tabs button{flex:0 0 auto;min-height:46px;padding:10px 18px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink);font:700 15px Arial,sans-serif;cursor:pointer}
+.admission-workspace-tabs button:hover{background:var(--maroon-soft);color:var(--maroon)}
+.admission-workspace-tabs button[aria-selected="true"]{background:var(--maroon);color:#fff;box-shadow:0 4px 12px #68172a33}
+.admission-workspace-page{min-width:0;animation:admission-page-in .16s ease-out}
+.admission-workspace-page[hidden]{display:none!important}
+@keyframes admission-page-in{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+#page-pending>.publication-bar{align-items:center;border-radius:14px;gap:24px;padding:24px 28px}
+#page-pending>.publication-bar>div:first-child{min-width:0}
+#page-pending>.publication-bar h1{font-size:clamp(25px,3vw,36px)}
+#page-pending>.publication-bar .publication-actions{justify-content:flex-end}
+#page-pending>.message{margin:0 0 16px}
+#page-pending>.metric-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0 20px}
+#page-pending .metric{display:flex;min-height:104px;flex-direction:column;justify-content:center;gap:4px;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--maroon);border-radius:0 12px 12px 0}
+#page-pending .metric strong{font-size:30px;line-height:1.1}
+#page-pending .metric span{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.historical-queue{overflow:hidden;margin:0 0 18px;padding:0;border:1px solid var(--line);border-top:5px solid var(--maroon);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
+.historical-queue .table-tools{align-items:center;padding:20px 22px}
+.historical-queue .table-tools h2{font-size:22px}
+.historical-queue .table-tools p{max-width:62ch;margin-top:5px;line-height:1.5}
+.historical-queue .table-wrap{max-height:min(58vh,620px);border-top:1px solid var(--line)}
+.historical-queue table{min-width:760px}
+.historical-queue td:last-child{min-width:150px}
+.historical-queue td:last-child button{white-space:normal}
+#page-offers .bulk-workspace,#page-registration .bulk-workspace,#page-photos .bulk-workspace{max-width:1100px;margin:0 auto;padding:clamp(20px,3vw,34px);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
+#page-offers .bulk-workspace h2,#page-registration .bulk-workspace h2,#page-photos .bulk-workspace h2{margin-top:0;color:var(--maroon);font-size:clamp(23px,3vw,30px)}
+#page-offers .bulk-workspace>p,#page-registration .bulk-workspace>p,#page-photos .bulk-workspace>p{max-width:72ch;color:var(--muted);line-height:1.6}
+#page-registration .admission-form-grid{margin:22px 0;grid-template-columns:repeat(3,minmax(0,1fr))}
+#page-registration label,#page-photos label{display:flex;min-width:0;flex-direction:column;gap:8px;font-weight:700}
+#page-registration select,#page-photos input[type=file]{width:100%;min-height:46px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}
+#page-photos label{margin:18px 0}
+#page-photos #photoPreview{display:grid;gap:10px;margin-top:16px}
+#page-applications .queue-tabs{position:static;display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding:8px;border:1px solid var(--line);border-radius:12px;background:#fff}
+#page-applications .queue-tabs button{flex:0 0 auto;min-height:43px;padding:9px 14px;border-radius:8px}
+#page-applications .bulk-bar{position:static;display:grid;gap:14px;margin:0 0 16px;padding:16px 18px;border:1px solid var(--line);border-left:5px solid var(--maroon);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+#page-applications .bulk-bar>div:first-child{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#page-applications .bulk-actions{display:flex;gap:8px;flex-wrap:wrap}
+#page-applications .bulk-actions button{min-height:42px;padding:8px 12px}
+#page-applications .workspace-grid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:16px}
+#page-applications .workspace-list,#page-applications .review-panel{min-width:0;overflow:hidden;border:1px solid var(--line);border-top:5px solid var(--maroon);border-radius:12px;background:#fff}
+#page-applications .workspace-list>label{display:block;padding:14px 18px;font-weight:700}
+#page-applications .workspace-list>label input{display:block;width:min(100%,440px);min-height:44px;margin-top:7px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font:inherit}
+#page-applications .table-wrap{max-height:65vh;overflow:auto}
+#page-applications table{min-width:760px}
+#page-applications .review-panel{position:sticky;top:78px;max-height:calc(100vh - 100px);overflow:auto}
+.admission-dialog{width:min(900px,calc(100vw - 32px));max-height:min(88vh,900px);overflow:auto;border-radius:16px}
+.admission-dialog form{padding:clamp(16px,3vw,28px)}
+.admission-dialog .officer-application-body h3{margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);color:var(--maroon)}
+.admission-dialog .officer-application-body label{min-width:0;display:flex;flex-direction:column;gap:6px;font-weight:650}
+.admission-dialog .officer-application-body input,.admission-dialog .officer-application-body select{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.admission-dialog .officer-application-body .officer-consent{display:flex;flex-direction:row;align-items:flex-start;margin-top:20px}
+.admission-dialog .officer-application-body .officer-consent input{width:20px;min-height:20px;flex:0 0 20px}
+@media(max-width:900px){.admission-shell{width:calc(100% - 28px)}#page-pending>.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#page-applications .workspace-grid{grid-template-columns:1fr}#page-applications .review-panel{position:static;max-height:none}}
+@media(max-width:620px){.admission-shell{width:calc(100% - 20px);margin:12px auto 28px}.admission-workspace-tabs{top:0;gap:5px;margin-bottom:14px;padding:6px}.admission-workspace-tabs button{min-height:43px;padding:8px 12px;font-size:13px}#page-pending>.publication-bar{padding:18px;gap:12px}#page-pending>.publication-bar .publication-actions{width:100%;justify-content:stretch}#page-pending>.publication-bar .publication-actions button{flex:1;min-width:0;padding:8px;font-size:13px}#page-pending>.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}#page-pending .metric{min-height:84px;padding:12px}#page-pending .metric strong{font-size:25px}#page-pending .metric span{font-size:12px}.historical-queue .table-tools{align-items:stretch;padding:15px;gap:12px}.historical-queue .table-tools h2{font-size:19px}.historical-queue .table-tools button{width:100%}.historical-queue .table-wrap{max-height:55vh}#page-applications .bulk-bar{padding:13px}#page-applications .bulk-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#page-applications .bulk-actions button{min-width:0;white-space:normal;font-size:12px}#page-applications .table-tools{align-items:stretch;flex-direction:column}#page-registration .admission-form-grid{grid-template-columns:1fr}.admission-dialog{width:calc(100vw - 16px);max-height:92dvh}.admission-dialog form{padding:16px}.admission-dialog .admission-form-grid{grid-template-columns:1fr}.admission-dialog header{position:sticky;top:-16px;z-index:2;padding:10px 0;background:#fff}}
+@media(prefers-reduced-motion:reduce){.admission-workspace-page{animation:none}}
