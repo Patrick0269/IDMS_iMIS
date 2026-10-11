@@ -51,9 +51,9 @@
           <label class="field create-field">Username<input name="username" maxlength="100"></label>
           <label class="field create-field">Temporary password<input name="password" id="password" type="password" minlength="10" autocomplete="new-password"></label>
           <label class="field">Employee number (optional)<input name="employeeNumber" maxlength="50" placeholder="Generated automatically when blank"></label>
-          <label class="field">Operational role<select name="roleCode" id="roleCode" required><option value="">Select role</option></select></label>
+          <label class="field">Operational roles<select name="roleCodes" id="roleCodes" multiple size="5" required aria-describedby="roleCodesHelp"><option value="">Loading available roles…</option></select><small id="roleCodesHelp">Select every role this staff member needs. Use Ctrl or Command to select more than one.</small></label>
           <label class="field">Institution<select name="institutionId" id="institutionId" required aria-readonly="true"><option value="">Loading IDMS...</option></select></label>
-          <label class="field">Department<select name="departmentId" id="departmentId"><option value="">No department selected</option></select></label>
+          <label class="field" id="departmentField">Department<select name="departmentId" id="departmentId"><option value="">Choose department</option></select><small id="departmentHelp">Required for department-scoped roles such as Lecturer and HOD.</small></label>
           <label class="field">Job title<input name="jobTitle" maxlength="150" placeholder="Defaults from selected role"></label>
           <label class="field">Phone<input name="phone" maxlength="50"></label>
           <label class="field">Employment type<select name="employmentType"><option>FULL_TIME</option><option>PART_TIME</option><option>CONTRACT</option><option>TEMPORARY</option><option>VOLUNTEER</option><option>INTERNSHIP</option><option>OTHER</option></select></label>
@@ -65,7 +65,7 @@
     <footer>IDMS iMIS · Identity, Staff Profile and Role Control</footer>
   </main>
 </div>
-<script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261011-friendly-network-errors"></script><script src="assets/js/staff-account-admin.js?v=20261005-staffhub1"></script>
+<script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261011-friendly-network-errors"></script><script src="assets/js/staff-account-admin.js?v=20261011-multi-role-department"></script>
 <script src="/assets/js/workflow-entry.js?v=20261004-r2"></script><script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
 <script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
 </html>

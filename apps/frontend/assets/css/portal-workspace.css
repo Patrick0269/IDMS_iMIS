@@ -14,7 +14,8 @@ body[data-results-mode] button{background:#741b36;color:white;border:1px solid #
 /* Embedded forms use the parent portal's navigation; hide the nested shell. */
 body.idmc-embedded-workspace :is(.portal-header,.portal-sidebar,.sidebar-brand,.student-profile-sidebar,.mast,.request-topbar,.topbar,.iw-topbar,.ipd-sidebar),
 body.idmc-embedded-workspace .portal-header,
-body.idmc-embedded-workspace .portal-sidebar{display:none!important}
+body.idmc-embedded-workspace .portal-sidebar,
+body.idmc-embedded-workspace .admissions-side-menu{display:none!important}
 body.idmc-embedded-workspace :is(.portal-shell,.portal-layout,.student-shell,.portal-main,.main-content,.student-profile-main){display:block!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:12px!important;box-shadow:none!important}
 body.idmc-embedded-workspace .idmc-workspace-panel{z-index:10000}
 /* Workspace windows cover the dashboard underneath so its navigation cannot

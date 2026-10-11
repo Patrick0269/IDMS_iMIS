@@ -1,13 +1,15 @@
 ﻿import type { NextFunction, Request, Response } from "express";
 import { getSupabase } from "../config/database.js";
-import { scopeRoleAssignments, rolesGrantPermission, rolesGrantRole } from "../utils/security.js";
+import { rolesGrantPermission, rolesGrantRole } from "../utils/security.js";
 
 type RoleAssignment = Record<string, any>;
 
-function assignmentsForActiveRole(req: Request, data: RoleAssignment[] | null): RoleAssignment[] {
-  const scoped = scopeRoleAssignments(data, req.user?.activeRoleId);
-  if (scoped[0]?.role_id) req.user!.activeRoleId = scoped[0].role_id;
-  return scoped;
+function assignmentGranting(req: Request, data: RoleAssignment[] | null, grants: (assignment: RoleAssignment) => boolean): RoleAssignment[] {
+  const rows = data ?? [];
+  const current = rows.find(assignment => assignment.role_id === req.user?.activeRoleId && grants(assignment));
+  const selected = current ?? rows.find(grants);
+  if (selected?.role_id) req.user!.activeRoleId = selected.role_id;
+  return selected ? [selected] : [];
 }
 
 export function requirePermission(permissionCode: string) {
@@ -55,7 +57,10 @@ export function requirePermission(permissionCode: string) {
         return;
       }
 
-      const hasPermission = rolesGrantPermission(assignmentsForActiveRole(req, data as RoleAssignment[]), permissionCode);
+      const hasPermission = rolesGrantPermission(
+        assignmentGranting(req, data as RoleAssignment[], assignment => rolesGrantPermission([assignment], permissionCode)),
+        permissionCode
+      );
 
       if (!hasPermission) {
         res.status(403).json({
@@ -86,7 +91,7 @@ export function requireAnyPermission(...permissionCodes: string[]) {
         .eq("user_id", req.user.id)
         .eq("status", "ACTIVE");
       if (error) return next(error);
-      const scoped = assignmentsForActiveRole(req, data as RoleAssignment[]);
+      const scoped = assignmentGranting(req, data as RoleAssignment[], assignment => permissionCodes.some(code => rolesGrantPermission([assignment], code)));
       const allowed = permissionCodes.some(code => rolesGrantPermission(scoped, code));
       if (!allowed) {
         res.status(403).json({ success: false, message: `Permission denied: ${permissionCodes.join(" or ")}` });
@@ -135,7 +140,10 @@ export function requireRole(...roleCodes: string[]) {
         return;
       }
 
-      const hasRole = rolesGrantRole(assignmentsForActiveRole(req, data as RoleAssignment[]), roleCodes);
+      const hasRole = rolesGrantRole(
+        assignmentGranting(req, data as RoleAssignment[], assignment => rolesGrantRole([assignment], roleCodes)),
+        roleCodes
+      );
 
       if (!hasRole) {
         res.status(403).json({

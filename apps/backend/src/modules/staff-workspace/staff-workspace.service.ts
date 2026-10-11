@@ -8,12 +8,19 @@ type Row = Record<string, any>;
 
 const STAFF_ACCOUNT_ROLES: Record<string, { category: string; title: string; portal: string }> = {
   LECTURER: { category: "ACADEMIC", title: "Lecturer", portal: "lecturer-portal.html" },
+  HOD: { category: "ACADEMIC", title: "Head of Department", portal: "hod-portal.html" },
+  DEPUTY_HOD: { category: "ACADEMIC", title: "Deputy Head of Department", portal: "hod-portal.html" },
   FINANCE_OFFICER: { category: "ADMINISTRATIVE", title: "Finance Officer", portal: "finance-portal.html" },
   ACCOUNTANT: { category: "ADMINISTRATIVE", title: "Accountant", portal: "finance-portal.html" },
   FINANCE_MANAGER: { category: "MANAGEMENT", title: "Finance Manager", portal: "finance-portal.html" },
   REGISTRAR: { category: "MANAGEMENT", title: "Registrar", portal: "registry-portal.html" },
   ACADEMIC_OFFICER: { category: "ADMINISTRATIVE", title: "Academic Officer", portal: "registry-portal.html" },
+  ADMISSIONS_OFFICER: { category: "ADMINISTRATIVE", title: "Admissions Officer", portal: "admission-portal.html" },
+  EXAMINATION_OFFICER: { category: "ADMINISTRATIVE", title: "Examinations Officer", portal: "examination-portal.html" },
+  EXAMINATIONS_OFFICER: { category: "ADMINISTRATIVE", title: "Examinations Officer", portal: "examination-portal.html" },
+  EXAM_OFFICER: { category: "ADMINISTRATIVE", title: "Examinations Officer", portal: "examination-portal.html" },
 };
+const DEPARTMENT_SCOPED_STAFF_ROLES = new Set(["LECTURER", "HOD", "DEPUTY_HOD"]);
 
 function userId(req: Request): string {
   if (!req.user?.id) throw httpError("Authentication required.", 401);
@@ -136,7 +143,7 @@ export async function listStaffAccounts() {
       roles: assignments.get(staff.user_id) ?? [],
       department: (departmentResult.data ?? []).find((department: Row) => department.id === staff.department_id) ?? null,
     })),
-    allowed_roles: (roleResult.data ?? []).filter((role: Row) => STAFF_ACCOUNT_ROLES[role.role_code]).map((role: Row) => ({ ...role, portal: STAFF_ACCOUNT_ROLES[role.role_code]?.portal })),
+    allowed_roles: (roleResult.data ?? []).filter((role: Row) => STAFF_ACCOUNT_ROLES[role.role_code]).map((role: Row) => ({ ...role, portal: STAFF_ACCOUNT_ROLES[role.role_code]?.portal, department_required: DEPARTMENT_SCOPED_STAFF_ROLES.has(role.role_code) })),
     institutions: institutionResult.data ?? [],
     departments: (departmentResult.data ?? []).filter((department: Row) => String(department.status ?? "").toUpperCase() === "ACTIVE"),
   };
@@ -178,14 +185,20 @@ export async function archiveStaffAccount(req: Request, staffId: string) {
 export async function provisionStaffAccount(req: Request, input: Row) {
   const actor = userId(req);
   const mode = String(input.mode ?? "CREATE").trim().toUpperCase();
-  const roleCode = String(input.roleCode ?? "").trim().toUpperCase();
+  const requestedRoles = Array.isArray(input.roleCodes) ? input.roleCodes : [input.roleCode];
+  const roleCodes = [...new Set(requestedRoles.map((value: unknown) => String(value ?? "").trim().toUpperCase()).filter(Boolean))];
+  if (!roleCodes.length || roleCodes.length > 8) throw httpError("Select between one and eight authorized staff roles.", 400);
+  if (roleCodes.some(selectedRoleCode => !STAFF_ACCOUNT_ROLES[selectedRoleCode])) throw httpError("One or more selected roles are not available for staff accounts.", 400);
+  const roleCode = roleCodes[0];
+  if (!roleCode) throw httpError("Choose at least one available staff role.", 400);
   const roleProfile = STAFF_ACCOUNT_ROLES[roleCode];
-  if (!roleProfile) throw httpError("Choose an authorized Lecturer, Finance or Registry role.", 400);
+  if (!roleProfile) throw httpError("Choose at least one available staff role.", 400);
   if (!["CREATE", "LINK"].includes(mode)) throw httpError("Account mode must be CREATE or LINK.", 400);
 
   const institutionId = await resolveInstitution(input.institutionId);
   const departmentId = clean(input.departmentId, 80);
-  if (roleCode === "LECTURER" && !departmentId) throw httpError("Select the lecturer's department before linking the Lecturer role.", 400);
+  const departmentRequired = roleCodes.some(code => DEPARTMENT_SCOPED_STAFF_ROLES.has(code));
+  if (departmentRequired && !departmentId) throw httpError("Select a department for the selected department-scoped staff role(s).", 400);
   if (departmentId) {
     const department = await institutionDb.from("departments").select("id").eq("id", departmentId).eq("institution_id", institutionId).eq("status", "ACTIVE").maybeSingle();
     if (department.error) throw department.error;
@@ -217,7 +230,8 @@ export async function provisionStaffAccount(req: Request, input: Row) {
   }
 
   try {
-    const role = await assignStaffRole(account.id, roleCode, actor);
+    const assignedRoles = [];
+    for (const selectedRoleCode of roleCodes) assignedRoles.push(await assignStaffRole(account.id, selectedRoleCode, actor));
     const employeeNumber = clean(input.employeeNumber, 50);
     if (employeeNumber) {
       const duplicate = await institutionDb.from("staff").select("id,user_id").eq("employee_number", employeeNumber).maybeSingle();
@@ -258,12 +272,12 @@ export async function provisionStaffAccount(req: Request, input: Row) {
         mode,
         user_id: account.id,
         employee_number: staffResult.data.employee_number,
-        role_code: role.role_code,
+        role_codes: assignedRoles.map((role: Row) => role.role_code),
         institution_id: institutionId,
         department_id: departmentId,
       },
     });
-    return { user: account, staff: staffResult.data, role, portal: roleProfile.portal, created: mode === "CREATE" };
+    return { user: account, staff: staffResult.data, role: assignedRoles[0], roles: assignedRoles, portal: roleProfile.portal, created: mode === "CREATE" };
   } catch (error) {
     if (createdAuthUserId) await institutionDb.auth.admin.deleteUser(createdAuthUserId);
     throw error;

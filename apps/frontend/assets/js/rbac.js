@@ -1398,19 +1398,15 @@
           const permissions =
             new Set();
 
-          const activeRoleId = window.IDMCAuth?.getActiveRoleId?.();
-          const activeRole = Array.isArray(storedUser?.roles)
-            ? storedUser.roles.find(role => String(role.id) === String(activeRoleId))
-            : null;
+          const assignedRoles = Array.isArray(storedUser?.roles) ? storedUser.roles : [];
+          const rolesWithPermissionLists = assignedRoles.filter(role => Array.isArray(role?.permissions));
 
-          if (Array.isArray(activeRole?.permissions)) {
-            activeRole.permissions.forEach(permission => {
+          if (rolesWithPermissionLists.length) {
+            rolesWithPermissionLists.forEach(role => role.permissions.forEach(permission => {
               const code = normalizePermissionCode(permission);
               if (code) permissions.add(code);
-            });
-          }
-
-          if (!Array.isArray(activeRole?.permissions)) sources.forEach(
+            }));
+          } else sources.forEach(
             source => {
 
               if (

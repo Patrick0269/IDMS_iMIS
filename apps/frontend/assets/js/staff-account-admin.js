@@ -16,7 +16,7 @@
     return user.display_name || [user.first_name || staff.first_name, user.middle_name || staff.middle_name, user.last_name || staff.last_name].filter(Boolean).join(" ") || staff.email || user.email || "Unnamed staff";
   }
   function renderSelects() {
-    $("roleCode").innerHTML = '<option value="">Select role</option>' + state.allowed_roles.map((item) => option(item.role_code, item.role_name)).join("");
+    $("roleCodes").innerHTML = state.allowed_roles.map((item) => option(item.role_code, `${item.role_name}${item.department_required ? " · Department required" : ""}`)).join("");
     $("institutionId").innerHTML = state.institutions.map((item) => option(item.id, `${item.institution_code} — ${item.institution_name}`)).join("");
     if (state.institutions.length === 1) { $("institutionId").value = state.institutions[0].id; $("institutionId").disabled = true; }
     const departments = [...new Map(state.departments.map((item) => [item.id, item])).values()];
@@ -26,10 +26,13 @@
     $("roleFilter").innerHTML = '<option value="">All roles</option>' + roleOptions.map((role) => option(role.role_code, role.role_name || role.role_code)).join("");
     updateDepartmentRequirement();
   }
+  function selectedRoleCodes() { return Array.from($("roleCodes").selectedOptions).map((item) => item.value).filter(Boolean); }
   function updateDepartmentRequirement() {
-    const required = $("roleCode").value === "LECTURER";
+    const selected = new Set(selectedRoleCodes());
+    const required = state.allowed_roles.some((role) => selected.has(role.role_code) && role.department_required);
     $("departmentId").required = required;
-    $("departmentId").setCustomValidity(required && !$("departmentId").value ? "Select the lecturer's department." : "");
+    $("departmentField").hidden = !required;
+    $("departmentId").setCustomValidity(required && !$("departmentId").value ? "Select a department for the selected role(s)." : "");
   }
   function filteredAccounts() {
     const term = $("staffSearch").value.trim().toLowerCase();
@@ -135,8 +138,8 @@
     staffRecordTabs(item); $("staffFile").scrollIntoView({ behavior: "smooth", block: "start" });
   }
   async function submit(event) {
-    event.preventDefault(); message(""); const form = event.currentTarget; const body = Object.fromEntries(new FormData(form).entries()); const button = form.querySelector("button[type=submit]"); button.disabled = true;
-    try { const result = payloadData(await IDMCAPI.post("/staff-workspace/admin/accounts", body)); form.reset(); $("existingUserResults").innerHTML = ""; setMode(); await load(); message(`Staff account saved. Assigned role: ${result.role.role_name}. Portal: ${result.portal}`); }
+    event.preventDefault(); message(""); const form = event.currentTarget; const body = Object.fromEntries(new FormData(form).entries()); body.roleCodes = selectedRoleCodes(); const button = form.querySelector("button[type=submit]"); button.disabled = true;
+    try { const result = payloadData(await IDMCAPI.post("/staff-workspace/admin/accounts", body)); form.reset(); $("existingUserResults").innerHTML = ""; setMode(); await load(); message(`Staff account saved. Assigned roles: ${(result.roles || []).map((role) => role.role_name).join(", ")}.`); }
     catch (error) { message(error.message || "Unable to save staff account.", true); }
     finally { button.disabled = false; }
   }
@@ -154,7 +157,7 @@
     catch (error) { message(error.message || "Unable to load staff accounts.", true); }
   }
   $("today").textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  $("mode").onchange = setMode; $("roleCode").onchange = updateDepartmentRequirement; $("departmentId").onchange = updateDepartmentRequirement;
+  $("mode").onchange = setMode; $("roleCodes").onchange = updateDepartmentRequirement; $("departmentId").onchange = updateDepartmentRequirement;
   $("findExistingUser").onclick = searchExistingUsers; $("existingUserSearch").addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); searchExistingUsers(); } });
   $("staffSearch").addEventListener("input", renderAccounts); $("departmentFilter").onchange = renderAccounts; $("roleFilter").onchange = renderAccounts; $("statusFilter").onchange = renderAccounts;
   $("refreshStaff").onclick = async () => { try { await load(); message("Staff directory refreshed."); } catch (error) { message(error.message || "Unable to refresh staff directory.", true); } };

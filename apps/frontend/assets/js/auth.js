@@ -523,8 +523,10 @@
         const user = getUser();
 
         if (!user) return false;
-        const activeRole = (user.roles || []).find(role => String(role.id) === String(getActiveRoleId()));
-        if (activeRole && Array.isArray(activeRole.permissions)) return activeRole.permissions.includes(permission);
+        const roles = (user.roles || []).filter(role => role && role.id);
+        if (roles.some(role => Array.isArray(role.permissions))) {
+            return roles.some(role => Array.isArray(role.permissions) && role.permissions.includes(permission));
+        }
         return Array.isArray(user.permissions) && user.permissions.includes(permission);
     }
 
