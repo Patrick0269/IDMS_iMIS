@@ -5,6 +5,8 @@
   if (!form || !window.IDMCAuth || !window.IDMC_RBAC_API || !window.IDMCAPI) return;
   const preview = $("#deletionPreview"), message = $("#deletionMessage");
   const phrase = $("#deletionPhrase"), execute = $("#executeDeletion");
+  const progress = $("#resetProgress"), progressTitle = $("#resetProgressTitle");
+  const progressDetail = $("#resetProgressDetail"), progressBar = $("#resetProgressBar");
   let previewKey = "";
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const selected = () => [...form.querySelectorAll('input[name="deleteGroup"]:checked')].map((x) => x.value).sort();
@@ -68,7 +70,11 @@
         if (!window.confirm(confirmText)) return;
         execute.disabled = true;
         message.className = "status";
-        message.textContent = "Deleting records. This may take up to 10 minutes. Keep this page open and do not retry while it is running…";
+        progress.hidden = false;
+        progressBar.removeAttribute("value");
+        progressTitle.textContent = "Deleting database records…";
+        progressDetail.textContent = "The database processes this reset in one transaction and reports the exact result when it commits. Keep this page open; do not submit it again.";
+        message.textContent = "Connecting to the database. This operation can take several minutes.";
         try {
           const result = await window.IDMCAPI.post(
             "/admin-data-reset/execute",
@@ -76,7 +82,14 @@
             { timeoutMs: 660000 },
           );
           const data = result.data || {};
+          progressBar.value = 100;
           const failedAuth = Array.isArray(data.authDeletionFailures) ? data.authDeletionFailures : [];
+          progressTitle.textContent = failedAuth.length
+            ? "Database deletion completed — 100%; account cleanup needs attention"
+            : "Deletion completed — 100%";
+          progressDetail.textContent = failedAuth.length
+            ? `${failedAuth.length} account cleanup item(s) failed; review the details below.`
+            : "The database and account cleanup steps have returned successfully.";
           preview.innerHTML = `<strong>${Number(data.totalDeleted || 0).toLocaleString()} database record(s) deleted.</strong><pre style="white-space:pre-wrap;max-height:220px;overflow:auto">${escapeHtml(JSON.stringify(data.deletedRows || {}, null, 2))}</pre><p>Non-admin Auth accounts deleted: ${Number(data.authAccountsDeleted || 0).toLocaleString()}. Admin accounts and institutional configuration were retained. IDMC/2026/00001 was deleted if its student records were selected.${failedAuth.length ? `<br><strong>Auth account cleanup incomplete:</strong><br>${failedAuth.map(escapeHtml).join("<br>")}` : ""}</p>`;
           message.className = failedAuth.length ? "status error" : "status success";
           message.textContent = result.message || "Selected data deletion completed.";
@@ -87,10 +100,12 @@
           previewKey = "";
         } catch (error) {
           message.className = "status error";
-          const detail = error.message || "Deletion failed. The database transaction was rolled back.";
+          const detail = error.message || "The deletion request could not be confirmed.";
+          progressTitle.textContent = "Completion could not be confirmed";
+          progressDetail.textContent = "The connection may have ended before the server replied. Check the updated preview before retrying; do not assume the data is unchanged.";
           message.textContent = error.requestId
-            ? `${detail} Support reference: ${error.requestId}. No records were deleted.`
-            : `${detail} No records were deleted.`;
+            ? `${detail} Support reference: ${error.requestId}. Refresh the preview before retrying.`
+            : `${detail} Refresh the preview before retrying.`;
           previewKey = "";
         } finally { refreshButton(); }
       });

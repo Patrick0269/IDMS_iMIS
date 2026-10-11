@@ -51,10 +51,19 @@ router.post("/execute", async (req, res, next) => {
         if (users.length < perPage) break;
         page++;
       }
-      for (const authUserId of toDelete) {
-        const removed = await db.auth.admin.deleteUser(authUserId);
-        if (removed.error) authDeletionFailures.push(`${authUserId}: ${removed.error.message}`);
-        else authAccountsDeleted++;
+      // Auth cleanup is independent per user. Bounded parallel deletion avoids
+      // hundreds of sequential network round-trips while limiting API pressure.
+      const concurrency = 8;
+      for (let offset = 0; offset < toDelete.length; offset += concurrency) {
+        const batch = toDelete.slice(offset, offset + concurrency);
+        const results = await Promise.all(batch.map(async authUserId => ({
+          authUserId,
+          result: await db.auth.admin.deleteUser(authUserId),
+        })));
+        for (const { authUserId, result: removed } of results) {
+          if (removed.error) authDeletionFailures.push(`${authUserId}: ${removed.error.message}`);
+          else authAccountsDeleted++;
+        }
       }
     }
     const responseData = { ...data, authAccountsDeleted, authDeletionFailures };

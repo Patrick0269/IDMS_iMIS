@@ -25,6 +25,9 @@
     button{border:0;border-radius:4px;padding:11px 16px;min-height:42px;font:inherit;font-weight:700;cursor:pointer;background:var(--del-red);color:#fff}button.secondary{background:#fff;border:1px solid #c9b9be;color:var(--del-red)}button:disabled{opacity:.48;cursor:not-allowed}
     .preview{margin-top:16px;color:var(--del-muted);line-height:1.5}.preview table{width:100%;border-collapse:collapse;margin-top:8px}.preview th,.preview td{padding:7px 9px;border-bottom:1px solid var(--del-line);text-align:left;font-size:13px}.preview th:last-child,.preview td:last-child{text-align:right}
     .status{min-height:22px;margin:10px 0;color:var(--del-muted)}.status.error{color:#9b1e2a}.status.success{color:#176b45}
+    .reset-progress{margin:12px 0;padding:12px 14px;border:1px solid var(--del-line);border-radius:6px;background:#fff;color:var(--del-muted);line-height:1.5}
+    .reset-progress[hidden]{display:none}.reset-progress progress{display:block;width:100%;height:12px;margin:8px 0;accent-color:var(--del-red)}
+    .reset-progress strong{color:var(--del-ink)}
     @media(max-width:620px){.deletion-page{padding:18px 13px 36px}.deletion-card{padding:16px}.confirm-row{grid-template-columns:1fr}.deletion-top{align-items:flex-start}}
   </style>
 <script src="assets/js/action-progress.js?v=20261009-single"></script>
@@ -54,6 +57,11 @@
         <div class="warning"><strong>Retained:</strong> The admin account submitting the reset, other ADMIN/SUPER_ADMIN accounts, institutional setup and role definitions remain so the system can be used again. Student <code>IDMC/2026/00001</code> is no longer protected and will be deleted when Students or Delete everything is selected. Uploaded files in Supabase Storage are not deleted. “Delete everything” cannot be undone from this portal.</div>
         <div class="confirm-row"><label class="confirm-label">Confirmation phrase<input type="text" id="deletionPhrase" autocomplete="off" placeholder="Preview first" required></label><button type="button" class="secondary" id="previewDeletion">Preview selected data</button></div>
         <div id="deletionPreview" class="preview" role="status" aria-live="polite">Choose data groups, then preview the records.</div>
+        <div id="resetProgress" class="reset-progress" role="status" aria-live="polite" hidden>
+          <strong id="resetProgressTitle">Preparing deletion…</strong>
+          <progress id="resetProgressBar" aria-label="Deletion progress"></progress>
+          <span id="resetProgressDetail">The database completes this operation as one transaction; exact percentage is available when it commits.</span>
+        </div>
         <div id="deletionMessage" class="status" role="status" aria-live="polite"></div>
         <button type="submit" id="executeDeletion" disabled>Delete selected data</button>
       </form>
@@ -64,7 +72,7 @@
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/api.js?v=20261011-friendly-network-errors"></script>
   <script src="assets/js/rbac.js"></script>
-  <script src="assets/js/admin-data-reset.js?v=20261012-reset-timeout-10m"></script>
+  <script src="assets/js/admin-data-reset.js?v=20261012-reset-progress-network"></script>
 <script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
 <script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>
 </html>
