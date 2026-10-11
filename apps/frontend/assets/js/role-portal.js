@@ -6,6 +6,7 @@
       ["Department requests", "Review student requests assigned to your department.", "student-requests.html", ["student_requests.view_department", "student_requests.decide_department"]],
       ["Course allocation", "Assign active lecturers to teaching courses in your department.", "hod-course-allocation.html", ["lecturer.assignments.manage"]],
       ["Publish results", "Publish submitted departmental results and read Principal comments.", "hod-results.html", ["results.hod.publish"]],
+      ["Intake & Academic Progression", "Review permitted student progression and manage intake result windows.", "intake-progression.html", ["results.window.manage", "results.hod.publish", "student_requests.view_department"]],
       ["Timetable", "Review course schedules and timetable records.", "timetable.html", ["timetable.view"]],
       ["Attendance", "Review attendance records available to your department.", "attendance.html", ["attendance.view"]],
       ["Department reports", "Open institutional reports allowed for your account.", "reports.html", ["reports.view"]]
@@ -89,10 +90,23 @@
     if (!config || !root || !window.IDMCAuth || !(await window.IDMCAuth.requireAuth())) return;
     const user = window.IDMCAuth.getUser() || {};
     const roles = user.roles || [];
-    const activeRoleId = window.IDMCAuth.getActiveRoleId();
-    const activeRole = roles.find(item => String(item.id) === String(activeRoleId));
-    const activeCode = String(activeRole?.roleCode || activeRole?.role_code || "").toUpperCase();
+    let activeRoleId = window.IDMCAuth.getActiveRoleId();
+    let activeRole = roles.find(item => String(item.id) === String(activeRoleId));
+    let activeCode = String(activeRole?.roleCode || activeRole?.role_code || "").toUpperCase();
     const portalsForUser = assignedPortals(roles);
+    if (!config.role.includes(activeCode)) {
+      const matchingRole = roles.find(item => config.role.includes(roleCode(item)));
+      if (matchingRole) {
+        try {
+          window.IDMCAuth.setActiveRole(matchingRole.id);
+          activeRole = matchingRole;
+          activeRoleId = matchingRole.id;
+          activeCode = roleCode(matchingRole);
+        } catch (error) {
+          console.error("Unable to activate the role required by this portal", error);
+        }
+      }
+    }
     const activePortal = portalPage(activeRole);
     if (!activeRole) {
       root.innerHTML = '<p class="rp-empty">Your account has no active role. Contact an administrator to review your access.</p>'; return;
