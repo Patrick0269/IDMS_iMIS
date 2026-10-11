@@ -67,7 +67,6 @@ function installStudentContentRouter(nav) {
   const navigate = (href, updateHistory = true) => {
     const url = new URL(href, location.href);
     if (url.origin !== location.origin || !allowed.has(url.pathname)) return false;
-    if (window.IDMCAuth?.getUser?.()?.mustChangePassword && !url.pathname.endsWith("/student-security.html")) return false;
     if (url.pathname.endsWith("/student-portal.html")) { showHome(updateHistory); return true; }
     url.searchParams.delete("panel");
     const relative = url.pathname.split("/").pop() + url.search + url.hash;

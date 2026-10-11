@@ -174,13 +174,14 @@ export async function authenticate(
 
     const requestedRoleId = String(req.get("x-idmc-active-role") ?? "").trim();
 
-    const mustChangePassword = authUser.app_metadata?.idmc_student_first_login === true;
-
     req.authUser = {
       id: authUser.id,
       email: authUser.email,
       emailVerified: Boolean(authUser.email_confirmed_at),
-      mustChangePassword
+      // Student registration-number passwords remain usable under the current
+      // institution policy. Older Auth accounts may still carry the legacy
+      // idmc_student_first_login marker; it no longer blocks portal access.
+      mustChangePassword: false
     };
 
     req.user = {
@@ -193,27 +194,6 @@ export async function authenticate(
       status: applicationUser.status,
       activeRoleId: requestedRoleId || null
     };
-
-    // First-login student/applicant identities may only validate their
-    // session and change the temporary password until setup is complete.
-    // Keep this server-side so bypassing the portal redirect does not grant
-    // access to protected API modules.
-    if (mustChangePassword) {
-      const requestPath = String(req.originalUrl || req.path).split("?")[0]?.replace(/\/+$/, "") || "";
-      const allowedDuringPasswordSetup = [
-        "/auth/me",
-        "/auth/change-password",
-        "/students/me/change-password",
-      ].some(path => requestPath.endsWith(path));
-      if (!allowedDuringPasswordSetup) {
-        res.status(403).json({
-          success: false,
-          code: "PASSWORD_CHANGE_REQUIRED",
-          message: "Change your temporary password in the Security section before using other portal services.",
-        });
-        return;
-      }
-    }
 
     next();
   } catch (error) {

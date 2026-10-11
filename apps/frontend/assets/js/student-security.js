@@ -16,12 +16,7 @@
       : "No security history is available.";
   }
   async function init() {
-    const profile = await IDMCAuth.requireAuth();
-    if (!profile) return;
-    if (profile.mustChangePassword) {
-      $("passwordForm").querySelector('[name="currentPassword"]')?.focus();
-      return;
-    }
+    if (!await IDMCAuth.requireAuth()) return;
     try { await loadHistory(); } catch (error) { $("securityHistory").textContent = error.message || "Unable to load security history."; }
   }
   $("passwordForm").addEventListener("submit", async event => {
@@ -29,20 +24,7 @@
     const form = event.currentTarget, fields = Object.fromEntries(new FormData(form).entries());
     if (fields.newPassword !== fields.confirmPassword) { setMessage("Passwords do not match.", true); return; }
     const submit = form.querySelector("button"); submit.disabled = true; setMessage("Changing password…");
-    try {
-      const firstLoginSetup = IDMCAuth.getUser()?.mustChangePassword === true;
-      const endpoint = firstLoginSetup ? "/auth/change-password" : "/students/me/change-password";
-      await IDMCAPI.post(endpoint, { currentPassword: fields.currentPassword, newPassword: fields.newPassword });
-      form.reset();
-      if (firstLoginSetup) {
-        const profile = await IDMCAuth.getCurrentUser();
-        if (profile.mustChangePassword) throw new Error("Password changed, but account setup is not yet confirmed. Please refresh and check again.");
-        setMessage("Password changed. Opening your Student Portal…");
-        window.top.location.replace("student-portal.html");
-        return;
-      }
-      setMessage("Password changed successfully.");
-    }
+    try { await IDMCAPI.post("/students/me/change-password", fields); form.reset(); setMessage("Password changed. Sign in again with the new password."); }
     catch (error) { setMessage(error.message || "Password could not be changed.", true); }
     finally { submit.disabled = false; }
   });

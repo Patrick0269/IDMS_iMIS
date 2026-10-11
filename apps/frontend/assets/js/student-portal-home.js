@@ -59,7 +59,7 @@ function render(data){
 function fatal(error){showMessage(error?.message||"Student Panel could not be loaded.","error");$("timetableRows").innerHTML='<tr><td colspan="5" class="empty-cell">Unable to load timetable.</td></tr>';}
 async function load(){
  const button=$("refreshPanel");if(button)button.disabled=true;showMessage("Loading your Student Panel...");
- try{const profile=await IDMCAuth.requireAuth();if(!profile||profile.mustChangePassword)return;const response=await IDMCAPI.get("/students/me/summary");render(response.data||response);showMessage("");}
+ try{if(!await IDMCAuth.requireAuth())return;const response=await IDMCAPI.get("/students/me/summary");render(response.data||response);showMessage("");}
  catch(error){fatal(error);}finally{if(button)button.disabled=false;}
 }
 document.addEventListener("DOMContentLoaded",()=>{

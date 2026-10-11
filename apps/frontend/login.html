@@ -658,7 +658,7 @@
 
 <script src="assets/js/config.js"></script>
 
-<script src="assets/js/auth.js?v=20261011-first-password-security"></script>
+<script src="assets/js/auth.js?v=20261011-friendly-network-errors"></script>
 
 <script>
 
@@ -878,11 +878,13 @@
                     throw new Error("Your account could not be verified in IDMC iMIS.");
                 }
 
-                // Route first-login student/applicant accounts into the
-                // Security panel inside their Student Portal, preserving the
-                // newly issued session before staff response-shape checks.
+                // The backend intentionally returns a compact, flat account
+                // payload for students who must change their temporary
+                // password. Route them before applying the regular staff
+                // response-shape checks; otherwise login cleanup clears this
+                // newly issued session before the password page can use it.
                 if (userData.mustChangePassword) {
-                    window.location.replace("student-portal.html?panel=student-security.html%23passwordForm");
+                    window.location.replace("student-first-password.html");
                     return;
                 }
 
