@@ -6,6 +6,16 @@ import vm from "node:vm";
 
 const root = path.resolve(import.meta.dirname, "../../..");
 const script = await fs.readFile(path.join(root, "apps/frontend/assets/js/student-first-password.js"), "utf8");
+const loginPage = await fs.readFile(path.join(root, "apps/frontend/login.html"), "utf8");
+
+test("login preserves the compact first-password session before checking the staff response shape", () => {
+  const start = loginPage.indexOf("const userData");
+  const redirect = loginPage.indexOf("if (userData.mustChangePassword)", start);
+  const responseShape = loginPage.indexOf("const verifiedUser = userData.user || userData;", start);
+  assert.notEqual(redirect, -1, "temporary-password accounts must be routed to their password form");
+  assert.notEqual(responseShape, -1, "regular login must still verify its returned account status");
+  assert.ok(redirect < responseShape, "the temporary-password route must run before validating the regular response shape");
+});
 
 class Element {
   constructor(value = "") { this.value = value; this.listeners = {}; this.hidden = false; this.disabled = false; this.textContent = ""; this.className = ""; }

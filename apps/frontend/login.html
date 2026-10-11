@@ -874,27 +874,25 @@
                     await IDMCAuth.getCurrentUser();
 
 
-                if (
-                    !userData ||
-                    !userData.user
-                ) {
-
-                    throw new Error(
-                        "Your account could not be verified in IDMC iMIS."
-                    );
-
+                if (!userData) {
+                    throw new Error("Your account could not be verified in IDMC iMIS.");
                 }
 
+                // The backend intentionally returns a compact, flat account
+                // payload for students who must change their temporary
+                // password. Route them before applying the regular staff
+                // response-shape checks; otherwise login cleanup clears this
+                // newly issued session before the password page can use it.
+                if (userData.mustChangePassword) {
+                    window.location.replace("student-first-password.html");
+                    return;
+                }
 
-                if (
-                    userData.user.status !==
-                    "ACTIVE"
-                ) {
-
+                const verifiedUser = userData.user || userData;
+                if (verifiedUser.status !== "ACTIVE") {
                     throw new Error(
-                        `Your IDMC iMIS account is ${userData.user.status}. Please contact the ICT Office.`
+                        `Your IDMC iMIS account is ${verifiedUser.status}. Please contact the ICT Office.`
                     );
-
                 }
 
 
@@ -908,10 +906,6 @@
                  *
                  */
 
-                if (userData.mustChangePassword) {
-                    window.location.replace("student-first-password.html");
-                    return;
-                }
                 const destination = IDMCAuth.getLandingPage();
 
                 showMessage(
