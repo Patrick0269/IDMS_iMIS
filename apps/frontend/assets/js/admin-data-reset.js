@@ -70,7 +70,11 @@
         message.className = "status";
         message.textContent = "Deleting records. Keep this page open…";
         try {
-          const result = await window.IDMCAPI.post("/admin-data-reset/execute", { categories: groups, confirmation: phrase.value.trim() });
+          const result = await window.IDMCAPI.post(
+            "/admin-data-reset/execute",
+            { categories: groups, confirmation: phrase.value.trim() },
+            { timeoutMs: 90000 },
+          );
           const data = result.data || {};
           const failedAuth = Array.isArray(data.authDeletionFailures) ? data.authDeletionFailures : [];
           preview.innerHTML = `<strong>${Number(data.totalDeleted || 0).toLocaleString()} database record(s) deleted.</strong><pre style="white-space:pre-wrap;max-height:220px;overflow:auto">${escapeHtml(JSON.stringify(data.deletedRows || {}, null, 2))}</pre><p>Non-admin Auth accounts deleted: ${Number(data.authAccountsDeleted || 0).toLocaleString()}. Admin accounts and institutional configuration were retained. IDMC/2026/00001 was deleted if its student records were selected.${failedAuth.length ? `<br><strong>Auth account cleanup incomplete:</strong><br>${failedAuth.map(escapeHtml).join("<br>")}` : ""}</p>`;
