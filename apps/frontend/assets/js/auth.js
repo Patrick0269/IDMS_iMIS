@@ -29,7 +29,7 @@
         } catch (error) {
             if (error && error.name === "AbortError") {
                 throw new Error(
-                    "The IDMC service did not respond within 25 seconds. Please retry."
+                    `The IDMC service did not respond within ${Math.ceil(timeoutMs / 1000)} seconds. Please retry.`
                 );
             }
 
@@ -191,8 +191,25 @@
         window.location.replace(landingPage());
     }
 
-    async function parseResponse(response) {
-        const text = await response.text();
+    async function parseResponse(response, timeoutMs = REQUEST_TIMEOUT_MS) {
+        let timeoutId;
+        let text;
+        try {
+            text = await Promise.race([
+                response.text(),
+                new Promise((_, reject) => {
+                    timeoutId = window.setTimeout(() => {
+                        try {
+                            const cancellation = response.body?.cancel?.();
+                            cancellation?.catch?.(() => undefined);
+                        } catch { /* the timeout should still reject if body cancellation is unsupported */ }
+                        reject(new Error(`The IDMC service response timed out after ${Math.ceil(timeoutMs / 1000)} seconds. Please retry.`));
+                    }, timeoutMs);
+                })
+            ]);
+        } finally {
+            window.clearTimeout(timeoutId);
+        }
 
         if (!text) {
             return {};
@@ -285,7 +302,7 @@
             throw new Error("Unable to connect to the configured IDMC backend.");
         }
 
-        const data = await parseResponse(response);
+        const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
         if (!response.ok || !data?.success || !data?.data?.access_token) {
             throw new Error(data?.message || "Student login failed.");
         }
@@ -385,7 +402,7 @@
             );
         }
 
-        const data = await parseResponse(response);
+        const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
 
         if (!response.ok) {
             throw new Error(
@@ -443,7 +460,14 @@
             return null;
         }
 
-        const newSession = await parseResponse(response);
+        let newSession;
+        try {
+            newSession = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
+        } catch (error) {
+            console.warn("Session refresh response could not be read:", error);
+            clearSession();
+            return null;
+        }
 
         if (!newSession?.access_token) {
             clearSession();
