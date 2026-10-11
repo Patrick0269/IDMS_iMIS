@@ -231,7 +231,7 @@ router.get("/workspace", admissionsWorkspaceAccess, wrap(async (_req: any, res: 
   }
   const nextOfKin = await db.from("application_next_of_kin").select("application_id,full_name,relationship,phone,email,address").limit(1000);
   if (nextOfKin.error && !["PGRST205", "42P01"].includes(String(nextOfKin.error.code))) throw nextOfKin.error;
-  const intakeRows=await db.from('idmc_intakes').select('id,code,academic_year_id,academic_years(year_name)');if(intakeRows.error)throw intakeRows.error;let intakeOpen=false;for(const i of intakeRows.data||[]){const x=await db.rpc('idmc_intake_state',{p_id:i.id});if(x.error)throw x.error;if(x.data==='OPEN')intakeOpen=true;}
+  const intakeRows=await db.from('idmc_intakes').select('id,code,academic_year_id,state,opens_at,closes_at,academic_years(year_name)');if(intakeRows.error)throw intakeRows.error;const now=Date.now();const intakeOpen=(intakeRows.data||[]).some((i:any)=>{if(i.state==='DRAFT'||i.state==='CLOSED')return false;const opens=Date.parse(i.opens_at||'');const closes=Date.parse(i.closes_at||'');return Number.isFinite(opens)&&Number.isFinite(closes)&&opens<=now&&now<closes;});
   res.json({ success: true, data: {
     onlineApplicationsOpen: intakeOpen,intakes:intakeRows.data??[],
     applications: applications.data ?? [], applicants: applicants.data ?? [], choices: choices.data ?? [],
