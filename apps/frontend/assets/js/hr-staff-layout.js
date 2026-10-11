@@ -4,6 +4,7 @@ function roles(user){return (user?.roles||[]).map(r=>String(r.roleCode||r.role_c
 function admin(user){return roles(user).some(r=>['ADMIN','SUPER_ADMIN','SYSTEM_ADMIN'].includes(r));}
 function apply(user){
  const page=location.pathname.split('/').pop();if(!admin(user)&&['users.html','user.html','roles.html','permissions.html','permission.html'].includes(page)){location.replace('staff-portal.html');return;}const staffPortal=page==='staff-portal.html',accounts=page==='staff-accounts.html';
+ document.querySelectorAll('[data-roles-any]').forEach(link=>{const allowed=link.dataset.rolesAny.split(',').map(value=>value.trim().toUpperCase()).filter(Boolean);link.hidden=!admin(user)&&!roles(user).some(role=>allowed.includes(role));});
  document.querySelectorAll('a[href]').forEach(a=>{const dest=new URL(a.href,location.href).pathname.split('/').pop();
   if((!admin(user)&&['users.html','user.html','roles.html','permissions.html','permission.html'].includes(dest))||(staffPortal&&dest==='dashboard.html')||(accounts&&['users.html','roles.html','permissions.html'].includes(dest))){const card=a.closest('.workspace-card,.idmc-portal-card');(card||a).remove();}
   if(accounts&&dest==='dashboard.html'){a.href='hr.html';a.textContent='Human Resources';}

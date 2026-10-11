@@ -117,7 +117,10 @@
     const rbac = window.IDMC_RBAC_API;
     const loaded = rbac && await rbac.ensureRBACLoaded();
     if (!loaded) { root.innerHTML = '<p class="rp-empty">Access permissions could not be loaded. Refresh this page or contact an administrator.</p>'; return; }
-    const modules = config.modules.filter(item => item[3].some(permission => rbac.hasPermission(permission)) || adminRoles.includes(activeCode));
+    const intakeProgressionRoles = ["ACADEMIC_OFFICER", "ADMISSIONS_OFFICER", "HOD", "DEPUTY_HOD", "LECTURER"];
+    const modules = config.modules.filter(item => item[2] === "intake-progression.html"
+      ? intakeProgressionRoles.includes(activeCode)
+      : item[3].some(permission => rbac.hasPermission(permission)) || adminRoles.includes(activeCode));
     const profileUser = user.user || user;
     const name = profileUser.fullName || profileUser.full_name || profileUser.displayName || [profileUser.firstName, profileUser.middleName, profileUser.lastName].filter(Boolean).join(" ") || profileUser.email || "Signed in";
     if (slug === "hod") {
