@@ -168,7 +168,9 @@ test('historical student number works as a temporary password only while first-l
   const number = 'NS2929/2000/2000';
   const records = {
     students: [{ id: 'student-2', student_number: 'IDMC/2026/00002', registration_number: number, user_id: 'user-2', student_status: 'ACTIVE' }],
-    users: [{ id: 'user-2', auth_user_id: 'auth-2', status: 'ACTIVE' }],
+    // Historical accounts can have login history even though the student has
+    // never changed the password to the registration-number temporary value.
+    users: [{ id: 'user-2', auth_user_id: 'auth-2', status: 'ACTIVE', password_changed_at: null, last_login_at: '2025-03-01T10:00:00.000Z' }],
     user_roles: [{ user_id: 'user-2', status: 'ACTIVE', roles: { role_code: 'STUDENT' } }],
   };
   const identity = { id: 'auth-2', email: 'student@example.edu', app_metadata: {} };

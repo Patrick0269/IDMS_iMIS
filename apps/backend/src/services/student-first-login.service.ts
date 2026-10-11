@@ -12,16 +12,20 @@ export function needsStudentPasswordChange(metadata: Record<string, any> | undef
   return metadata?.idmc_student_first_login === true;
 }
 
-/** Initialize an unused student account once. Never reset an account that has logged in or changed its password. */
+/** Initialize an unchanged student account once. A prior login alone does not prove the student changed their password. */
 export async function initialiseStudentFirstLogin(authUserId: string, student: { registration_number?: unknown; student_number?: unknown }) {
   const db = getSupabase();
   const result = await db.auth.admin.getUserById(authUserId);
   if (result.error || !result.data.user) throw result.error || new Error("Student identity missing.");
   const identity = result.data.user;
   if (identity.app_metadata?.idmc_student_initialised === true) return;
-  const profile = await db.from("users").select("id,password_changed_at,last_login_at").eq("auth_user_id", authUserId).maybeSingle();
+  const profile = await db.from("users").select("id,password_changed_at").eq("auth_user_id", authUserId).maybeSingle();
   if (profile.error) throw profile.error;
-  if (profile.data?.password_changed_at || profile.data?.last_login_at) return;
+  // Existing/historical student accounts may already have last_login_at from
+  // before the forced first-password-change flow was introduced. Only the
+  // explicit password-change timestamp means the temporary password is no
+  // longer allowed.
+  if (profile.data?.password_changed_at) return;
   if (profile.data) {
     const roles = await db.from("user_roles").select("roles!inner(role_code)").eq("user_id", profile.data.id).eq("status", "ACTIVE");
     if (roles.error) throw roles.error;
