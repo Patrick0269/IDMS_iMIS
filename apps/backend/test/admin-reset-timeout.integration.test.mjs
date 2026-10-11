@@ -7,8 +7,12 @@ const migration = await readFile(
   new URL("../../../supabase/migrations/20261012000100_admin_reset_statement_timeout.sql", import.meta.url),
   "utf8",
 );
+const tenMinuteMigration = await readFile(
+  new URL("../../../supabase/migrations/20261012000200_admin_reset_ten_minute_timeout.sql", import.meta.url),
+  "utf8",
+);
 
-test("the reset RPC alone receives a 60 second statement timeout", async () => {
+test("the reset RPC alone receives a ten minute statement timeout", async () => {
   const db = new PGlite();
   try {
     await db.exec(`
@@ -18,6 +22,7 @@ test("the reset RPC alone receives a 60 second statement timeout", async () => {
       RETURNS integer LANGUAGE sql AS $$ SELECT 1 $$;
     `);
     await db.exec(migration);
+    await db.exec(tenMinuteMigration);
 
     const reset = await db.query(`
       SELECT proconfig FROM pg_proc
@@ -26,7 +31,7 @@ test("the reset RPC alone receives a 60 second statement timeout", async () => {
     const other = await db.query(`
       SELECT proconfig FROM pg_proc WHERE oid='public.other_rpc()'::regprocedure
     `);
-    assert.deepEqual(reset.rows[0].proconfig, ["statement_timeout=60s"]);
+    assert.deepEqual(reset.rows[0].proconfig, ["statement_timeout=10min"]);
     assert.equal(other.rows[0].proconfig, null);
   } finally {
     await db.close();

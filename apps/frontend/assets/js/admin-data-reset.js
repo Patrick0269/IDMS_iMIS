@@ -68,12 +68,12 @@
         if (!window.confirm(confirmText)) return;
         execute.disabled = true;
         message.className = "status";
-        message.textContent = "Deleting records. Keep this page open…";
+        message.textContent = "Deleting records. This may take up to 10 minutes. Keep this page open and do not retry while it is running…";
         try {
           const result = await window.IDMCAPI.post(
             "/admin-data-reset/execute",
             { categories: groups, confirmation: phrase.value.trim() },
-            { timeoutMs: 90000 },
+            { timeoutMs: 660000 },
           );
           const data = result.data || {};
           const failedAuth = Array.isArray(data.authDeletionFailures) ? data.authDeletionFailures : [];
