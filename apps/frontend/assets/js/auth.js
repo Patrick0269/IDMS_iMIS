@@ -13,12 +13,13 @@
     const REDIRECT_KEY = "idmc_redirect";
     const ACTIVE_ROLE_KEY = "idmc_active_role";
     const REQUEST_TIMEOUT_MS = 25000;
+    const SESSION_VALIDATION_TIMEOUT_MS = 12000;
 
-    async function fetchWithTimeout(url, options) {
+    async function fetchWithTimeout(url, options, timeoutMs = REQUEST_TIMEOUT_MS) {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(function () {
             controller.abort();
-        }, REQUEST_TIMEOUT_MS);
+        }, timeoutMs);
 
         try {
             return await fetch(url, {
@@ -373,7 +374,8 @@
                 {
                     method: "GET",
                     headers
-                }
+                },
+                SESSION_VALIDATION_TIMEOUT_MS
             );
         } catch (error) {
             console.error("Backend connection error:", error);
@@ -415,7 +417,7 @@
         let response;
 
         try {
-            response = await fetch(
+            response = await fetchWithTimeout(
                 `${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
                 {
                     method: "POST",
@@ -427,7 +429,8 @@
                     body: JSON.stringify({
                         refresh_token: session.refresh_token
                     })
-                }
+                },
+                SESSION_VALIDATION_TIMEOUT_MS
             );
         } catch (error) {
             console.error("Session refresh failed:", error);
