@@ -89,18 +89,17 @@ test('student recovery response is non-enumerating and account setup uses an ema
 
     records.students[0].user_id = 'user-1';
     records.students[0].registration_number = 'NS1179/0269/2020';
-    records.students[0].applicant_id = 'applicant-1';
     records.students[0].first_name = 'Test';
     records.students[0].last_name = 'Student';
-    records.academic_qualifications = [{ applicant_id: 'applicant-1', qualification_type: 'SECONDARY', completion_year: 2014 }];
-    records.users = [{ id: 'user-1', auth_user_id: 'auth-1', status: 'ACTIVE', display_name: 'Test Student' }];
+    records.students[0].date_of_birth = '2002-06-14';
+    records.users = [{ id: 'user-1', auth_user_id: 'auth-1', status: 'ACTIVE', email: 'student@example.edu', display_name: 'Test Student' }];
     db.auth.admin.getUserById = async id => ({ data: { user: { id, email: 'student@example.edu' } }, error: null });
     let generated;
     db.auth.admin.generateLink = async input => { generated = input; return { data: { properties: { action_link: 'https://auth.example/recovery-token' } }, error: null }; };
     const sent = [];
-    assert.equal(await requestVerifiedPasswordReset({ accountType: 'student', registrationNumber: 'NS1179/0269/2020', formFourYear: 2013, email: 'student@example.edu' }, async message => sent.push(message)), false);
-    assert.equal(sent.length, 0, 'incorrect Form Four year cannot receive a reset link');
-    const studentVerified = await requestVerifiedPasswordReset({ accountType: 'student', registrationNumber: 'NS1179/0269/2020', formFourYear: 2014, email: 'student@example.edu' }, async message => sent.push(message));
+    assert.equal(await requestVerifiedPasswordReset({ accountType: 'student', registrationNumber: 'NS1179/0269/2020', birthYear: 2001 }, async message => sent.push(message)), false);
+    assert.equal(sent.length, 0, 'incorrect birth year cannot receive a reset link');
+    const studentVerified = await requestVerifiedPasswordReset({ accountType: 'student', registrationNumber: 'NS1179/0269/2020', birthYear: 2002 }, async message => sent.push(message));
     assert.equal(studentVerified, true);
     assert.equal(generated.type, 'recovery');
     assert.equal(generated.email, 'student@example.edu');
@@ -112,7 +111,7 @@ test('student recovery response is non-enumerating and account setup uses an ema
     let resetFallback;
     db.auth.resetPasswordForEmail = async (...args) => { resetFallback = args; return { error: null }; };
     const fallbackSent = await requestVerifiedPasswordReset(
-      { accountType: 'student', registrationNumber: 'NS1179/0269/2020', formFourYear: 2014, email: 'student@example.edu' },
+      { accountType: 'student', registrationNumber: 'NS1179/0269/2020', birthYear: 2002 },
       async () => { throw Object.assign(new Error('SMTP unavailable'), { code: 'ECONNECTION' }); },
     );
     assert.equal(fallbackSent, true, 'Supabase Auth email is attempted when Worker SMTP fails');

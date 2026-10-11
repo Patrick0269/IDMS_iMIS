@@ -7,7 +7,7 @@
   function esc(v) { return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function message(text, type) { var box = $("#pageMessage"); box.className = "message" + (text ? " show " + (type || "info") : ""); box.textContent = text || ""; }
   function activateWorkspace(name, updateAddress) {
-    var allowed = ["pending", "applications", "offers", "registration", "photos"];
+    var allowed = ["pending", "applications", "offers", "registration", "photos", "account-recovery"];
     if (!allowed.includes(name)) name = "applications";
     $$('[data-admission-page]').forEach(function (page) { var active = page.dataset.admissionPage === name; page.hidden = !active; page.classList.toggle("active", active); });
     $$('[data-admission-tab]').forEach(function (tab) { var active = tab.dataset.admissionTab === name; tab.setAttribute("aria-selected", String(active)); tab.tabIndex = active ? 0 : -1; });

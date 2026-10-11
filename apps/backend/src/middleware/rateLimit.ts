@@ -4,10 +4,10 @@ type Entry = { count: number; resetAt: number };
 const buckets = new Map<string, Entry>();
 
 /** Small dependency-free limiter for authentication endpoints. */
-export function rateLimit(options: { windowMs: number; max: number; name: string }) {
+export function rateLimit(options: { windowMs: number; max: number; name: string; keyGenerator?: (req: Request) => string }) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const now = Date.now();
-    const key = `${options.name}:${req.ip || req.socket.remoteAddress || "unknown"}`;
+    const key = `${options.name}:${req.ip || req.socket.remoteAddress || "unknown"}:${options.keyGenerator?.(req) || ""}`;
     const current = buckets.get(key);
     const entry = !current || current.resetAt <= now
       ? { count: 1, resetAt: now + options.windowMs }

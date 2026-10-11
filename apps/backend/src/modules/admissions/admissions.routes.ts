@@ -2,6 +2,8 @@ import express, { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { authenticate } from "../../middleware/auth.js";
 import { requireAnyPermission, requirePermission } from "../../middleware/rbac.js";
+import { rateLimit } from "../../middleware/rateLimit.js";
+import { requestVerifiedPasswordReset } from "../auth/services/auth.service.js";
 import { getSupabase } from "../../config/database.js";
 import { env } from "../../config/env.js";
 import { privateStorageObjectPath } from "../../utils/private-storage-path.js";
@@ -14,6 +16,26 @@ import { escapeIlikeLiteral, rolesGrantPermission, rolesGrantRole, scopeRoleAssi
 
 const router = Router();
 router.use(authenticate);
+const wrap = (fn: any) => async (req: any, res: any, next: any) => {
+  try { await fn(req, res); } catch (error) { next(error); }
+};
+
+router.post("/students/password-reset", rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 2,
+  name: "admissions-student-password-reset",
+  keyGenerator: req => String(req.body?.registrationNumber ?? "unknown").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 60),
+}), requirePermission("admissions.manage"), wrap(async (req: any, res: any) => {
+  const registrationNumber = String(req.body?.registrationNumber ?? "").trim();
+  const birthYear = Number(req.body?.birthYear);
+  if (!registrationNumber || !Number.isInteger(birthYear) || birthYear < 1900 || birthYear > new Date().getFullYear()) {
+    return res.status(400).json({ success: false, message: "Weka namba ya usajili na mwaka sahihi wa kuzaliwa." });
+  }
+  const sent = await requestVerifiedPasswordReset({ accountType: "student", registrationNumber, birthYear });
+  if (!sent) return res.status(422).json({ success: false, message: "Taarifa hazijalingana au akaunti haina email inayotumika. Hakiki namba, mwaka wa kuzaliwa na email kwenye rekodi za mwanafunzi." });
+  await createAuditLog({ actorUserId: req.user!.id, actionCode: "STUDENT_PASSWORD_RESET_EMAIL_REQUESTED", moduleCode: "ADMISSIONS", entityType: "student", newValues: { registrationNumber } });
+  res.json({ success: true, message: "Link salama ya kubadilisha password imetumwa kwenye email iliyosajiliwa na mwanafunzi. Amwombe mwanafunzi aangalie Inbox na Spam/Junk." });
+}));
 
 router.get("/programme-requirements", requirePermission("admissions.view"), async (_req, res, next) => {
   try {
@@ -48,10 +70,6 @@ async function admissionsWorkspaceAccess(req: any, res: any, next: any) {
     next(error);
   }
 }
-
-const wrap = (fn: any) => async (req: any, res: any, next: any) => {
-  try { await fn(req, res); } catch (error) { next(error); }
-};
 
 async function bulkAdmissionsAccess(req: any, res: any, next: any) {
   try {

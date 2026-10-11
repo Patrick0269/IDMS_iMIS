@@ -114,7 +114,7 @@ export async function requestVerifiedPasswordReset(req: Request, res: Response):
       accountType: String(req.body?.accountType ?? "").trim().toLowerCase() as "student" | "lecturer",
       email: String(req.body?.email ?? "").trim(),
       registrationNumber: String(req.body?.registrationNumber ?? "").trim(),
-      formFourYear: Number(req.body?.formFourYear),
+      birthYear: Number(req.body?.birthYear),
       phone: String(req.body?.phone ?? "").trim(),
     });
   } catch (error) {

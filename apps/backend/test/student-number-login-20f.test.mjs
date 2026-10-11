@@ -50,7 +50,8 @@ test("student number is a first-login temporary password only; recovery verifies
   assert.doesNotMatch(linking, /password:\s*String\(student\.student_number\)/);
   assert.match(service, /generateLink\(\{[\s\S]*type: "recovery"/);
   assert.match(service, /sendAccountPasswordRecoveryEmail/);
-  assert.match(service, /academic_qualifications/);
+  assert.match(service, /date_of_birth/);
+  assert.match(service, /storedBirthYear/);
   assert.match(service, /staff_category/);
   assert.match(service, /normalizePhone/);
   assert.match(service, /endsWith\("@students\.idmc\.local"\)/);
@@ -73,7 +74,8 @@ test("one login form recognizes student identifiers and redirects by verified ac
   assert.match(auth, /requestVerifiedPasswordReset/);
   assert.match(html, /forgot-password\.html/);
   assert.match(recoveryPage, /registrationNumber/);
-  assert.match(recoveryPage, /formFourYear/);
+  assert.match(recoveryPage, /birthYear/);
+  assert.match(recoveryPage, /Ombi 3 kwa siku/);
   assert.match(recoveryPage, /lecturerPhone/);
   assert.match(recoveryPage, /lecturerEmail/);
   assert.match(passwordPage, /password-setup-complete/);

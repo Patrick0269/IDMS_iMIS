@@ -100,8 +100,36 @@ function installStudentContentRouter(nav) {
       if (!doc || !currentUrl) return;
       const style = doc.createElement("style");
       style.id = "idmc-single-panel-mode";
-      style.textContent = `html,body{min-height:100%;background:#f6f3f4!important}body{margin:0!important}.portal-header,.portal-sidebar,.sidebar-brand,.student-profile-sidebar,.mast,.request-topbar,.student-shell>.topbar,.student-shell>.sidebar{display:none!important}.portal-shell,.portal-layout{display:block!important;min-height:0!important;width:100%!important}.portal-main,.main-content,.student-profile-main,.shell,.page{width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;padding:18px clamp(12px,2vw,28px)!important;box-shadow:none!important}.student-profile-page .page{display:block!important}.student-footer{margin-left:0!important;margin-right:0!important}.idmc-student-tools,.idmc-account-menu{display:none!important}`;
+      style.textContent = `html,body{box-sizing:border-box;width:100%;max-width:100%;min-height:100%;background:#f6f3f4!important;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;overflow-x:clip!important}*,*::before,*::after{box-sizing:border-box}body{margin:0!important;font-size:15px!important;line-height:1.5!important}.portal-header,.portal-sidebar,.sidebar-brand,.student-profile-sidebar,.mast,.request-topbar,.student-shell>.topbar,.student-shell>.sidebar{display:none!important}.portal-shell,.portal-layout{display:block!important;min-height:0!important;width:100%!important;max-width:100%!important;min-width:0!important}.portal-main,.main-content,.student-profile-main,.shell,.page{width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;margin:0!important;padding:18px clamp(12px,2vw,28px)!important;box-shadow:none!important;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important}.student-profile-page .page{display:block!important}.student-footer{margin-left:0!important;margin-right:0!important}.idmc-student-tools,.idmc-account-menu{display:none!important}:is(.table-scroll,.table-wrap,.table-wrapper,.table-container,.table-responsive,.responsive-table,.result-table-wrap,.course-table-wrap){max-width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}:is(table){max-width:none!important}h1,h2,h3{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;line-height:1.25!important}`;
       doc.head.appendChild(style);
+      const cosisStyle = doc.createElement("style");
+      cosisStyle.id = "idmc-cosis-content-style";
+      cosisStyle.textContent = `:root{--maroon:#5b1025;--maroon-dark:#3d0918;--maroon-mid:#7c1830;--maroon-soft:#f5e8eb;--gold:#c5a367;--paper:#f6f3f4;--ink:#2e2025;--muted:#685961;--line:#eadfe2;--primary:#5b1025}html,body{background:#f6f3f4!important;color:#2e2025!important;font:14px/1.5 Arial,"Segoe UI",Roboto,sans-serif!important}h1,h2,h3,h4{color:#2e2025!important;font:500 1.35em/1.3 Arial,"Segoe UI",Roboto,sans-serif!important}a,.link{color:#5b1025} :is(.card,.panel,.portal-card,.portal-section,.content-card,.profile-card,.workspace-card){border:1px solid #ddd!important;border-radius:4px!important;box-shadow:none!important;background:#fff!important}:is(th,thead th){background:#f5f5f5!important;color:#5b1025!important}:is(input,select,textarea,.form-control){max-width:100%!important;border:1px solid #ccc!important;border-radius:3px!important;background:#fff!important;font:14px Arial,"Segoe UI",Roboto,sans-serif!important}:is(.btn-primary,button[type=submit],input[type=submit],input[type=button]){background:#5b1025!important;border-color:#5b1025!important;color:#fff!important}`;
+      doc.head.appendChild(cosisStyle);
+      let resizeFrame = 0;
+      const fitFrameToContent = () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+          const root = doc.documentElement;
+          const body = doc.body;
+          if (!root || !body || frame.contentDocument !== doc) return;
+          const height = Math.max(root.scrollHeight, root.offsetHeight, body.scrollHeight, body.offsetHeight);
+          if (height > 0) frame.style.height = `${height}px`;
+        });
+      };
+      if (typeof ResizeObserver === "function") {
+        const resizeObserver = new ResizeObserver(fitFrameToContent);
+        resizeObserver.observe(doc.documentElement);
+        if (doc.body) resizeObserver.observe(doc.body);
+      }
+      if (typeof MutationObserver === "function") {
+        const mutationObserver = new MutationObserver(fitFrameToContent);
+        mutationObserver.observe(doc.documentElement, { childList: true, subtree: true, attributes: true, characterData: true });
+      }
+      doc.defaultView?.addEventListener("resize", fitFrameToContent, { passive: true });
+      doc.querySelectorAll("img").forEach(image => image.addEventListener("load", fitFrameToContent, { once: true }));
+      doc.fonts?.ready?.then(fitFrameToContent).catch(() => {});
+      fitFrameToContent();
       doc.addEventListener("click", event => intercept(event, doc));
       doc.querySelectorAll("a[href]").forEach(anchor => {
         const href = anchor.getAttribute("href");
