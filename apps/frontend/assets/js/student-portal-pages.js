@@ -108,9 +108,9 @@
         const token = IDMCAuth.getAccessToken();
         const response = await fetch(`${IDMCAPI.baseUrl}/finance/workflow/student/payment-requests/${encodeURIComponent(input.dataset.id)}/receipt`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/octet-stream", "X-File-Name": file.name, "X-Mime-Type": file.type }, body: file });
         const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.message || "Receipt upload failed.");
+        if (!response.ok) { const error = new Error(payload.message || "Receipt upload failed."); error.status = response.status; error.requestId = response.headers?.get("x-request-id") || payload.requestId; throw error; }
         alert("Receipt uploaded. Finance will review and confirm the payment."); await loadView();
-      } catch (error) { alert(error.message || "Receipt upload failed."); }
+      } catch (error) { alert(IDMCAPI.toUserMessage(error) || "Receipt upload failed."); }
     }));
   }
 

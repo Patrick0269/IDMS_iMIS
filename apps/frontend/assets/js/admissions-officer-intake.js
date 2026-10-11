@@ -97,8 +97,8 @@
                 },
                 body: file
               });
-              if (!uploaded.ok) { const result = await uploaded.json(); throw new Error(result.message || `Upload failed for ${file.name}`); }
-            } catch (error) { documentErrors.push(error.message || `Upload failed for ${file.name}`); }
+              if (!uploaded.ok) { const result = await uploaded.json().catch(() => ({})); const error = new Error(result.message || `Upload failed for ${file.name}`); error.status = uploaded.status; error.requestId = uploaded.headers?.get("x-request-id") || result.requestId; throw error; }
+            } catch (error) { documentErrors.push(IDMCAPI.toUserMessage(error) || `Upload failed for ${file.name}`); }
           }
           dialog.close();
           form.reset();
@@ -109,7 +109,7 @@
           note.className = `message show ${problems.length ? "error" : "success"}`;
           $("#refreshWorkspace").click();
         } catch (error) {
-          note.textContent = error.message || "Application could not be created.";
+          note.textContent = IDMCAPI.toUserMessage(error) || "Application could not be created.";
           note.className = "message show error";
         } finally { submit.disabled = false; }
       });

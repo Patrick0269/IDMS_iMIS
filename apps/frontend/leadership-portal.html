@@ -27,7 +27,7 @@
     </section>
     <p class="leadership-note">If a work area is not listed, your account has not been granted its viewing permission. Ask the system administrator to review your role assignment.</p>
   </main>
-  <script src="assets/js/idmc-session.js"></script><script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261009-single"></script><script src="assets/js/rbac.js"></script>
+  <script src="assets/js/idmc-session.js"></script><script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js?v=20261011-friendly-network-errors"></script><script src="assets/js/rbac.js"></script>
   <script>document.addEventListener("DOMContentLoaded", async () => { if (!(await window.IDMCAuth.requireAuth())) return; const codes=(window.IDMCAuth.getUser()?.roles||[]).map(role=>String(role.roleCode||role.role_code||"").toUpperCase()); const target=codes.includes("PRINCIPAL")?"principal-portal.html":codes.includes("DEPUTY_PRINCIPAL")?"deputy-principal-portal.html":codes.includes("DIRECTOR")?"director-portal.html":"dashboard.html"; window.location.replace(target); });</script>
 <script src="assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
 <script defer src="assets/js/hr-staff-layout.js?v=20261008-offering-hr"></script><script defer src="assets/js/coursework-entry.js?v=20261009-single"></script></body>

@@ -6,6 +6,13 @@
     message.hidden = false;
   };
   const apiBase = String(window.IDMC_CONFIG?.API_BASE_URL || "/api/v1").replace(/\/+$/, "");
+  const requestError = (response, payload, fallback) => {
+    const error = new Error(payload?.message || payload?.error || fallback);
+    error.status = response.status;
+    error.requestId = response.headers?.get("x-request-id") || payload?.requestId || null;
+    return error;
+  };
+  const userError = (error, fallback) => window.IDMCAuth?.toUserMessage?.(error) || error?.message || fallback;
 
   const params = new URLSearchParams(window.location.search);
   async function completeEmailConfirmation() {
@@ -35,11 +42,11 @@
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || payload.success === false || !payload.data?.access_token) {
-          throw new Error(payload.message || "This verification link is invalid or has expired. Request a new one.");
+          throw requestError(response, payload, "This verification link is invalid or has expired. Request a new one.");
         }
         await openApplicantSession(payload.data);
       } catch (error) {
-        showMessage(error.message || "Unable to verify your email address. Request a new link.", "error");
+        showMessage(userError(error, "Unable to verify your email address. Request a new link."), "error");
       }
       return;
     }
@@ -71,7 +78,7 @@
       window.location.replace("/applicant-portal.html");
     } catch (error) {
       window.IDMCAuth.clearSession();
-      showMessage(error.message || "Your email was verified, but we could not open your account. Please sign in.", "error");
+      showMessage(userError(error, "Your email was verified, but we could not open your account. Please sign in."), "error");
     }
   }
   void completeEmailConfirmation();
@@ -95,7 +102,7 @@
       window.IDMCAuth.setActiveRole(applicantRole.id || applicantRole.roleId || applicantRole.role_id);
       window.location.replace("/applicant-portal.html");
     } catch (error) {
-      showMessage(error.message || "Unable to sign in. Check your email and password.", "error");
+      showMessage(userError(error, "Unable to sign in. Check your email and password."), "error");
     } finally {
       button.disabled = false;
     }
@@ -119,7 +126,7 @@
         body: JSON.stringify(values)
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.success === false) throw new Error(payload.message || payload.error || "Unable to create applicant account.");
+      if (!response.ok || payload.success === false) throw requestError(response, payload, "Unable to create applicant account.");
       form.reset();
       if (payload.data?.verificationEmailSent === false) {
         const resendForm = document.getElementById("applicantResendForm");
@@ -133,7 +140,7 @@
       const resendForm = document.getElementById("applicantResendForm");
       resendForm.elements.email.value = values.email;
       resendForm.hidden = false;
-      showMessage(error.message || "Unable to create applicant account.", "error");
+      showMessage(userError(error, "Unable to create applicant account."), "error");
     } finally {
       button.disabled = false;
     }
@@ -150,10 +157,10 @@
         body: JSON.stringify({ email: form.elements.email.value })
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.success === false) throw new Error(payload.message || "Unable to request a verification email.");
+      if (!response.ok || payload.success === false) throw requestError(response, payload, "Unable to request a verification email.");
       showMessage(payload.message || "If this address has an unverified applicant account, a new verification email will be sent.", "success");
     } catch (error) {
-      showMessage(error.message || "Unable to request a verification email.", "error");
+      showMessage(userError(error, "Unable to request a verification email."), "error");
     } finally {
       button.disabled = false;
     }

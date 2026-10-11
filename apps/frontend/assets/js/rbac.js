@@ -498,7 +498,7 @@
     ) {
 
       throw new Error(
-        "Backend API URL is not configured."
+        "This page is temporarily unavailable. Refresh it and try again."
       );
 
     }
@@ -533,7 +533,7 @@
       );
 
       throw new Error(
-        "Unable to connect to IDMC backend. Make sure the backend server is running on port 4000."
+        window.IDMCAPI?.toUserMessage ? window.IDMCAPI.toUserMessage(error) : "We couldn't reach the service right now. Check your connection and try again in a moment."
       );
 
     }
@@ -542,6 +542,12 @@
       await parseResponse(
         response
       );
+
+    if (response.status >= 500 || response.status === 429) {
+      throw new Error(window.IDMCAPI?.toUserMessage
+        ? window.IDMCAPI.toUserMessage({ status: response.status, message: result?.message, requestId: response.headers?.get("x-request-id") || result?.requestId })
+        : "We couldn't complete this request right now. Please try again in a moment.");
+    }
 
     /* ==========================================================
        401 - TOKEN EXPIRED
@@ -580,7 +586,7 @@
           );
 
           throw new Error(
-            "Unable to connect to IDMC backend. Make sure the backend server is running on port 4000."
+            window.IDMCAPI?.toUserMessage ? window.IDMCAPI.toUserMessage(error) : "We couldn't reach the service right now. Check your connection and try again in a moment."
           );
 
         }

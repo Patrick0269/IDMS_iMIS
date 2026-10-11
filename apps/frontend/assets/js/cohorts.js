@@ -172,9 +172,9 @@
       if (programme) query.set("programmeId", programme); if (academicYear) query.set("academicYearId", academicYear); if (year) query.set("admissionYear", year); if (intake) query.set("intakeCode", intake);
       const base = String(IDMC_CONFIG.API_BASE_URL || IDMCAPI.baseUrl).replace(/\/$/, "");
       const response = await fetch(`${base}/cohorts/export.csv?${query}`, { headers: { Authorization: `Bearer ${IDMCAuth.getAccessToken()}`, Accept: "text/csv" } });
-      if (!response.ok) throw new Error(`Export failed with HTTP ${response.status}.`);
+      if (!response.ok) { const error = new Error(`Export failed with HTTP ${response.status}.`); error.status = response.status; error.requestId = response.headers?.get("x-request-id"); throw error; }
       const url = URL.createObjectURL(await response.blob()); const link = document.createElement("a"); link.href = url; link.download = "idmc-cohorts.csv"; link.click(); URL.revokeObjectURL(url);
-    } catch (error) { notice(error.message || "Unable to export cohorts.", "error"); }
+    } catch (error) { notice(IDMCAPI.toUserMessage(error) || "Unable to export cohorts.", "error"); }
   }
   function bind() {
     $("#newButton").addEventListener("click", () => showForm());

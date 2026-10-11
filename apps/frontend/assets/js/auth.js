@@ -15,6 +15,29 @@
     const REQUEST_TIMEOUT_MS = 25000;
     const SESSION_VALIDATION_TIMEOUT_MS = 12000;
 
+    function connectionMessage(error) {
+        if (error?.code === "REQUEST_TIMEOUT" || error?.name === "AbortError") return "This is taking longer than expected. Check your connection and try again.";
+        if (navigator.onLine === false) return "You appear to be offline. Check your internet connection and try again.";
+        return "We couldn't reach the service right now. Check your connection and try again in a moment.";
+    }
+
+    function httpErrorMessage(response, payload, fallback) {
+        if (response.status >= 500) {
+            const reference = response.headers?.get("x-request-id") || payload?.requestId;
+            return `We couldn't complete this request right now. Please try again.${reference ? ` Reference: ${reference}` : ""}`;
+        }
+        if (response.status === 429) return "Too many attempts were made. Please wait a moment and try again.";
+        return payload?.message || payload?.error || fallback;
+    }
+
+    function toUserMessage(error) {
+        if (!error) return "Something went wrong. Please try again.";
+        if (error.status === 0 || error.code === "REQUEST_TIMEOUT" || error.code === "REQUEST_CANCELLED" || error.name === "AbortError" || /failed to fetch|networkerror|load failed|backend/i.test(String(error.message || ""))) return connectionMessage(error);
+        if (error.status >= 500) return httpErrorMessage({ status: error.status, headers: { get: function () { return error.requestId || null; } } }, null, "We couldn't complete this request right now. Please try again.");
+        if (error.status === 429) return "Too many attempts were made. Please wait a moment and try again.";
+        return error.message || "Something went wrong. Please try again.";
+    }
+
     async function fetchWithTimeout(url, options, timeoutMs = REQUEST_TIMEOUT_MS) {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(function () {
@@ -28,9 +51,9 @@
             });
         } catch (error) {
             if (error && error.name === "AbortError") {
-                throw new Error(
-                    `The IDMC service did not respond within ${Math.ceil(timeoutMs / 1000)} seconds. Please retry.`
-                );
+                const timeoutError = new Error("Request timed out.");
+                timeoutError.code = "REQUEST_TIMEOUT";
+                throw timeoutError;
             }
 
             throw error;
@@ -237,7 +260,7 @@
         }
 
         if (!CONFIG.API_BASE_URL) {
-            throw new Error("Backend API URL is not configured.");
+            throw new Error("This page is temporarily unavailable. Refresh it and try again.");
         }
 
         let response;
@@ -258,20 +281,13 @@
             );
         } catch (error) {
             console.error("Backend connection error:", error);
-            const networkFailure = error?.name === "TypeError" || /failed to fetch|networkerror/i.test(String(error?.message || ""));
-            throw new Error(networkFailure
-                ? `Imeshindikana kufikia huduma ya IDMC (${CONFIG.API_BASE_URL}). Angalia intaneti, kisha ujaribu tena.`
-                : error?.message || "Unable to connect to the configured IDMC backend.");
+            throw new Error(connectionMessage(error));
         }
 
         const data = await parseResponse(response);
 
         if (!response.ok || !data?.success) {
-            throw new Error(
-                data?.message ||
-                data?.error ||
-                "Login failed."
-            );
+            throw new Error(httpErrorMessage(response, data, "We couldn't sign you in. Check your details and try again."));
         }
 
         saveSession(data.data);
@@ -299,12 +315,12 @@
             });
         } catch (error) {
             console.error("Student login connection error:", error);
-            throw new Error("Unable to connect to the configured IDMC backend.");
+            throw new Error(connectionMessage(error));
         }
 
         const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
         if (!response.ok || !data?.success || !data?.data?.access_token) {
-            throw new Error(data?.message || "Student login failed.");
+            throw new Error(httpErrorMessage(response, data, "Student sign-in failed. Check your details and try again."));
         }
 
         saveSession(data.data);
@@ -312,13 +328,19 @@
     }
 
     async function requestVerifiedPasswordReset(fields) {
-        const response = await fetchWithTimeout(`${CONFIG.API_BASE_URL}/auth/password-reset`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(fields || {})
-        });
+        let response;
+        try {
+            response = await fetchWithTimeout(`${CONFIG.API_BASE_URL}/auth/password-reset`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(fields || {})
+            });
+        } catch (error) {
+            console.error("Password recovery connection error:", error);
+            throw new Error(connectionMessage(error));
+        }
         const data = await parseResponse(response);
-        if (!response.ok || !data?.success) throw new Error(data?.message || "Unable to request password reset.");
+        if (!response.ok || !data?.success) throw new Error(httpErrorMessage(response, data, "We couldn't start password recovery. Please try again."));
         return data;
     }
 
@@ -335,7 +357,7 @@
         }
 
         if (!CONFIG.API_BASE_URL) {
-            throw new Error("Backend API URL is not configured.");
+            throw new Error("This page is temporarily unavailable. Refresh it and try again.");
         }
 
         let response;
@@ -347,12 +369,12 @@
             });
         } catch (error) {
             console.error("Backend login connection error:", error);
-            throw new Error("Unable to connect to IDMC backend.");
+            throw new Error(connectionMessage(error));
         }
 
         const payload = await parseResponse(response);
         if (!response.ok || !payload?.success || !payload?.data?.access_token) {
-            throw new Error(payload?.message || "Login failed.");
+            throw new Error(httpErrorMessage(response, payload, "We couldn't sign you in. Check your details and try again."));
         }
 
         saveSession(payload.data);
@@ -374,7 +396,7 @@
         }
 
         if (!CONFIG.API_BASE_URL) {
-            throw new Error("Backend API URL is not configured.");
+            throw new Error("This page is temporarily unavailable. Refresh it and try again.");
         }
 
         let response;
@@ -396,21 +418,13 @@
             );
         } catch (error) {
             console.error("Backend connection error:", error);
-            const detail = String(error?.message || "");
-            if (/failed to fetch|networkerror|load failed/i.test(detail)) {
-                throw new Error(`Imeshindikana kuwasiliana na seva ya IDMC (${CONFIG.API_BASE_URL}). Hakikisha intaneti inafanya kazi, kisha bonyeza “Jaribu tena kuthibitisha akaunti”.`);
-            }
-            throw new Error(detail || "Unable to connect to the configured IDMC backend.");
+            throw new Error(connectionMessage(error));
         }
 
         const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
 
         if (!response.ok) {
-            throw new Error(
-                data?.message ||
-                data?.error ||
-                "Unable to load user profile."
-            );
+            throw new Error(httpErrorMessage(response, data, "We couldn't load your account details. Please try again."));
         }
 
         if (!data.success || !data.data) {
@@ -635,7 +649,8 @@
         getLandingPage: landingPage,
         getDisplayName,
         redirectToLogin,
-        redirectAfterLogin
+        redirectAfterLogin,
+        toUserMessage
     };
 
 })();

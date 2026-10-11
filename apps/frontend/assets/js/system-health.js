@@ -10,7 +10,7 @@
     var checks=await Promise.allSettled([window.IDMCAPI.get("/health",{cache:"no-store"}),window.IDMCAPI.get("/ready",{cache:"no-store"})]);
     var api=checks[0].status==="fulfilled"?checks[0].value:null;var ready=checks[1].status==="fulfilled"?checks[1].value:null;
     var apiOk=!!(api&&api.success===true&&api.status==="healthy");var dbOk=!!(ready&&ready.success===true&&ready.status==="ready"&&ready.dependencies&&ready.dependencies.database==="ready");
-    badge("apiBadge",apiOk?"healthy":"unavailable",apiOk?"Healthy":"Unavailable");$("apiMessage").textContent=apiOk?"The backend health endpoint responded successfully.":"The backend health endpoint could not confirm service health.";
+    badge("apiBadge",apiOk?"healthy":"unavailable",apiOk?"Healthy":"Unavailable");$("apiMessage").textContent=apiOk?"The IDMC service is responding normally.":"The IDMC service could not be reached. Check the connection or try again later.";
     $("apiApplication").textContent=apiOk?(api.application||"IDMC iMIS API"):"Not available";$("apiTime").textContent=apiOk?localTime(api.timestamp):"Not reported";
     badge("databaseBadge",dbOk?"healthy":"unavailable",dbOk?"Ready":"Unavailable");$("databaseMessage").textContent=dbOk?"The readiness check confirmed a database connection.":"The readiness check could not confirm a database connection.";
     $("databaseDependency").textContent=dbOk?"Ready":"Not confirmed";$("databaseLatency").textContent=dbOk&&Number.isFinite(Number(ready.latencyMs))?Math.max(0,Math.round(Number(ready.latencyMs)))+" ms":"Not reported";

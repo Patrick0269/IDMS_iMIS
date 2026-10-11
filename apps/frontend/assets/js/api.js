@@ -131,7 +131,7 @@
         const raw = String(message || "").trim();
         const generic = /^(internal server error|something went wrong)$/i.test(raw);
 
-        if (status === 401) return "Your session has expired or the login details are incorrect. Please sign in again.";
+        if (status === 401) return "Your sign-in details may be incorrect or your session may have expired. Check them and try again.";
         if (status === 403) {
             if (/^Four-eyes control:/i.test(raw)) return "Afisa mwingine mwenye ruhusa ya Admissions lazima athibitishe mwanafunzi huyu. Akaunti iliyothibitisha import haiwezi kufanya Verify & Link.";
             if (/^Permission denied:/i.test(raw)) return "Ruhusa inakosekana: " + raw.replace(/^Permission denied:\s*/i, "") + ". Wasiliana na msimamizi wa roles.";
@@ -139,11 +139,28 @@
         }
         if (status === 404) return raw && !generic ? raw : "The requested information was not found.";
         if (status === 409) return raw && !generic ? raw : "This action conflicts with an existing record.";
-        if (status === 429) return "Too many requests were sent. Wait briefly and try again.";
-        if (status >= 500 && generic) {
-            return `The service could not complete this request. Try again.${requestId ? ` Reference: ${requestId}` : ""}`;
+        if (status === 429) return "Too many attempts were made. Please wait a moment and try again.";
+        if (status >= 500) {
+            return `We couldn't complete this request right now. Please try again.${requestId ? ` Reference: ${requestId}` : ""}`;
         }
         return raw || `Request failed with HTTP ${status}`;
+    }
+
+    function connectionMessage(error) {
+        if (error?.code === "REQUEST_CANCELLED") return "This request was cancelled. You can try again.";
+        if (error?.code === "REQUEST_TIMEOUT" || error?.name === "AbortError") return "This is taking longer than expected. Check your connection and try again.";
+        if (navigator.onLine === false) return "You appear to be offline. Check your internet connection and try again.";
+        return "We couldn't reach the service right now. Check your connection and try again in a moment.";
+    }
+
+    function toUserMessage(error) {
+        if (window.IDMCAuth?.toUserMessage && (error?.status === 0 || error?.status >= 500 || error?.status === 429 || error?.code === "REQUEST_TIMEOUT" || error?.code === "REQUEST_CANCELLED" || error?.name === "AbortError" || /backend|failed to fetch|networkerror|load failed/i.test(String(error?.message || "")))) return window.IDMCAuth.toUserMessage(error);
+        if (!error) return "Something went wrong. Please try again.";
+        if (error.status === 0 || error.code === "REQUEST_TIMEOUT" || error.code === "REQUEST_CANCELLED" || error.name === "AbortError") return connectionMessage(error);
+        if (error.status >= 500) return friendlyMessage(error.message, error.status, error.requestId);
+        const raw = String(error.message || "");
+        if (/backend|failed to fetch|networkerror|load failed/i.test(raw)) return connectionMessage(error);
+        return raw || "Something went wrong. Please try again.";
     }
 
     function cacheKey(url, token) {
@@ -175,13 +192,14 @@
                 return performRequest(url, requestOptions, callerSignal, timeoutMs, attempt + 1);
             }
 
-            const error = new Error(
-                networkError?.name === "AbortError"
-                    ? "The request took too long. Check the connection and try again."
-                    : "Unable to connect to the IDMC backend. Confirm that port 4000 is running."
-            );
+            const cancelled = callerSignal?.aborted;
+            const error = new Error(connectionMessage({
+                name: networkError?.name,
+                code: cancelled ? "REQUEST_CANCELLED" : networkError?.name === "AbortError" ? "REQUEST_TIMEOUT" : undefined
+            }));
             error.cause = networkError;
             error.status = 0;
+            error.code = cancelled ? "REQUEST_CANCELLED" : networkError?.name === "AbortError" ? "REQUEST_TIMEOUT" : "NETWORK_UNAVAILABLE";
             error.url = url;
             throw error;
         } finally {
@@ -310,6 +328,7 @@
 
     window.IDMCAPI = {
         baseUrl: API_BASE_URL,
+        toUserMessage,
         getAccessToken,
         request,
         clearCache: clearGetCache,

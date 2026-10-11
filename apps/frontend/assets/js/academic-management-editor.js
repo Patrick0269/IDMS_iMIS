@@ -128,7 +128,7 @@ import { renderAcademicTable } from "./academic-management-render.js";
       if(note)note.textContent="Course Master feeds department and programme setup. CSV uses names/codes. Programme credits and CORE/ELECTIVE belong to Curriculum Mapping; saved student credits are preserved.";
     }catch(error){
       var message=error.message||"Academic setup failed to load.";
-      if(note){note.classList.add('error');note.textContent=/Route not found|404/.test(message)?'Backend workspace is not loaded. Install the latest patch, build, stop the previous backend console, and start the project again. '+message:message;}
+      if(note){note.classList.add('error');note.textContent=/Route not found|404/i.test(message)?'Academic setup is temporarily unavailable. Refresh this page and try again. If the issue continues, contact your system administrator.':(window.IDMCAPI?.toUserMessage ? window.IDMCAPI.toUserMessage(error) : message);}
       renderRegistry();
     }
   }

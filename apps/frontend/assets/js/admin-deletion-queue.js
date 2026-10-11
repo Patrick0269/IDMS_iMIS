@@ -40,7 +40,7 @@
     } catch (error) {
       $("#adminDeletionCount").textContent = "";
       body.innerHTML = `<tr><td colspan="5" style="padding:13px;color:#9c2f35">${esc(error.message || "Unable to load deletion requests.")}</td></tr>`;
-      message.textContent = "Confirm that you are signed in as Admin and the backend/database migration is ready.";
+      message.textContent = "Sign in with an administrator account and try again. If the problem continues, contact your system administrator.";
     }
   }
 

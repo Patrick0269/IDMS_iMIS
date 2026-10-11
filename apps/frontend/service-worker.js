@@ -1,4 +1,4 @@
-const CACHE_NAME = "idmc-shell-v15-intake-password-fixes-20261011";
+const CACHE_NAME = "idmc-shell-v16-friendly-network-errors-20261011";
 const MAX_CACHED_FILES = 180;
 self.addEventListener("install", event => event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate", event => event.waitUntil((async () => {
