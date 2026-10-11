@@ -26,9 +26,12 @@ test("first-time student can verify session, submit a new password and continue 
   const context = {
     document, window,
     IDMCAuth: {
-      requireAuth: async () => ({ mustChangePassword: true }),
+      requireAuth: async () => { throw new Error("The password page must not silently refresh and retry authentication"); },
       refreshSession: async () => ({ access_token: "refreshed" }),
-      getCurrentUser: async () => ({ mustChangePassword: false }),
+      getCurrentUser: async () => {
+        calls.push(["auth"]);
+        return { mustChangePassword: calls.filter(call => call[0] === "auth").length === 1 };
+      },
       redirectAfterLogin: () => { throw new Error("unexpected redirect"); },
       logout: () => calls.push(["logout"]),
     },
@@ -41,10 +44,10 @@ test("first-time student can verify session, submit a new password and continue 
   assert.equal(elements.get("save").disabled, false);
 
   await elements.get("form").listeners.submit({ preventDefault() {} });
-  assert.deepEqual(calls.map(call => call[0]), ["post", "redirect"]);
-  assert.equal(calls[0][1], "/auth/change-password");
-  assert.equal(calls[0][2].currentPassword, "NS1234/2020/2000");
-  assert.deepEqual(calls[1], ["redirect", "student-portal.html"]);
+  assert.deepEqual(calls.map(call => call[0]), ["auth", "post", "auth", "redirect"]);
+  assert.equal(calls[1][1], "/auth/change-password");
+  assert.equal(calls[1][2].currentPassword, "NS1234/2020/2000");
+  assert.deepEqual(calls[3], ["redirect", "student-portal.html"]);
 });
 
 test("failed account validation ends the form loader and explains how to retry", async () => {
@@ -52,12 +55,17 @@ test("failed account validation ends the form loader and explains how to retry",
   const context = {
     document: { getElementById: id => elements.get(id) },
     window: { location: { replace() {} } },
-    IDMCAuth: { requireAuth: async () => { throw new Error("Validation failed"); }, logout() {} },
+    IDMCAuth: {
+      requireAuth: async () => { throw new Error("Must not use recursive authentication"); },
+      getCurrentUser: async () => { throw new Error("Session was rejected by /auth/me"); },
+      logout() {},
+    },
     IDMCAPI: { post: async () => { throw new Error("Must not submit before validation"); } },
   };
   vm.runInNewContext(script, context);
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(elements.get("progress").hidden, true);
   assert.equal(elements.get("save").disabled, true);
-  assert.match(elements.get("message").textContent, /Validation failed/);
+  assert.match(elements.get("message").textContent, /Session was rejected by \/auth\/me/);
+  assert.equal(elements.get("logout").textContent, "Rudi kwenye login");
 });

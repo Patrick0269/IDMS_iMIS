@@ -6,6 +6,7 @@
   const button = document.getElementById("save");
   const progress = document.getElementById("progress");
   const progressText = document.getElementById("progressText");
+  const logout = document.getElementById("logout");
   let ready = false;
   let submitting = false;
 
@@ -20,7 +21,7 @@
     message.className = kind || "";
   }
 
-  document.getElementById("logout").addEventListener("click", function () {
+  logout.addEventListener("click", function () {
     IDMCAuth.logout();
   });
 
@@ -62,13 +63,10 @@
   (async function initialize() {
     setProgress(true, "Tunathibitisha akaunti yako…");
     try {
-      const profile = await IDMCAuth.requireAuth();
-      if (!profile) {
-        setProgress(false);
-        button.disabled = true;
-        showMessage("Session haijapatikana. Ingia tena kwa namba yako ya usajili na password ya muda.", "error");
-        return;
-      }
+      // A successful login has just created this session. Validate it once on
+      // this page; requireAuth() silently refreshes and retries, which hides a
+      // persistent backend/session error behind an endless-looking spinner.
+      const profile = await IDMCAuth.getCurrentUser();
       if (!profile.mustChangePassword) {
         IDMCAuth.redirectAfterLogin();
         return;
@@ -78,7 +76,8 @@
     } catch (error) {
       setProgress(false);
       button.disabled = true;
-      showMessage(error.message || "Imeshindikana kuthibitisha akaunti. Ingia tena ujaribu.", "error");
+      logout.textContent = "Rudi kwenye login";
+      showMessage((error.message || "Imeshindikana kuthibitisha akaunti.") + " Ingia tena kwa namba yako ya usajili na password ya muda, kisha ujaribu tena.", "error");
     }
   })();
 })();

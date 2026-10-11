@@ -259,9 +259,7 @@
         } catch (error) {
             console.error("Backend connection error:", error);
 
-            throw new Error(
-                "Unable to connect to the configured IDMC backend."
-            );
+            throw new Error(error?.message || "Unable to connect to the configured IDMC backend.");
         }
 
         const data = await parseResponse(response);
@@ -397,9 +395,7 @@
         } catch (error) {
             console.error("Backend connection error:", error);
 
-            throw new Error(
-                "Unable to connect to the configured IDMC backend."
-            );
+            throw new Error(error?.message || "Unable to connect to the configured IDMC backend.");
         }
 
         const data = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
@@ -484,7 +480,7 @@
 
         try {
             if (token) {
-                await fetch(
+                await fetchWithTimeout(
                     `${CONFIG.SUPABASE_URL}/auth/v1/logout`,
                     {
                         method: "POST",
@@ -492,7 +488,8 @@
                             "Authorization": `Bearer ${token}`,
                             "apikey": CONFIG.SUPABASE_ANON_KEY
                         }
-                    }
+                    },
+                    4000
                 );
             }
         } catch (error) {
