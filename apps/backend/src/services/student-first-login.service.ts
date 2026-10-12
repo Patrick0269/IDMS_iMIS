@@ -2,6 +2,7 @@ import { getSupabase } from "../config/database.js";
 import { env } from "../config/env.js";
 import { getLocalAuthUserById, updateLocalAuthCredentials, createLocalAuthUser } from "./postgres-auth.service.js";
 import { randomUUID } from "node:crypto";
+import { logInfo } from "../utils/logger.js";
 
 export function studentInitialNumber(student: { registration_number?: unknown; student_number?: unknown }): string {
   const value = String(student.registration_number || student.student_number || "").replace(/\s+/g, "").toUpperCase();
@@ -32,11 +33,17 @@ export async function initialiseStudentFirstLogin(authUserId: string, student: {
   // before the forced first-password-change flow was introduced. Only the
   // explicit password-change timestamp means the temporary password is no
   // longer allowed.
-  if (profile.data?.password_changed_at) return;
+  if (profile.data?.password_changed_at) {
+    logInfo("Student first-login password initialization skipped", { reason: "password_change_already_recorded" });
+    return;
+  }
   if (profile.data) {
     const roles = await db.from("user_roles").select("roles!inner(role_code)").eq("user_id", profile.data.id).eq("status", "ACTIVE");
     if (roles.error) throw roles.error;
-    if ((roles.data || []).some((r: any) => !["STUDENT", "APPLICANT"].includes(r.roles?.role_code))) return;
+    if ((roles.data || []).some((r: any) => !["STUDENT", "APPLICANT"].includes(r.roles?.role_code))) {
+      logInfo("Student first-login password initialization skipped", { reason: "additional_non_student_role" });
+      return;
+    }
   }
   const metadata = { ...appMetadata, idmc_student_initialised: true, idmc_student_first_login: true, idmc_student_initial_number: number };
   if (env.AUTH_PROVIDER === "postgres") {
