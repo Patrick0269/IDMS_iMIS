@@ -375,7 +375,7 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
     if (!role.data) throw Object.assign(new Error("Active STUDENT role is missing."), { statusCode: 409 });
     const assigned = await db.from("user_roles").upsert({ user_id: linkedUser.id, role_id: role.data.id, assigned_by: req.user!.id, status: "ACTIVE" }, { onConflict: "user_id,role_id" });
     if (assigned.error) throw assigned.error;
-    const activated = await db.from("students").update({ user_id: linkedUser.id, student_status: "ACTIVE", updated_at: now, updated_by: req.user!.id }).eq("id", student.id).select("id").maybeSingle();
+    const activated = await db.from("students").update({ user_id: linkedUser.id, student_status: "ACTIVE", updated_at: now }).eq("id", student.id).select("id").maybeSingle();
     if (activated.error) throw activated.error;
     if (!activated.data) throw Object.assign(new Error("Student status changed during review; refresh and retry."), { statusCode: 409 });
     const updated = await db.from("historical_import_account_results").update({ admission_status: "CONFIRMED", account_status: "CREATED", user_id: linkedUser.id, auth_user_id: authUserId, error_message: null, completed_at: now, updated_at: now }).eq("id", pending.data.id).in("admission_status", ["PENDING", "FAILED"]).select("id").maybeSingle();

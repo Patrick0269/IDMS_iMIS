@@ -30,6 +30,15 @@ test("historical students remain separate from Admissions and require clean conf
   assert.doesNotMatch(route, /admission_offers|applications|applicants/);
 });
 
+test("student activation updates only columns present on the students schema", () => {
+  const admissions = read("apps/backend/src/modules/admissions/admissions.routes.ts");
+  const students = read("apps/backend/src/modules/student-management/students/students.routes.ts");
+  assert.match(admissions, /from\("students"\)\.update\(\{ user_id: linkedUser\.id, student_status: "ACTIVE", updated_at: now \}\)/);
+  assert.match(students, /from\("students"\)\.update\(\{ student_status: "ACTIVE", updated_at: now \}\)/);
+  assert.doesNotMatch(admissions, /from\("students"\)\.update\([^;]*updated_by/s);
+  assert.doesNotMatch(students, /from\("students"\)\.update\([^;]*updated_by/s);
+});
+
 test("CSV parser supports quoted data and rejects unsafe file types", async () => {
   const { parseSpreadsheet } = await import("../dist/modules/historical-students/spreadsheet.js");
   const csv = 'studentNumber,firstName,lastName,cohortYear\r\n"IDMC/2023/00001","Jane, Mary",Doe,2023\r\n';

@@ -54,7 +54,7 @@ router.post("/bulk-status", requirePermission("students.activate"), async (req, 
         if (!["ACTIVE", "INACTIVE"].includes(status)) return res.status(400).json({ success: false, message: "Choose ACTIVE or INACTIVE." });
         if (status === "INACTIVE") return res.status(403).json({ success: false, message: "Use the controlled student status workflow to deactivate records." });
         const db = getSupabase(), now = new Date().toISOString();
-        const changed = await db.from("students").update({ student_status: "ACTIVE", updated_at: now, updated_by: req.user?.id }).eq("student_status", "INACTIVE").is("archived_at", null).select("id,student_number");
+        const changed = await db.from("students").update({ student_status: "ACTIVE", updated_at: now }).eq("student_status", "INACTIVE").is("archived_at", null).select("id,student_number");
         if (changed.error) throw changed.error;
         await createAuditLog({ actorUserId: req.user!.id, actionCode: "STUDENTS_BULK_ACTIVATE", moduleCode: "students", entityType: "student", oldValues: { student_status: "INACTIVE" }, newValues: { student_status: "ACTIVE", count: changed.data?.length ?? 0 }, requestId: req.requestId, ipAddress: req.ip });
         res.json({ success: true, data: { updated: changed.data?.length ?? 0 }, message: `${changed.data?.length ?? 0} inactive student(s) activated.` });
