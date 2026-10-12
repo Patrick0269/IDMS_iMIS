@@ -22,6 +22,18 @@ test("Admissions workspace separates long work areas into accessible tabs", asyn
   assert.match(styles, /\.historical-queue/);
 });
 
+test("Admissions sidebar reserves content space and collapses into navigation on narrow screens", async () => {
+  const [html, css, enhancements] = await Promise.all([
+    read("admissions.html"),
+    read("assets/css/admissions-reference.css"),
+    read("assets/css/admissions-enhancements.css"),
+  ]);
+  assert.match(html, /admissions-reference\.css\?v=20261012-sidebar-layout-fix/);
+  assert.match(css, /\.staff-view \.portal-shell\.wide\{width:auto;max-width:none;margin:0 0 0 274px/);
+  assert.match(css, /@media \(max-width: 900px\)[\s\S]*?\.staff-view \.portal-shell\.wide\{width:auto;margin:0/);
+  assert.doesNotMatch(enhancements, /\.admissions-sidebar\{display:none!important\}/);
+});
+
 test("dashboard combines Applications and Admissions and Applicant Portal does not link to Student Portal", async () => {
   const [dashboard, html, script] = await Promise.all([
     read("assets/js/dashboard.js"),

@@ -173,7 +173,7 @@ body.admission-body input:focus-visible,body.admission-body select:focus-visible
 .admissions-progression-link>span:first-child{display:grid;flex:0 0 22px;place-items:center;font-weight:800;color:#f5e8eb}
 .admissions-progression-link:hover,.admissions-progression-link:focus-visible{background:#562033;color:#fff}
 .admissions-progression-link[hidden]{display:none!important}
-.portal-shell.wide{margin-left:250px}
+.staff-view .portal-shell.wide{width:auto;max-width:none;margin:0 0 0 274px;padding:18px 22px 28px}
 .portal-header{padding-left:270px}
 .publication-bar {
   align-items: center;
@@ -278,7 +278,7 @@ body.admission-body a[href$="finance.html"],body.admission-body a[href*="/financ
 .admissions-side-menu .admission-workspace-tabs button::before{flex:0 0 auto;font-size:15px;color:var(--maroon-700)}
 .admissions-side-menu .admission-workspace-tabs button[aria-selected="true"]{background:var(--maroon-tint);color:var(--maroon-900)}
 .admissions-progression-link{position:sticky;top:116px;z-index:14;width:max-content;max-width:100%;margin:8px 0 12px;background:var(--maroon-900);font-size:12px}
-.portal-shell.wide{margin-left:0}
+.staff-view .portal-shell.wide{width:auto;margin:0;padding:14px}
   .portal-header { padding: 8px 12px; }
   .portal-header .admissions-heading { min-width: 170px; }
   .portal-shell.wide { margin-left: 0; padding: 14px; }
@@ -292,6 +292,7 @@ body.admission-body a[href$="finance.html"],body.admission-body a[href*="/financ
 @media (max-width: 620px) {
 .admissions-side-menu .admission-workspace-tabs{top:104px}
 .admissions-progression-link{top:156px}
+.staff-view .portal-shell.wide{padding:10px 8px 22px}
   .portal-header { height: auto; min-height: 58px; padding: 8px 10px 8px 70px; gap: 8px; flex-wrap: wrap; }
   .portal-header .brand-mark { display: grid; width: 36px; height: 36px; }
   .portal-header .admissions-heading { min-width: 0; flex: 1 1 140px; }

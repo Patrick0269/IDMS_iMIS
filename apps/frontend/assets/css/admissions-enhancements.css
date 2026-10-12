@@ -25,7 +25,6 @@
 td input[type="checkbox"],th input[type="checkbox"]{width:18px;height:18px;accent-color:var(--maroon);cursor:pointer}
 
 /* Admissions workspace navigation and focused, uncluttered work pages. */
-.admissions-sidebar{display:none!important}
 .admission-shell{width:min(1540px,calc(100% - 48px));margin:24px auto 48px}
 .admission-workspace-tabs{position:sticky;top:0;z-index:15;display:flex;gap:8px;overflow-x:auto;padding:10px 12px;margin:0 0 20px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:0 8px 22px #32141b12;scrollbar-width:thin}
 .admission-workspace-tabs button{flex:0 0 auto;min-height:46px;padding:10px 18px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink);font:700 15px Arial,sans-serif;cursor:pointer}
