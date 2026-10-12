@@ -27,6 +27,20 @@ const SAFE_MESSAGES: Record<string, { status: number; message: string }> = {
 
 function safeFailure(err: HttpError | undefined, requestId: string | undefined) {
   const code = String(err?.code ?? "").toUpperCase();
+  const isHistoricalLink = /\/admissions\/historical-students(?:\/|\?|$)/i.test(String((err as any)?.requestPath ?? ""));
+  if (isHistoricalLink) {
+    if (["PGRST204", "42703"].includes(code)) return { status: 503, message: "Muunganisho haujakamilika kwa sababu hifadhidata haijalinganishwa na mfumo. Msimamizi asakinishe sasisho la schema ya wanafunzi, kisha jaribu tena." };
+    if (["42P01", "PGRST202"].includes(code)) return { status: 503, message: "Sehemu ya hifadhidata inayohitajika haipo. Msimamizi akamilishe sasisho la hifadhidata, kisha jaribu tena." };
+    const text = String(err?.message ?? "").toLowerCase();
+    if (/student email is required/.test(text)) return { status: 409, message: "Barua pepe ya mwanafunzi haipo. Rekebisha taarifa za mwanafunzi kisha ujaribu tena." };
+    if (/already linked to another|ownership does not match|email differs/.test(text)) return { status: 409, message: "Akaunti hii haiendani na mwanafunzi huyu au tayari imeunganishwa na rekodi nyingine. Msimamizi ahakiki umiliki wa akaunti." };
+    if (/four-eyes|different admissions officer/.test(text)) return { status: 403, message: "Afisa mwingine wa Udahili anahitajika kuthibitisha rekodi hii." };
+    if (/not found/.test(text)) return { status: 404, message: "Rekodi haijapatikana. Onyesha upya foleni kisha ujaribu tena." };
+    if (/already been reviewed|another admissions user completed/.test(text)) return { status: 409, message: "Rekodi hii tayari imekamilishwa na afisa mwingine. Onyesha upya foleni." };
+    if (/active student role is missing/.test(text)) return { status: 503, message: "Jukumu la mwanafunzi halijasanidiwa. Msimamizi wa mfumo akague mipangilio ya majukumu." };
+    if (/fetch failed|network|econn|timeout|timed out|socket/.test(text)) return { status: 503, message: "Huduma ya hifadhidata haipatikani kwa sasa. Hakuna uthibitisho uliokamilika; jaribu tena baada ya muda." };
+    return { status: 500, message: `Muunganisho wa akaunti haujakamilika. Hakuna uthibitisho uliorekodiwa; jaribu tena au wasiliana na msimamizi. Rejea: ${requestId ?? "haipatikani"}` };
+  }
   if (SAFE_MESSAGES[code]) return SAFE_MESSAGES[code];
 
   const text = String(err?.message ?? "").toLowerCase();
@@ -44,12 +58,13 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   logError("request_failed", { requestId: req.requestId, method: req.method, path: req.originalUrl, error: err });
   const message = err instanceof Error ? err.message : "The requested operation could not be completed.";
   // Supabase/PostgREST failures are usually plain objects, not Error instances.
-  const httpError = err && typeof err === "object" ? err as HttpError : undefined;
+  const httpError = err && typeof err === "object" ? { ...(err as HttpError), requestPath: req.path } : undefined;
   const candidate = httpError?.statusCode ?? httpError?.status;
   const explicitStatus = typeof candidate === "number" && Number.isInteger(candidate) && candidate >= 400 && candidate <= 599 ? candidate : null;
   const safe = safeFailure(httpError, req.requestId);
   const statusCode = explicitStatus ?? safe.status;
-  const publicMessage = err instanceof Error && explicitStatus !== null && statusCode < 500 ? message : safe.message;
+  const isHistoricalLink = /\/admissions\/historical-students(?:\/|\?|$)/i.test(req.path);
+  const publicMessage = isHistoricalLink ? safe.message : err instanceof Error && explicitStatus !== null && statusCode < 500 ? message : safe.message;
   return res.status(statusCode).json({
     success: false,
     message: publicMessage,

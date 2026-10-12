@@ -156,7 +156,7 @@ export async function linkStudentPortalAccount(studentId: string, actorUserId: s
   }
   const updatedUser = await db.from("users").update({ user_number: userNumber, username, first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName, email, phone: student.phone || applicant?.phone || null, status: "ACTIVE", updated_at: new Date().toISOString() }).eq("id", account.id);
   if (updatedUser.error) throw updatedUser.error;
-  const linkedStudent = await db.from("students").update({ user_id: account.id, email, first_name: firstName, middle_name: middleName, last_name: lastName, phone: student.phone || applicant?.phone || null, updated_at: new Date().toISOString() })
+  const linkedStudent = await db.from("students").update({ user_id: account.id, email, first_name: firstName, middle_name: middleName, last_name: lastName, phone: student.phone || applicant?.phone || null, updated_by: actorUserId, updated_at: new Date().toISOString() })
     .eq("id", student.id).select("id").single();
   if (linkedStudent.error) throw linkedStudent.error;
   const assigned = await db.from("user_roles").upsert({

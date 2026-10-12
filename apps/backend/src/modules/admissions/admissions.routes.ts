@@ -375,7 +375,7 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
     if (!role.data) throw Object.assign(new Error("Active STUDENT role is missing."), { statusCode: 409 });
     const assigned = await db.from("user_roles").upsert({ user_id: linkedUser.id, role_id: role.data.id, assigned_by: req.user!.id, status: "ACTIVE" }, { onConflict: "user_id,role_id" });
     if (assigned.error) throw assigned.error;
-    const activated = await db.from("students").update({ user_id: linkedUser.id, student_status: "ACTIVE", updated_at: now }).eq("id", student.id).select("id").maybeSingle();
+    const activated = await db.from("students").update({ user_id: linkedUser.id, student_status: "ACTIVE", updated_by: req.user!.id, updated_at: now }).eq("id", student.id).select("id").maybeSingle();
     if (activated.error) throw activated.error;
     if (!activated.data) throw Object.assign(new Error("Student status changed during review; refresh and retry."), { statusCode: 409 });
     const updated = await db.from("historical_import_account_results").update({ admission_status: "CONFIRMED", account_status: "CREATED", user_id: linkedUser.id, auth_user_id: authUserId, error_message: null, completed_at: now, updated_at: now }).eq("id", pending.data.id).in("admission_status", ["PENDING", "FAILED"]).select("id").maybeSingle();
@@ -401,11 +401,11 @@ router.post("/historical-students/:id/confirm", requirePermission("admissions.ma
       }
     }
     const emailNotice = accessEmailSent === true
-      ? " Student Portal sign-in instructions were emailed."
+      ? " Maelekezo ya kuingia kwenye Mfumo wa Mwanafunzi yametumwa kwa barua pepe."
       : accessEmailSent === false
-        ? " The account was created, but the sign-in email could not be sent; contact ICT to arrange delivery."
-        : " The existing account remains linked to the Student role.";
-    res.json({ success: true, data: { studentId: student.id, studentNumber: student.student_number, admissionStatus: "CONFIRMED", accountStatus: "CREATED", accessEmailSent, userId: linkedUser.id }, message: `Historical student ${student.student_number} confirmed and linked to the Student role.${emailNotice}` });
+        ? " Akaunti imeunganishwa, lakini barua pepe haikutumwa. Wasiliana na TEHAMA ili mwanafunzi apewe maelekezo ya kuingia."
+        : " Akaunti iliyokuwepo imeunganishwa na jukumu la Mwanafunzi.";
+    res.json({ success: true, data: { studentId: student.id, studentNumber: student.student_number, admissionStatus: "CONFIRMED", accountStatus: "CREATED", accessEmailSent, userId: linkedUser.id }, message: `Mwanafunzi ${student.student_number} amethibitishwa na akaunti yake imeunganishwa na Mfumo wa Mwanafunzi.${emailNotice}` });
   } catch (error: any) {
     await db.from("historical_import_account_results").update({ admission_status: "FAILED", account_status: "FAILED", error_message: String(error?.message || "Account setup failed").slice(0, 1000), updated_at: new Date().toISOString() }).eq("id", pending.data.id);
     throw error;
