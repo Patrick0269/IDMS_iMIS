@@ -57,5 +57,7 @@ TEST-RESULTS.txt
 /scripts/api-tests/
 **/*repair-backups*/
 **/current-frontend-repair-backups/
+# Local PostgREST executable; install from the pinned upstream release described in database/postgrest/README.md.
+/tools/postgrest/postgrest.exe
 *.backup
 *.backup[0-9]backup-cors-*/

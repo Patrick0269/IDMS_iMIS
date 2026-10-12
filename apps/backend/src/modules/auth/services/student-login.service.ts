@@ -3,6 +3,7 @@ import { env } from "../../../config/env.js";
 import { sendAccountPasswordRecoveryEmail } from "../../../services/email.service.js";
 import { initialiseStudentFirstLogin, needsStudentPasswordChange, studentInitialNumber } from "../../../services/student-first-login.service.js";
 import { logError } from "../../../utils/logger.js";
+import { getLocalAuthUserById, issueLocalAuthAction } from "../../../services/postgres-auth.service.js";
 
 const BLOCKED_STUDENT_STATUSES = new Set([
   "PENDING_ACTIVATION",
@@ -35,7 +36,11 @@ export function normaliseStudentNumber(value: string): string {
 
 export function isValidStudentNumber(value: string): boolean {
   const number = normaliseStudentNumber(value);
-  return /^N[A-Z]\d{4}\/\d{4}\/\d{4}$/.test(number) || /^IDMS\/\d{4}\/\d{5}$/.test(number);
+  // Keep the historic IDMC prefix valid for existing student records while
+  // accepting the newer IDMS prefix for newly issued numbers.
+  return /^N[A-Z]\d{4}\/\d{4}\/\d{4}$/.test(number)
+    || /^IDMC\/\d{4}\/\d{5}$/.test(number)
+    || /^IDMS\/\d{4}\/\d{5}$/.test(number);
 }
 
 async function findStudentByIdentifier(value: string): Promise<StudentRow | null> {
@@ -68,11 +73,13 @@ export async function resolveStudentLoginEmail(identifier: string, password: str
   const usingInitialPassword = normaliseStudentNumber(password) === initialNumber;
   if (usingInitialPassword) await initialiseStudentFirstLogin(String(user.auth_user_id), student);
 
-  const { data, error: authError } = await supabase.auth.admin.getUserById(String(user.auth_user_id));
-  const identity = data?.user;
+  const identity = env.AUTH_PROVIDER === "postgres"
+    ? await getLocalAuthUserById(String(user.auth_user_id))
+    : (await supabase.auth.admin.getUserById(String(user.auth_user_id))).data?.user;
   const email = String(identity?.email ?? "").trim().toLowerCase();
-  if (authError || !email) throw new Error(INVALID);
-  if (usingInitialPassword && (!needsStudentPasswordChange(identity?.app_metadata) || String(identity?.app_metadata?.idmc_student_initial_number ?? "").toUpperCase() !== initialNumber)) return null;
+  if (!email) throw new Error(INVALID);
+  const authMetadata = (identity as unknown as Record<string, any>).raw_app_meta_data ?? (identity as unknown as Record<string, any>).app_metadata ?? {};
+  if (usingInitialPassword && (!needsStudentPasswordChange(authMetadata) || String(authMetadata.idmc_student_initial_number ?? "").toUpperCase() !== initialNumber)) return null;
   return email;
 }
 
@@ -136,21 +143,34 @@ export async function requestVerifiedPasswordReset(
   if (!profile.data || profile.data.status !== "ACTIVE" || !profile.data.auth_user_id) return false;
   if (input.accountType === "student") email = String(profile.data.email ?? "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
-  const { data: identity, error: identityError } = await db.auth.admin.getUserById(String(profile.data.auth_user_id));
-  if (identityError || !identity?.user || String(identity.user.email ?? "").trim().toLowerCase() !== email || email.endsWith("@students.idmc.local")) return false;
-  const { data: generated, error: linkError } = await db.auth.admin.generateLink({
-    type: "recovery", email,
-    options: { redirectTo: `${env.FRONTEND_URL.replace(/\/$/, "")}/set-password.html` },
-  });
-  if (linkError || !generated?.properties?.action_link) throw linkError ?? new Error("Unable to create password reset link.");
+  const identity = env.AUTH_PROVIDER === "postgres"
+    ? await getLocalAuthUserById(String(profile.data.auth_user_id))
+    : (await db.auth.admin.getUserById(String(profile.data.auth_user_id))).data?.user;
+  if (!identity || String(identity.email ?? "").trim().toLowerCase() !== email || email.endsWith("@students.idmc.local")) return false;
+  let recoveryUrl: string;
+  if (env.AUTH_PROVIDER === "postgres") {
+    const token = await issueLocalAuthAction(String(profile.data.auth_user_id), "recovery");
+    const url = new URL(`${env.FRONTEND_URL.replace(/\/$/, "")}/set-password.html`);
+    url.searchParams.set("token_hash", token);
+    url.searchParams.set("type", "recovery");
+    recoveryUrl = url.toString();
+  } else {
+    const { data: generated, error: linkError } = await db.auth.admin.generateLink({
+      type: "recovery", email,
+      options: { redirectTo: `${env.FRONTEND_URL.replace(/\/$/, "")}/set-password.html` },
+    });
+    if (linkError || !generated?.properties?.action_link) throw linkError ?? new Error("Unable to create password reset link.");
+    recoveryUrl = generated.properties.action_link;
+  }
   try {
     await deliver({
       recipientEmail: email,
       recipientName: String(profile.data.display_name || [profile.data.first_name, profile.data.last_name].filter(Boolean).join(" ") || recoveryName),
-      recoveryUrl: generated.properties.action_link,
+      recoveryUrl,
     });
   } catch (smtpError) {
     const frontend = env.FRONTEND_URL.replace(/\/$/, "");
+    if (env.AUTH_PROVIDER === "postgres") throw new AggregateError([smtpError], "Password recovery email could not be sent.");
     const { error: fallbackError } = await db.auth.resetPasswordForEmail(email, {
       redirectTo: `${frontend}/set-password.html`,
     });

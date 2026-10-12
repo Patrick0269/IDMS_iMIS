@@ -78,7 +78,7 @@ test("one login form recognizes student identifiers and redirects by verified ac
   assert.match(recoveryPage, /Ombi 3 kwa siku/);
   assert.match(recoveryPage, /lecturerPhone/);
   assert.match(recoveryPage, /lecturerEmail/);
-  assert.match(passwordPage, /password-setup-complete/);
+  assert.match(passwordPage, /password-(?:setup-complete|recovery-complete)/);
   assert.match(passwordPage, /password\.length < 12/);
   assert.match(studentSecurity, /name="currentPassword"/);
   assert.match(staffSecurity, /name="currentPassword"/);

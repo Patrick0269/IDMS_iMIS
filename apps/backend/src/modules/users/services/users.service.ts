@@ -1,5 +1,7 @@
 import { getSupabase } from "../../../config/database.js";
 import { env } from "../../../config/env.js";
+import { randomUUID } from "node:crypto";
+import { createLocalAuthUser, getLocalAuthUserByEmail, issueLocalAuthAction } from "../../../services/postgres-auth.service.js";
 import {
   createAuditLog,
 } from "../../../services/audit.service.js";
@@ -373,6 +375,16 @@ export async function createUser(
       );
     }
 
+    if (env.AUTH_PROVIDER === "postgres") {
+      const duplicateIdentity = await getLocalAuthUserByEmail(email);
+      if (duplicateIdentity) {
+        throw Object.assign(
+          new Error("An authentication identity already uses this email. Ask ICT to restore or reconcile that account before creating another one."),
+          { statusCode: 409 },
+        );
+      }
+    }
+
     if (username) {
       const { data: duplicateUsername } =
         await supabase
@@ -402,33 +414,36 @@ export async function createUser(
      * -------------------------------------------------------
      */
 
-    const {
-      data: authData,
-      error: authError,
-    } = await supabase.auth.admin.createUser({
-      email,
+    const userMetadata = {
+      first_name: firstName,
+      middle_name: middleName,
+      last_name: lastName,
+      display_name: displayName,
+      username,
+    };
 
-      password: input.password,
+    if (env.AUTH_PROVIDER === "postgres") {
+      authUserId = randomUUID();
+      await createLocalAuthUser({
+        id: authUserId,
+        email,
+        password: input.password,
+        emailConfirmed: true,
+        userMetadata,
+      });
+    } else {
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password: input.password,
+        email_confirm: true,
+        user_metadata: userMetadata,
+      });
 
-      email_confirm: true,
-
-      user_metadata: {
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
-        display_name: displayName,
-        username,
-      },
-    });
-
-    if (authError || !authData.user) {
-      throw new Error(
-        authError?.message ||
-          "Unable to create authentication account."
-      );
+      if (authError || !authData.user) {
+        throw new Error(authError?.message || "Unable to create authentication account.");
+      }
+      authUserId = authData.user.id;
     }
-
-    authUserId = authData.user.id;
 
     await createAuditLog({
       actorUserId,
@@ -607,33 +622,24 @@ export async function createUser(
     let welcomeEmailSent = false;
 
     if (shouldSendWelcomeMessage) {
-      const {
-        data: linkData,
-        error: linkError,
-      } =
-        await supabase.auth.admin.generateLink({
+      if (env.AUTH_PROVIDER === "postgres") {
+        const token = await issueLocalAuthAction(authUserId, "recovery");
+        const setupUrl = new URL(`${env.FRONTEND_URL.replace(/\/$/, "")}/set-password.html`);
+        setupUrl.searchParams.set("token_hash", token);
+        setupUrl.searchParams.set("type", "recovery");
+        setupPasswordUrl = setupUrl.toString();
+      } else {
+        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
           type: "recovery",
-
           email,
-
-          options: {
-            redirectTo:
-              `${env.FRONTEND_URL}/set-password.html`,
-          },
+          options: { redirectTo: `${env.FRONTEND_URL}/set-password.html` },
         });
 
-      if (
-        linkError ||
-        !linkData?.properties?.action_link
-      ) {
-        throw new Error(
-          linkError?.message ||
-            "Unable to generate secure password setup link."
-        );
+        if (linkError || !linkData?.properties?.action_link) {
+          throw new Error(linkError?.message || "Unable to generate secure password setup link.");
+        }
+        setupPasswordUrl = linkData.properties.action_link;
       }
-
-      setupPasswordUrl =
-        linkData.properties.action_link;
     }
 
     /*

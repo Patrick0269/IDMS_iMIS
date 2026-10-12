@@ -856,7 +856,7 @@
                  * can sign in with their own identifier.
                  */
 
-                const studentNumberPattern = /^(?:IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/i;
+                const studentNumberPattern = /^(?:IDMC\/\d{4}\/\d{5}|IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/i;
                 if (studentNumberPattern.test(username.replace(/\s+/g, ""))) {
                     const studentNumber = username.replace(/\s+/g, "").toUpperCase();
                     await IDMCAuth.studentLogin(studentNumber, password);

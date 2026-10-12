@@ -192,7 +192,7 @@ router.get("/documents/:id/download", requirePermission("students.self.view"), h
   const student = await getMyStudentRecord(req) as Row;
   const result = await institutionDb.from("student_documents").select("*").eq("id", req.params.id).eq("student_id", student.id).maybeSingle();
   if (result.error || !result.data) throw new StudentSelfServiceError("Document was not found for the authenticated student.", 404);
-  const path = privateStorageObjectPath(result.data.file_url || result.data.file_path, env.SUPABASE_URL, `students/${student.id}/`);
+  const path = privateStorageObjectPath(result.data.file_url || result.data.file_path, env.LEGACY_STORAGE_ORIGIN || "https://local.invalid", `students/${student.id}/`);
   if (!path) throw new StudentSelfServiceError("Document storage path is invalid or unavailable.", 404);
   const signed = await institutionDb.storage.from("idmc-private-documents").createSignedUrl(path, 300);
   if (signed.error) throw new Error(`Unable to prepare document download: ${signed.error.message}`);

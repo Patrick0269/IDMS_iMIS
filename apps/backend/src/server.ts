@@ -3,11 +3,19 @@ import { env } from "./config/env.js";
 import { logInfo } from "./utils/logger.js";
 
 import { getSupabase } from "./config/database.js";
+import { withPostgresClient } from "./config/postgres.js";
 let academicTickRunning = false;
 async function academicTick() {
  if (academicTickRunning) return;
  academicTickRunning = true;
- try { const result = await getSupabase().rpc('idmc_ap_calendar_tick'); if (result.error) console.warn('Academic scheduler: '+result.error.message); }
+ try {
+  if (env.DATABASE_URL) {
+   await withPostgresClient((client) => client.query('SELECT idmc_ap_calendar_tick()'));
+  } else {
+   const result = await getSupabase().rpc('idmc_ap_calendar_tick');
+   if (result.error) console.warn('Academic scheduler: '+result.error.message);
+  }
+ }
  catch (error:any) { console.warn('Academic scheduler: '+error.message); }
  finally { academicTickRunning = false; }
 }

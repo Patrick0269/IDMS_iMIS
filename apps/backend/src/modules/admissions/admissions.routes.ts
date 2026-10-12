@@ -134,7 +134,7 @@ async function reconcileConvertedApplication(applicationId: string, actorUserId:
   }
 
   if (student.data.user_id && student.data.user_id !== publicUser.data.id) {
-    throw Object.assign(new Error("Student is already linked to a different IDMS account. Resolve the ownership conflict before reconciliation."), { statusCode: 409 });
+    throw Object.assign(new Error("Student is already linked to a different IDMC account. Resolve the ownership conflict before reconciliation."), { statusCode: 409 });
   }
 
   if (student.data.user_id !== publicUser.data.id) {
@@ -574,7 +574,7 @@ router.get("/review/documents/:id/access", requirePermission("applications.view"
   const application = await db.from("applications").select("applicant_id").eq("id", document.data.application_id).maybeSingle();
   if (application.error) throw application.error;
   const prefixes = [`admissions/${document.data.application_id}/`, ...(application.data?.applicant_id ? [`applicants/${application.data.applicant_id}/${document.data.application_id}/`] : [])];
-  const path = privateStorageObjectPath(document.data.file_url, env.SUPABASE_URL, prefixes);
+  const path = privateStorageObjectPath(document.data.file_url, env.LEGACY_STORAGE_ORIGIN || "https://local.invalid", prefixes);
   if (!path) return res.status(404).json({ success: false, message: "Document storage path is invalid or unavailable." });
   const signed = await db.storage.from("idmc-private-documents").createSignedUrl(path, 600);
   if (signed.error) throw signed.error;

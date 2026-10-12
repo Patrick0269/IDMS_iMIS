@@ -143,7 +143,7 @@ export async function createInstitutionController(
     return sendError(
         res,
         409,
-        "IDMS is configured for one institution. A second institution cannot be created."
+        "IDMS is configured and locked to one institution. A second institution cannot be created."
     );
 }
 

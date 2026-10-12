@@ -6,6 +6,11 @@
     message.hidden = false;
   };
   const apiBase = String(window.IDMC_CONFIG?.API_BASE_URL || "/api/v1").replace(/\/+$/, "");
+  const dateOfBirthInput = document.getElementById("applicantDateOfBirth");
+  if (dateOfBirthInput) {
+    const today = new Date();
+    dateOfBirthInput.max = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  }
   const requestError = (response, payload, fallback) => {
     const error = new Error(payload?.message || payload?.error || fallback);
     error.status = response.status;

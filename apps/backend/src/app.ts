@@ -12,6 +12,7 @@ import studentManagementRoutes from "./modules/student-management/student-manage
 import { requestContext } from "./middleware/requestContext.js";
 import { assertSafeProductionOrigins, isOriginAllowed, isOriginSameHost, parseAllowedOrigins } from "./config/cors.js";
 import { getSupabase } from "./config/database.js";
+import { checkPostgres, isPostgresConfigured } from "./config/postgres.js";
 import { openApiDocument } from "./config/openapi.js";
 import { apiCachePolicy } from "./middleware/performance.js";
 import adminDataResetRoutes from "./modules/system/admin-data-reset.routes.js";
@@ -69,6 +70,13 @@ app.get(`${API_BASE}/health`, (_req, res) => {
 app.get(`${API_BASE}/ready`, async (req, res) => {
   const startedAt = Date.now();
   try {
+    if (isPostgresConfigured()) {
+      const database = await checkPostgres();
+      const api = await getSupabase().from("institutions").select("id", { count: "exact", head: true });
+      if (api.error) throw api.error;
+      res.json({ success: true, status: "ready", dependencies: { database: "ready", dataApi: "ready", engine: "PostgreSQL", version: database.version }, latencyMs: Date.now() - startedAt, requestId: req.requestId });
+      return;
+    }
     const result = await getSupabase().from("institutions").select("id", { count: "exact", head: true });
     if (result.error) throw result.error;
     res.json({ success: true, status: "ready", dependencies: { database: "ready" }, latencyMs: Date.now() - startedAt, requestId: req.requestId });

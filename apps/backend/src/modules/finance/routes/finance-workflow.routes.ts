@@ -288,7 +288,7 @@ router.post("/student/payment-requests/:id/receipt", requirePermission("students
 router.get("/payment-requests/:id/receipt", requirePermission("finance.portal.view"), handle(async req => {
   const request = await getSupabase().from("student_payment_requests").select("student_id,receipt_file_path,receipt_file_name").eq("id",param(req,"id")).maybeSingle();
   if (request.error || !request.data?.receipt_file_path) throw new Error("Receipt was not found.");
-  const path = privateStorageObjectPath(request.data.receipt_file_path, env.SUPABASE_URL, `finance/receipts/${request.data.student_id}/`);
+  const path = privateStorageObjectPath(request.data.receipt_file_path, env.LEGACY_STORAGE_ORIGIN || "https://local.invalid", `finance/receipts/${request.data.student_id}/`);
   if (!path) throw Object.assign(new Error("Receipt was not found."), { statusCode: 404 });
   const signed = await getSupabase().storage.from("idmc-private-documents").createSignedUrl(path,300);
   if (signed.error) throw signed.error;

@@ -31,15 +31,6 @@
     window.IDMC_CONFIG = Object.freeze({
         ...existing,
         ...injected,
-        SUPABASE_URL:
-            injected.SUPABASE_URL ||
-            existing.SUPABASE_URL ||
-            "https://ocvfpoxukbquzmapfqjx.supabase.co",
-        // Publishable/anon key only. Never place a service-role key in frontend files.
-        SUPABASE_ANON_KEY:
-            injected.SUPABASE_ANON_KEY ||
-            existing.SUPABASE_ANON_KEY ||
-            "sb_publishable_62rJTajRkmlGIe3BikTq_g_P0L6KzPI",
         API_BASE_URL: apiBase
     });
 

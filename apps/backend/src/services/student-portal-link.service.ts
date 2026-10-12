@@ -86,7 +86,7 @@ export async function linkStudentPortalAccount(studentId: string, actorUserId: s
   }
 
   if (account && student.user_id && String(student.user_id) !== String(account.id)) {
-    throw new Error("Student is already linked to a different IDMS account. An administrator must reconcile the account ownership before portal access can be repaired.");
+    throw new Error("Student is already linked to a different IDMC account. An administrator must reconcile the account ownership before portal access can be repaired.");
   }
 
   const firstName = String(student.first_name || applicant?.first_name || "Student").trim();

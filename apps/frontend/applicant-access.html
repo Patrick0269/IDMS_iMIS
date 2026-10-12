@@ -25,7 +25,7 @@
         <form id="applicantRegisterForm"><div class="field-grid">
           <label class="field">First name<input name="firstName" required autocomplete="given-name" maxlength="100"></label><label class="field">Middle name<input name="middleName" autocomplete="additional-name" maxlength="100"></label>
           <label class="field">Last name<input name="lastName" required autocomplete="family-name" maxlength="100"></label><label class="field">Phone number<input name="phone" type="tel" autocomplete="tel" maxlength="50" placeholder="+255 7XX XXX XXX"></label>
-          <label class="field">Email address<input name="email" type="email" required autocomplete="email" maxlength="255"></label><label class="field">Date of birth<input name="dateOfBirth" type="date" autocomplete="bday"></label>
+          <label class="field">Email address<input name="email" type="email" required autocomplete="email" maxlength="255"></label><label class="field">Date of birth<input id="applicantDateOfBirth" name="dateOfBirth" type="date" autocomplete="bday"></label>
           <label class="field">Gender<select name="gender"><option value="">Select (optional)</option><option value="MALE">Male</option><option value="FEMALE">Female</option><option value="OTHER">Other</option><option value="PREFER_NOT_TO_SAY">Prefer not to say</option></select></label>
           <label class="field">Nationality<input name="nationality" value="Tanzanian" maxlength="100"></label>
           <label class="field">National ID number (optional)<input name="nationalIdNumber" maxlength="100"></label><label class="field">Passport number (optional)<input name="passportNumber" maxlength="100"></label>
@@ -37,6 +37,6 @@
     <p class="footer">Institute of Development and Medical Sciences · IDMS iMIS</p>
   </main>
   <script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js"></script>
-  <script src="assets/js/applicant-access.js?v=20261010-applicant-verification-fix"></script>
+  <script src="assets/js/applicant-access.js?v=20261012-applicant-date-validation"></script>
 </body>
 </html>

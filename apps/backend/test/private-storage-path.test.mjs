@@ -35,10 +35,10 @@ test("private storage path accepts one of several trusted entity prefixes", () =
 test("student document downloads sign validated storage paths instead of returning arbitrary URLs", async () => {
   const { readFile } = await import("node:fs/promises");
   const source = await readFile(new URL("../src/modules/student-management/students/student-self-service.routes.ts", import.meta.url), "utf8");
-  assert.match(source, /privateStorageObjectPath\(result\.data\.file_url \|\| result\.data\.file_path, env\.SUPABASE_URL, `students\/\$\{student\.id\}\/`\)/);
+  assert.match(source, /privateStorageObjectPath\(result\.data\.file_url \|\| result\.data\.file_path, env\.LEGACY_STORAGE_ORIGIN,?\s*\|\|\s*"https:\/\/local\.invalid", `students\/\$\{student\.id\}\/`\)/);
   assert.doesNotMatch(source, /if\s*\(\s*\^https\?:.*return\s*\{\s*url\s*:\s*path/);
   const admissions = await readFile(new URL("../src/modules/admissions/admissions.routes.ts", import.meta.url), "utf8");
   const finance = await readFile(new URL("../src/modules/finance/routes/finance-workflow.routes.ts", import.meta.url), "utf8");
-  assert.match(admissions, /privateStorageObjectPath\(document\.data\.file_url, env\.SUPABASE_URL, prefixes\)/);
-  assert.match(finance, /privateStorageObjectPath\(request\.data\.receipt_file_path, env\.SUPABASE_URL, `finance\/receipts\/\$\{request\.data\.student_id\}\/`\)/);
+  assert.match(admissions, /privateStorageObjectPath\(document\.data\.file_url, env\.LEGACY_STORAGE_ORIGIN\s*\|\|\s*"https:\/\/local\.invalid", prefixes\)/);
+  assert.match(finance, /privateStorageObjectPath\(request\.data\.receipt_file_path, env\.LEGACY_STORAGE_ORIGIN\s*\|\|\s*"https:\/\/local\.invalid", `finance\/receipts\/\$\{request\.data\.student_id\}\/`\)/);
 });

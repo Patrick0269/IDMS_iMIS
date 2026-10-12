@@ -80,7 +80,7 @@
     } catch (error) {
       setProgress(false);
       button.disabled = true;
-      logout.textContent = "Back to login";
+      logout.textContent = "Rudi kwenye login";
       showMessage((error.message || "We could not verify your account.") + " Sign in again with your registration number and temporary password, then try again.", "error");
       retry.hidden = false;
     } finally {

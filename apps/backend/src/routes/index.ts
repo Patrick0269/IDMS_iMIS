@@ -42,8 +42,21 @@ import cohortsRoutes from "../modules/cohorts/cohorts.routes.js";
 import studentEngagementRoutes from "../modules/student-engagement/student-engagement.routes.js";
 import staffOperationsRoutes from "../modules/staff-operations/staff-operations.routes.js";
 import publicSiteRoutes from "../modules/website/public-site.routes.js";
+import { readLocalStorageToken } from "../services/postgres-storage.service.js";
 
 const router = Router();
+
+router.get("/storage/private/:token", async (req, res, next) => {
+  try {
+    const file = await readLocalStorageToken(String(req.params.token || ""));
+    if (!file) return res.status(404).json({ success: false, message: "File link is invalid, expired, or the file is unavailable." });
+    res.setHeader("Content-Type", file.contentType);
+    res.setHeader("Content-Length", String(file.bytes.length));
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    return res.status(200).send(file.bytes);
+  } catch (error) { return next(error); }
+});
 
 export function scopedAliasPrefix(internalPrefix: string): RequestHandler {
   return (req, _res, next) => {

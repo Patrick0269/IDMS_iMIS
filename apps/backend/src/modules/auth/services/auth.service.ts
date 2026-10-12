@@ -14,6 +14,7 @@ import { randomUUID } from "node:crypto";
 import { env } from "../../../config/env.js";
 import { createAuditLog } from "../../../services/audit.service.js";
 import { sendApplicantVerificationEmail } from "../../../services/email.service.js";
+import { getLocalAuthUserById, getLocalAuthUserByEmail, signInLocalAuth, refreshLocalAuthSession, revokeLocalAuthSession, createLocalAuthUser, deleteLocalAuthUser, issueLocalAuthAction, consumeLocalAuthAction, completeLocalPasswordRecovery, createLocalAuthSession } from "../../../services/postgres-auth.service.js";
 
 export async function registerApplicant(input: {
   firstName: string; middleName?: string; lastName: string; email: string; phone?: string;
@@ -31,24 +32,63 @@ export async function registerApplicant(input: {
   if (password.length < 12 || password.length > 128) {
     throw Object.assign(new Error("Choose a password between 12 and 128 characters."), { statusCode: 400 });
   }
+  if (input.dateOfBirth) {
+    const birthDate = new Date(`${input.dateOfBirth}T00:00:00Z`);
+    const todayParts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Africa/Dar_es_Salaam", year: "numeric", month: "2-digit", day: "2-digit",
+    }).formatToParts(new Date());
+    const today = `${todayParts.find((part) => part.type === "year")?.value}-${todayParts.find((part) => part.type === "month")?.value}-${todayParts.find((part) => part.type === "day")?.value}`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.dateOfBirth) || Number.isNaN(birthDate.getTime()) || birthDate.toISOString().slice(0, 10) !== input.dateOfBirth || input.dateOfBirth > today) {
+      throw Object.assign(new Error("Enter a valid date of birth that is today or earlier."), { statusCode: 400 });
+    }
+  }
 
   const existing = await db.from("users").select("id").eq("email", email).maybeSingle();
   if (existing.error) throw existing.error;
   if (existing.data) throw Object.assign(new Error("An account already uses this email. Sign in or use account recovery."), { statusCode: 409 });
+  if (env.AUTH_PROVIDER === "postgres") {
+    // A restored/migrated auth identity can exist without its public IDMS profile.
+    // Do not attempt to recreate that unique email identity or overwrite its password;
+    // direct the operator to reconcile the missing profile instead.
+    const existingIdentity = await getLocalAuthUserByEmail(email);
+    if (existingIdentity) {
+      throw Object.assign(
+        new Error("A sign-in identity already exists for this email, but its IDMS applicant profile is missing. Contact Admissions or ICT to restore the existing profile; do not register again."),
+        { statusCode: 409 },
+      );
+    }
+  }
   const role = await db.from("roles").select("id").eq("role_code", "APPLICANT").eq("status", "ACTIVE").single();
   if (role.error || !role.data) throw new Error("Applicant access is not configured. Contact the Admissions Office.");
 
   const displayName = [firstName, middleName, lastName].filter(Boolean).join(" ");
   const frontend = env.FRONTEND_URL.replace(/\/+$/, "");
-  const generated = await db.auth.admin.generateLink({
-    type: "signup", email, password,
-    options: { data: { first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName }, redirectTo: frontend + "/applicant-access.html" },
-  });
-  if (generated.error || !generated.data?.user?.id || !generated.data.properties?.hashed_token) {
-    throw Object.assign(new Error(generated.error?.message || "Unable to create the applicant account."), { statusCode: 400 });
+  const userMetadata = { first_name: firstName, middle_name: middleName, last_name: lastName, display_name: displayName };
+  let authUserId: string;
+  let verificationToken: string;
+  if (env.AUTH_PROVIDER === "postgres") {
+    authUserId = randomUUID();
+    try {
+      await createLocalAuthUser({ id: authUserId, email, password, userMetadata, appMetadata: {}, emailConfirmed: false });
+      verificationToken = await issueLocalAuthAction(authUserId, "signup");
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+      if (code === "23505") {
+        throw Object.assign(new Error("An account already uses this email. Sign in or use account recovery."), { statusCode: 409 });
+      }
+      throw Object.assign(error instanceof Error ? error : new Error("Unable to create the applicant account."), { statusCode: 503 });
+    }
+  } else {
+    const generated = await db.auth.admin.generateLink({
+      type: "signup", email, password,
+      options: { data: userMetadata, redirectTo: frontend + "/applicant-access.html" },
+    });
+    if (generated.error || !generated.data?.user?.id || !generated.data.properties?.hashed_token) {
+      throw Object.assign(new Error(generated.error?.message || "Unable to create the applicant account."), { statusCode: 400 });
+    }
+    authUserId = generated.data.user.id;
+    verificationToken = generated.data.properties.hashed_token;
   }
-
-  const authUserId = generated.data.user.id;
   let userId: string | null = null;
   let applicantId: string | null = null;
   try {
@@ -80,19 +120,21 @@ export async function registerApplicant(input: {
       await db.from("user_roles").delete().eq("user_id", userId).eq("role_id", role.data.id);
       await db.from("users").delete().eq("id", userId);
     }
-    await db.auth.admin.deleteUser(authUserId);
+    if (env.AUTH_PROVIDER === "postgres") await deleteLocalAuthUser(authUserId);
+    else await db.auth.admin.deleteUser(authUserId);
     throw error;
   }
 
   let verificationEmailSent = false;
   try {
     const verifyUrl = new URL(`${frontend}/applicant-access.html`);
-    verifyUrl.searchParams.set("token_hash", generated.data.properties.hashed_token);
+    verifyUrl.searchParams.set("token_hash", verificationToken);
     verifyUrl.searchParams.set("type", "signup");
     await sendApplicantVerificationEmail({ recipientEmail: email, recipientName: displayName, actionLink: verifyUrl.toString() });
     verificationEmailSent = true;
   } catch (smtpError) {
     try {
+      if (env.AUTH_PROVIDER === "postgres") throw smtpError;
       const resend = await db.auth.resend({
         type: "signup",
         email,
@@ -130,16 +172,19 @@ export async function resendApplicantVerification(email: string): Promise<boolea
   if (rolesError) throw rolesError;
   if (!(assignments || []).some((assignment: any) => String(assignment.roles?.role_code || "").toUpperCase() === "APPLICANT")) return false;
 
-  const { data: identity, error: identityError } = await db.auth.admin.getUserById(String(profile.auth_user_id));
-  if (identityError) throw identityError;
-  if (!identity?.user || String(identity.user.email ?? "").trim().toLowerCase() !== normalizedEmail || identity.user.email_confirmed_at) return false;
+  const identity = env.AUTH_PROVIDER === "postgres"
+    ? await getLocalAuthUserById(String(profile.auth_user_id))
+    : (await db.auth.admin.getUserById(String(profile.auth_user_id))).data?.user;
+  if (!identity || String(identity.email ?? "").trim().toLowerCase() !== normalizedEmail || Boolean(identity.email_confirmed_at)) return false;
 
   // Generate a one-time sign-in/verification token server-side and deliver it
   // through the same Worker SMTP transport used by password recovery.
   const frontend = env.FRONTEND_URL.replace(/\/+$/, "");
-  const generated = await db.auth.admin.generateLink({ type: "magiclink", email: normalizedEmail });
-  const tokenHash = generated.data?.properties?.hashed_token;
-  if (generated.error || !tokenHash) throw generated.error ?? new Error("Unable to create applicant verification link.");
+  const generated = env.AUTH_PROVIDER === "postgres" ? null : await db.auth.admin.generateLink({ type: "magiclink", email: normalizedEmail });
+  const tokenHash = env.AUTH_PROVIDER === "postgres"
+    ? await issueLocalAuthAction(String(profile.auth_user_id), "magiclink")
+    : generated?.data?.properties?.hashed_token;
+  if (!tokenHash || generated?.error) throw generated?.error ?? new Error("Unable to create applicant verification link.");
 
   const verifyUrl = new URL(`${frontend}/applicant-access.html`);
   verifyUrl.searchParams.set("token_hash", tokenHash);
@@ -151,6 +196,7 @@ export async function resendApplicantVerification(email: string): Promise<boolea
   } catch (smtpError) {
     // Supabase Auth SMTP is a separate fallback provider. Keep it as a fallback
     // so an SMTP outage in either service does not make resend impossible.
+    if (env.AUTH_PROVIDER === "postgres") throw smtpError;
     const { error } = await db.auth.resend({
       type: "signup",
       email: normalizedEmail,
@@ -164,6 +210,18 @@ export async function resendApplicantVerification(email: string): Promise<boolea
 export async function verifyApplicantEmail(tokenHash: string, type: "signup" | "magiclink" = "signup") {
   if (!tokenHash || tokenHash.length > 512) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
   if (type !== "signup" && type !== "magiclink") throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
+  if (env.AUTH_PROVIDER === "postgres") {
+    const user = await consumeLocalAuthAction(tokenHash, type);
+    if (!user) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
+    const db = getSupabase();
+    const profile = await db.from("users").select("id,status").eq("auth_user_id", user.id).maybeSingle();
+    if (profile.error) throw profile.error;
+    if (!profile.data || profile.data.status !== "ACTIVE") throw Object.assign(new Error("Applicant access is not available for this account."), { statusCode: 403 });
+    const assignments = await db.from("user_roles").select("roles(role_code)").eq("user_id", profile.data.id).eq("status", "ACTIVE");
+    if (assignments.error) throw assignments.error;
+    if (!(assignments.data || []).some((assignment: any) => String(assignment.roles?.role_code || "").toUpperCase() === "APPLICANT")) throw Object.assign(new Error("Applicant access is not available for this account."), { statusCode: 403 });
+    return createLocalAuthSession(user);
+  }
   const authClient = createSupabaseAuthClient();
   const { data, error } = await authClient.auth.verifyOtp({ token_hash: tokenHash, type });
   if (error || !data.session || !data.user) throw Object.assign(new Error("This verification link is invalid or has expired. Request a new one."), { statusCode: 400 });
@@ -213,13 +271,13 @@ async function resolveLoginEmail(
       throw new Error("Invalid login credentials");
     }
 
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.getUserById(String(emailUser.auth_user_id));
-
-    if (authError || !authData?.user?.email) {
-      throw new Error("Invalid login credentials");
+    if (env.AUTH_PROVIDER === "postgres") {
+      const authUser = await getLocalAuthUserById(String(emailUser.auth_user_id));
+      if (!authUser?.email) throw new Error("Invalid login credentials");
+      return authUser.email.trim().toLowerCase();
     }
-
+    const { data: authData, error: authError } = await supabase.auth.admin.getUserById(String(emailUser.auth_user_id));
+    if (authError || !authData?.user?.email) throw new Error("Invalid login credentials");
     return String(authData.user.email).trim().toLowerCase();
   }
 
@@ -236,13 +294,13 @@ async function resolveLoginEmail(
       throw new Error(`User account is ${usernameUser.status}`);
     }
 
-    const { data: authData, error: authError } =
-      await supabase.auth.admin.getUserById(String(usernameUser.auth_user_id));
-
-    if (authError || !authData?.user?.email) {
-      throw new Error("Invalid login credentials");
+    if (env.AUTH_PROVIDER === "postgres") {
+      const authUser = await getLocalAuthUserById(String(usernameUser.auth_user_id));
+      if (!authUser?.email) throw new Error("Invalid login credentials");
+      return authUser.email.trim().toLowerCase();
     }
-
+    const { data: authData, error: authError } = await supabase.auth.admin.getUserById(String(usernameUser.auth_user_id));
+    if (authError || !authData?.user?.email) throw new Error("Invalid login credentials");
     return String(authData.user.email).trim().toLowerCase();
   }
 
@@ -255,8 +313,14 @@ export async function login(identifier: string, password: string) {
   }
 
   const supabase = getSupabase();
-  const authClient = createSupabaseAuthClient();
   const email = await resolveLoginEmail(identifier, String(password));
+  if (env.AUTH_PROVIDER === "postgres") {
+    const session = await signInLocalAuth(email, String(password));
+    const { error: lastLoginError } = await supabase.from("users").update({ last_login_at: new Date().toISOString() }).eq("email", email);
+    if (lastLoginError) console.warn("Unable to update last_login_at", lastLoginError.message);
+    return session;
+  }
+  const authClient = createSupabaseAuthClient();
   const { data, error } = await authClient.auth.signInWithPassword({
     email,
     password: String(password),
@@ -299,6 +363,12 @@ export async function studentLogin(studentNumber: string, password: string) {
   }
 
   const supabase = getSupabase();
+  if (env.AUTH_PROVIDER === "postgres") {
+    const session = await signInLocalAuth(email, passwordToCheck);
+    const { error: lastLoginError } = await supabase.from("users").update({ last_login_at: new Date().toISOString() }).ilike("email", escapeIlikeLiteral(email));
+    if (lastLoginError) console.warn("Unable to update last_login_at", lastLoginError.message);
+    return session;
+  }
   const authClient = createSupabaseAuthClient();
   const { data, error } = await authClient.auth.signInWithPassword({
     email,
@@ -324,6 +394,27 @@ export async function studentLogin(studentNumber: string, password: string) {
     expires_in: data.session.expires_in,
     token_type: data.session.token_type,
   };
+}
+
+export async function refreshSession(refreshToken: string) {
+  if (env.AUTH_PROVIDER === "postgres") return refreshLocalAuthSession(refreshToken);
+  const authClient = createSupabaseAuthClient();
+  const { data, error } = await authClient.auth.refreshSession({ refresh_token: refreshToken });
+  if (error || !data.session) throw new Error("Invalid or expired refresh token");
+  return { access_token: data.session.access_token, refresh_token: data.session.refresh_token, expires_at: data.session.expires_at, expires_in: data.session.expires_in, token_type: data.session.token_type };
+}
+
+export async function logoutSession(refreshToken: string, accessToken?: string) {
+  if (env.AUTH_PROVIDER === "postgres") return revokeLocalAuthSession(refreshToken);
+  if (!accessToken) return;
+  const authClient = createSupabaseAuthClient();
+  await authClient.auth.setSession({ access_token: accessToken, refresh_token: refreshToken || "" });
+  await authClient.auth.signOut();
+}
+
+export async function completePasswordRecovery(token: string, password: string) {
+  if (env.AUTH_PROVIDER === "postgres") return completeLocalPasswordRecovery(token, password);
+  throw Object.assign(new Error("Complete password recovery through the secure email link."), { statusCode: 400 });
 }
 
 export async function requestVerifiedPasswordReset(input: Parameters<typeof sendVerifiedPasswordReset>[0]) {

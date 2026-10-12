@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { getSupabase } from "../config/database.js";
 import { escapeIlikeLiteral, parseBearerToken } from "../utils/security.js";
+import { env } from "../config/env.js";
+import { verifyLocalAccessToken } from "../services/postgres-auth.service.js";
 
 export interface AuthenticatedUser {
   id: string;
@@ -52,21 +54,22 @@ export async function authenticate(
     }
 
     const supabase = getSupabase();
+    const localIdentity = env.AUTH_PROVIDER === "postgres" ? await verifyLocalAccessToken(token) : null;
+    const authData = localIdentity ? { user: {
+      id: localIdentity.id,
+      email: localIdentity.email,
+      email_confirmed_at: localIdentity.emailVerified ? new Date().toISOString() : null,
+    } } : null;
+    const legacyAuthData = env.AUTH_PROVIDER === "postgres" ? null : await supabase.auth.getUser(token);
+    const authUser = authData?.user ?? legacyAuthData?.data.user ?? null;
 
-    const {
-      data: authData,
-      error: authError
-    } = await supabase.auth.getUser(token);
-
-    if (authError || !authData.user) {
+    if (!authUser || (env.AUTH_PROVIDER !== "postgres" && legacyAuthData?.error)) {
       res.status(401).json({
         success: false,
         message: "Invalid or expired authentication token"
       });
       return;
     }
-
-    const authUser = authData.user;
 
     let {
       data: applicationUser,

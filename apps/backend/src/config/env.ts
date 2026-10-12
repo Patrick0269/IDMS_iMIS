@@ -18,13 +18,25 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().default(4000),
 
-  SUPABASE_URL: z
-    .string()
-    .url(),
+  // Direct PostgreSQL connection for native scheduler/maintenance operations.
+  // Application table and RPC calls use POSTGREST_URL.
+  DATABASE_URL: optionalText,
 
-  SUPABASE_SERVICE_ROLE_KEY: z
-    .string()
-    .min(1),
+  // Self-managed PostgREST endpoint for PostgreSQL table/RPC access.
+  POSTGREST_URL: optionalUrl,
+  POSTGREST_SERVICE_ROLE_KEY: optionalText,
+
+  // Keep the Supabase implementation as the default until the local Auth
+  // tables and PostgreSQL API have been configured and verified.
+  AUTH_PROVIDER: z.enum(["supabase", "postgres"]).default("supabase"),
+  LOCAL_AUTH_JWT_SECRET: optionalText,
+  PUBLIC_API_URL: optionalUrl,
+
+  SUPABASE_URL: optionalUrl,
+  SUPABASE_SERVICE_ROLE_KEY: optionalText,
+  // Origin used only to recognize old Supabase Storage URLs already stored in
+  // file metadata; PostgreSQL mode never makes requests to this origin.
+  LEGACY_STORAGE_ORIGIN: optionalUrl,
 
   JWT_SECRET: z
     .string()
@@ -84,6 +96,15 @@ const envSchema = z.object({
   NATIONAL_RESULTS_PROVIDER_URL: optionalUrl,
   NATIONAL_RESULTS_PROVIDER_API_KEY: optionalText,
 }).superRefine((settings, context) => {
+  if (Boolean(settings.POSTGREST_URL) !== Boolean(settings.POSTGREST_SERVICE_ROLE_KEY)) {
+    context.addIssue({ code: "custom", path: ["POSTGREST_SERVICE_ROLE_KEY"], message: "Set POSTGREST_URL and POSTGREST_SERVICE_ROLE_KEY together." });
+  }
+  if (settings.AUTH_PROVIDER === "postgres" && (!settings.POSTGREST_URL || !settings.POSTGREST_SERVICE_ROLE_KEY || !settings.LOCAL_AUTH_JWT_SECRET)) {
+    context.addIssue({ code: "custom", path: ["LOCAL_AUTH_JWT_SECRET"], message: "PostgreSQL Auth requires POSTGREST_URL, POSTGREST_SERVICE_ROLE_KEY and LOCAL_AUTH_JWT_SECRET." });
+  }
+  if (settings.AUTH_PROVIDER === "supabase" && (!settings.SUPABASE_URL || !settings.SUPABASE_SERVICE_ROLE_KEY)) {
+    context.addIssue({ code: "custom", path: ["SUPABASE_URL"], message: "The Supabase Auth provider requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY." });
+  }
   if (!settings.SMTP_PASSWORD && !settings.SMTP_PASS) {
     context.addIssue({ code: "custom", path: ["SMTP_PASSWORD"], message: "Set SMTP_PASSWORD or SMTP_PASS." });
   }

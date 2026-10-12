@@ -7,6 +7,8 @@ import { requirePermission } from "../../middleware/rbac.js";
 const router = Router();
 const categories = new Set(["admissions", "students", "academics", "finance", "staff", "operations", "communications", "audit", "accounts", "everything"]);
 const projectReference = () => {
+  if (env.AUTH_PROVIDER === "postgres") return "local-postgres";
+  if (!env.SUPABASE_URL) return "";
   const host = new URL(env.SUPABASE_URL).hostname;
   return host.endsWith(".supabase.co") ? host.split(".")[0] : process.env.SUPABASE_PROJECT_REF || "";
 };

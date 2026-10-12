@@ -108,6 +108,44 @@ export async function studentLogin(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function refreshSession(req: Request, res: Response): Promise<void> {
+  const refreshToken = String(req.body?.refresh_token ?? "");
+  if (!refreshToken || refreshToken.length > 256) {
+    res.status(401).json({ success: false, message: "Session expired. Sign in again." });
+    return;
+  }
+  try {
+    res.json({ success: true, data: await authService.refreshSession(refreshToken) });
+  } catch {
+    res.status(401).json({ success: false, message: "Session expired. Sign in again." });
+  }
+}
+
+export async function logoutSession(req: Request, res: Response): Promise<void> {
+  const refreshToken = String(req.body?.refresh_token ?? "");
+  const authorization = String(req.headers.authorization ?? "");
+  const accessToken = authorization.match(/^Bearer\s+([^\s]+)$/i)?.[1];
+  try { await authService.logoutSession(refreshToken, accessToken); }
+  catch (error) { logError("Logout session revocation failed", error); }
+  res.json({ success: true });
+}
+
+export async function completePasswordRecovery(req: Request, res: Response): Promise<void> {
+  const token = String(req.body?.token_hash ?? "");
+  const password = String(req.body?.password ?? "");
+  try {
+    const changed = await authService.completePasswordRecovery(token, password);
+    if (!changed) {
+      res.status(400).json({ success: false, message: "This recovery link is invalid or expired. Request a new one." });
+      return;
+    }
+    res.json({ success: true, message: "Password changed. You can now sign in." });
+  } catch (error) {
+    const status = Number((error as { statusCode?: number })?.statusCode) || 400;
+    res.status(status).json({ success: false, message: error instanceof Error ? error.message : "Unable to change password." });
+  }
+}
+
 export async function requestVerifiedPasswordReset(req: Request, res: Response): Promise<void> {
   try {
     await authService.requestVerifiedPasswordReset({

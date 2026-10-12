@@ -28,8 +28,9 @@ test("role landing prioritizes Admin and sends roleless accounts to access denie
   ] });
   assert.equal(auth.getActiveRoleId(), "admin");
   assert.equal(auth.getLandingPage(), "dashboard.html");
-  auth.saveUser({ roles: [], permissions: [] });
+  auth.saveUser({ roles: [], permissions: ["system.config.manage"] });
   assert.equal(auth.getLandingPage(), "access-denied.html");
+  assert.equal(auth.hasPermission("system.config.manage"), false, "a roleless account cannot inherit stale flattened permissions");
 });
 
 test("a selected role controls landing page and client-side permission checks", () => {

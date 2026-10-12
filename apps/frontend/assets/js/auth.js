@@ -299,7 +299,7 @@
         studentNumber = String(studentNumber || "").trim().replace(/\s+/g, "").toUpperCase();
         password = String(password || "");
 
-        if (!/^(?:IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/.test(studentNumber)) {
+        if (!/^(?:IDMC\/\d{4}\/\d{5}|IDMS\/\d{4}\/\d{5}|N[A-Z]\d{4}\/\d{4}\/\d{4})$/.test(studentNumber)) {
             throw new Error("Enter a valid Student Number or Registration Number.");
         }
         if (!password) {
@@ -450,13 +450,11 @@
 
         try {
             response = await fetchWithTimeout(
-                `${CONFIG.SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,
+                `${CONFIG.API_BASE_URL}/auth/refresh`,
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "apikey": CONFIG.SUPABASE_ANON_KEY,
-                        "Authorization": `Bearer ${CONFIG.SUPABASE_ANON_KEY}`
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
                         refresh_token: session.refresh_token
@@ -475,16 +473,17 @@
             return null;
         }
 
-        let newSession;
+        let envelope;
         try {
-            newSession = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
+            envelope = await parseResponse(response, SESSION_VALIDATION_TIMEOUT_MS);
         } catch (error) {
             console.warn("Session refresh response could not be read:", error);
             clearSession();
             return null;
         }
 
-        if (!newSession?.access_token) {
+        const newSession = envelope?.data;
+        if (!response.ok || !envelope?.success || !newSession?.access_token) {
             clearSession();
             return null;
         }
@@ -500,13 +499,14 @@
         try {
             if (token) {
                 await fetchWithTimeout(
-                    `${CONFIG.SUPABASE_URL}/auth/v1/logout`,
+                    `${CONFIG.API_BASE_URL}/auth/logout`,
                     {
                         method: "POST",
                         headers: {
+                            "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
-                            "apikey": CONFIG.SUPABASE_ANON_KEY
-                        }
+                        },
+                        body: JSON.stringify({ refresh_token: getSession()?.refresh_token || "" })
                     },
                     4000
                 );
@@ -524,8 +524,11 @@
 
         if (!user) return false;
         const roles = (user.roles || []).filter(role => role && role.id);
+        if (!roles.length) return false;
         if (roles.some(role => Array.isArray(role.permissions))) {
-            return roles.some(role => Array.isArray(role.permissions) && role.permissions.includes(permission));
+            const activeRoleId = getActiveRoleId();
+            const activeRole = roles.find(role => String(role.id) === String(activeRoleId));
+            return Boolean(activeRole && Array.isArray(activeRole.permissions) && activeRole.permissions.includes(permission));
         }
         return Array.isArray(user.permissions) && user.permissions.includes(permission);
     }
