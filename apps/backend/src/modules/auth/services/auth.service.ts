@@ -5,7 +5,7 @@ import {
 import {
   isValidStudentNumber,
   normaliseStudentNumber,
-  resolveStudentLoginEmail,
+  resolveStudentLoginCredentials,
   requestVerifiedPasswordReset as sendVerifiedPasswordReset,
 } from "./student-login.service.js";
 import { changeAuthenticatedPassword } from "../../../services/password.service.js";
@@ -356,11 +356,11 @@ export async function studentLogin(studentNumber: string, password: string) {
     throw new Error("Invalid login credentials");
   }
 
-  const passwordToCheck = normaliseStudentNumber(suppliedPassword) === number ? number : suppliedPassword;
-  const email = await resolveStudentLoginEmail(number, passwordToCheck);
-  if (!email) {
+  const credentials = await resolveStudentLoginCredentials(number, suppliedPassword);
+  if (!credentials) {
     throw new Error("Invalid login credentials");
   }
+  const { email, password: passwordToCheck } = credentials;
 
   const supabase = getSupabase();
   if (env.AUTH_PROVIDER === "postgres") {

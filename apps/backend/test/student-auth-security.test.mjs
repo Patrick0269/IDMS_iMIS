@@ -4,6 +4,7 @@ import express from 'express';
 
 Object.assign(process.env, {
   NODE_ENV: 'test',
+  AUTH_PROVIDER: 'supabase',
   SUPABASE_URL: 'http://127.0.0.1:9',
   SUPABASE_SERVICE_ROLE_KEY: 'test-key-only',
   JWT_SECRET: 'test-secret-at-least-sixteen',
@@ -17,7 +18,7 @@ const { getSupabase } = await import('../dist/config/database.js');
 const { default: authRoutes } = await import('../dist/modules/auth/routes/auth.routes.js');
 const { completePasswordSetup } = await import('../dist/modules/auth/services/auth.service.js');
 const { changeAuthenticatedPassword } = await import('../dist/services/password.service.js');
-const { resolveStudentLoginEmail, requestVerifiedPasswordReset, normaliseStudentNumber, isValidStudentNumber } = await import('../dist/modules/auth/services/student-login.service.js');
+const { resolveStudentLoginEmail, resolveStudentLoginCredentials, requestVerifiedPasswordReset, normaliseStudentNumber, isValidStudentNumber } = await import('../dist/modules/auth/services/student-login.service.js');
 
 function tableMock(records, onInsert = () => {}) {
   return table => {
@@ -193,6 +194,45 @@ test('historical student number works as a temporary password only while first-l
 
     identity.app_metadata.idmc_student_first_login = false;
     assert.equal(await resolveStudentLoginEmail(number, number), null, 'the temporary number password stops working after the required change');
+  } finally {
+    db.from = originalFrom;
+    db.auth.admin.getUserById = originalGetUserById;
+    db.auth.admin.updateUserById = originalUpdateUserById;
+  }
+});
+
+test('a linked student can use either stored student number as the first-login username and password', async () => {
+  const db = getSupabase();
+  const originalFrom = db.from;
+  const originalGetUserById = db.auth.admin.getUserById;
+  const originalUpdateUserById = db.auth.admin.updateUserById;
+  const studentNumber = 'IDMC/2026/01234';
+  const registrationNumber = 'NS4001/0268/2020';
+  const records = {
+    students: [{ id: 'student-3', student_number: studentNumber, registration_number: registrationNumber, user_id: 'user-3', student_status: 'ACTIVE' }],
+    users: [{ id: 'user-3', auth_user_id: 'auth-3', status: 'ACTIVE', password_changed_at: null }],
+    user_roles: [{ user_id: 'user-3', status: 'ACTIVE', roles: { role_code: 'STUDENT' } }],
+  };
+  const identity = { id: 'auth-3', email: 'student@example.edu', app_metadata: {} };
+  let initializedPassword = '';
+  db.from = tableMock(records);
+  db.auth.admin.getUserById = async () => ({ data: { user: identity }, error: null });
+  db.auth.admin.updateUserById = async (_id, input) => {
+    initializedPassword = input.password;
+    identity.app_metadata = input.app_metadata;
+    return { data: { user: identity }, error: null };
+  };
+  try {
+    const credentials = await resolveStudentLoginCredentials(studentNumber, studentNumber);
+    assert.deepEqual(credentials, { email: 'student@example.edu', password: registrationNumber });
+    assert.equal(initializedPassword, registrationNumber, 'Auth uses the canonical registration number as initial password');
+    assert.equal(identity.app_metadata.idmc_student_first_login, true);
+    assert.equal(await resolveStudentLoginEmail(registrationNumber, registrationNumber), 'student@example.edu');
+    assert.equal(await resolveStudentLoginEmail(studentNumber, registrationNumber), 'student@example.edu');
+
+    records.users[0].password_changed_at = '2026-10-13T09:00:00.000Z';
+    identity.app_metadata.idmc_student_first_login = false;
+    assert.equal(await resolveStudentLoginEmail(studentNumber, studentNumber), null, 'a changed password cannot be replaced by a student-number password');
   } finally {
     db.from = originalFrom;
     db.auth.admin.getUserById = originalGetUserById;

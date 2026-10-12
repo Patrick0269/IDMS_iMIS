@@ -101,9 +101,11 @@ export async function studentLogin(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: session });
   } catch (error) {
     logError("Student login failed", error);
-    res.status(401).json({
+    const invalidCredentials = error instanceof Error && error.message === "Invalid login credentials";
+    res.status(invalidCredentials ? 401 : 503).json({
       success: false,
-      message: "Invalid Student Number or password",
+      message: invalidCredentials ? "Invalid Student Number or password" : "Student sign-in is temporarily unavailable. Please try again shortly.",
+      ...(!invalidCredentials && req.requestId ? { requestId: req.requestId } : {}),
     });
   }
 }

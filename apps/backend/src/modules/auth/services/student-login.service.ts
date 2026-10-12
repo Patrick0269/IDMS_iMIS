@@ -54,12 +54,20 @@ async function findStudentByIdentifier(value: string): Promise<StudentRow | null
 }
 
 /** Resolve an existing linked identity only; login must never create/link an account. */
-export async function resolveStudentLoginEmail(identifier: string, password: string): Promise<string | null> {
+export async function resolveStudentLoginCredentials(identifier: string, password: string): Promise<{ email: string; password: string } | null> {
   const studentNumber = normaliseStudentNumber(identifier);
   if (!isValidStudentNumber(studentNumber) || !password) return null;
 
   const student = await findStudentByIdentifier(studentNumber);
   if (!student || BLOCKED_STUDENT_STATUSES.has(String(student.student_status ?? "").toUpperCase()) || !student.user_id) return null;
+
+  const initialNumber = studentInitialNumber(student);
+  const suppliedPassword = String(password);
+  const normalizedPassword = normaliseStudentNumber(suppliedPassword);
+  const registeredNumbers = [student.student_number, student.registration_number]
+    .map(value => normaliseStudentNumber(String(value ?? "")))
+    .filter(Boolean);
+  const usingRegisteredNumberPassword = registeredNumbers.includes(normalizedPassword);
 
   const supabase = getSupabase();
   const { data: user, error } = await supabase.from("users")
@@ -69,9 +77,10 @@ export async function resolveStudentLoginEmail(identifier: string, password: str
   if (error) throw error;
   if (!user || user.status !== "ACTIVE" || !user.auth_user_id) return null;
 
-  const initialNumber = studentInitialNumber(student);
-  const usingInitialPassword = normaliseStudentNumber(password) === initialNumber;
-  if (usingInitialPassword) await initialiseStudentFirstLogin(String(user.auth_user_id), student);
+  // Only initialize a temporary number password after confirming the linked
+  // institutional account is active. This prevents login attempts from
+  // changing credentials on disabled profiles.
+  if (usingRegisteredNumberPassword) await initialiseStudentFirstLogin(String(user.auth_user_id), student);
 
   const identity = env.AUTH_PROVIDER === "postgres"
     ? await getLocalAuthUserById(String(user.auth_user_id))
@@ -79,8 +88,16 @@ export async function resolveStudentLoginEmail(identifier: string, password: str
   const email = String(identity?.email ?? "").trim().toLowerCase();
   if (!email) throw new Error(INVALID);
   const authMetadata = (identity as unknown as Record<string, any>).raw_app_meta_data ?? (identity as unknown as Record<string, any>).app_metadata ?? {};
-  if (usingInitialPassword && (!needsStudentPasswordChange(authMetadata) || String(authMetadata.idmc_student_initial_number ?? "").toUpperCase() !== initialNumber)) return null;
-  return email;
+  const recordedInitialNumber = normaliseStudentNumber(String(authMetadata.idmc_student_initial_number ?? ""));
+  const initialLoginForThisStudent = needsStudentPasswordChange(authMetadata) && recordedInitialNumber === initialNumber;
+  if (usingRegisteredNumberPassword && !initialLoginForThisStudent) return null;
+  if (usingRegisteredNumberPassword && initialLoginForThisStudent) return { email, password: initialNumber };
+  return { email, password: suppliedPassword };
+}
+
+export async function resolveStudentLoginEmail(identifier: string, password: string): Promise<string | null> {
+  const credentials = await resolveStudentLoginCredentials(identifier, password);
+  return credentials?.email ?? null;
 }
 
 function normalizeRecoveryIdentifier(value: unknown): string {

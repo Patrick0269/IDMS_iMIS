@@ -23,7 +23,9 @@ export async function initialiseStudentFirstLogin(authUserId: string, student: {
     : (await db.auth.admin.getUserById(authUserId)).data?.user;
   if (!identity) throw new Error("Student identity missing.");
   const appMetadata = ("raw_app_meta_data" in identity ? identity.raw_app_meta_data : identity.app_metadata) ?? {};
-  if (appMetadata.idmc_student_initialised === true) return;
+  const number = studentInitialNumber(student);
+  const recordedInitialNumber = String(appMetadata.idmc_student_initial_number ?? "").replace(/\s+/g, "").toUpperCase();
+  if (appMetadata.idmc_student_initialised === true && recordedInitialNumber === number) return;
   const profile = await db.from("users").select("id,password_changed_at").eq("auth_user_id", authUserId).maybeSingle();
   if (profile.error) throw profile.error;
   // Existing/historical student accounts may already have last_login_at from
@@ -36,7 +38,6 @@ export async function initialiseStudentFirstLogin(authUserId: string, student: {
     if (roles.error) throw roles.error;
     if ((roles.data || []).some((r: any) => !["STUDENT", "APPLICANT"].includes(r.roles?.role_code))) return;
   }
-  const number = studentInitialNumber(student);
   const metadata = { ...appMetadata, idmc_student_initialised: true, idmc_student_first_login: true, idmc_student_initial_number: number };
   if (env.AUTH_PROVIDER === "postgres") {
     await updateLocalAuthCredentials({ id: authUserId, password: number, appMetadata: metadata });

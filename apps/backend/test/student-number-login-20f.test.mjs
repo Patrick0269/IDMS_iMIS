@@ -94,9 +94,10 @@ test("student login only authenticates the existing linked student account", () 
 });
 
 
-test("student login reads the current students schema and does not require a legacy registration_number column", () => {
+test("student login accepts both student number and registration number aliases", () => {
   const service = read("apps/backend/src/modules/auth/services/student-login.service.ts");
   assert.match(service, /\.or\(/);
   assert.match(service, /student_number\.ilike/);
-  assert.doesNotMatch(service, /student\.registration_number/);
+  assert.match(service, /registration_number\.ilike/);
+  assert.match(service, /\[student\.student_number, student\.registration_number\]/);
 });
