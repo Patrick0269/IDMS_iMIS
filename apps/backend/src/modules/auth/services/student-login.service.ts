@@ -2,7 +2,7 @@ import { getSupabase } from "../../../config/database.js";
 import { env } from "../../../config/env.js";
 import { sendAccountPasswordRecoveryEmail } from "../../../services/email.service.js";
 import { initialiseStudentFirstLogin, needsStudentPasswordChange, studentInitialNumber } from "../../../services/student-first-login.service.js";
-import { logError } from "../../../utils/logger.js";
+import { logError, logInfo } from "../../../utils/logger.js";
 import { getLocalAuthUserById, issueLocalAuthAction } from "../../../services/postgres-auth.service.js";
 
 const BLOCKED_STUDENT_STATUSES = new Set([
@@ -23,6 +23,13 @@ interface StudentRow {
 }
 
 const INVALID = "Invalid login credentials";
+
+function rejectStudentLogin(reason: string): null {
+  // Keep the client response generic while leaving an identifier-free reason
+  // for production diagnostics.
+  logInfo("Student login identity resolution rejected", { reason });
+  return null;
+}
 
 function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, character => `\\${character}`);
@@ -56,10 +63,12 @@ async function findStudentByIdentifier(value: string): Promise<StudentRow | null
 /** Resolve an existing linked identity only; login must never create/link an account. */
 export async function resolveStudentLoginCredentials(identifier: string, password: string): Promise<{ email: string; password: string } | null> {
   const studentNumber = normaliseStudentNumber(identifier);
-  if (!isValidStudentNumber(studentNumber) || !password) return null;
+  if (!isValidStudentNumber(studentNumber) || !password) return rejectStudentLogin("invalid_identifier_or_empty_password");
 
   const student = await findStudentByIdentifier(studentNumber);
-  if (!student || BLOCKED_STUDENT_STATUSES.has(String(student.student_status ?? "").toUpperCase()) || !student.user_id) return null;
+  if (!student) return rejectStudentLogin("student_not_found_or_ambiguous");
+  if (BLOCKED_STUDENT_STATUSES.has(String(student.student_status ?? "").toUpperCase())) return rejectStudentLogin("student_status_blocked");
+  if (!student.user_id) return rejectStudentLogin("student_account_not_linked");
 
   const initialNumber = studentInitialNumber(student);
   const suppliedPassword = String(password);
@@ -75,7 +84,7 @@ export async function resolveStudentLoginCredentials(identifier: string, passwor
     .eq("id", student.user_id)
     .maybeSingle();
   if (error) throw error;
-  if (!user || user.status !== "ACTIVE" || !user.auth_user_id) return null;
+  if (!user || user.status !== "ACTIVE" || !user.auth_user_id) return rejectStudentLogin("linked_user_missing_or_inactive");
 
   // Only initialize a temporary number password after confirming the linked
   // institutional account is active. This prevents login attempts from
@@ -90,7 +99,7 @@ export async function resolveStudentLoginCredentials(identifier: string, passwor
   const authMetadata = (identity as unknown as Record<string, any>).raw_app_meta_data ?? (identity as unknown as Record<string, any>).app_metadata ?? {};
   const recordedInitialNumber = normaliseStudentNumber(String(authMetadata.idmc_student_initial_number ?? ""));
   const initialLoginForThisStudent = needsStudentPasswordChange(authMetadata) && recordedInitialNumber === initialNumber;
-  if (usingRegisteredNumberPassword && !initialLoginForThisStudent) return null;
+  if (usingRegisteredNumberPassword && !initialLoginForThisStudent) return rejectStudentLogin("student_number_password_not_eligible");
   if (usingRegisteredNumberPassword && initialLoginForThisStudent) return { email, password: initialNumber };
   return { email, password: suppliedPassword };
 }
