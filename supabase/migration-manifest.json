@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-09T18:33:46.369Z",
+  "generated_at": "2026-10-13T04:58:22.149Z",
   "authoritative_directory": "supabase/migrations",
   "reference_only_directory": "database/migrations",
   "migrations": [
@@ -1032,6 +1032,94 @@
       "name": "20261009210000_public_website_publishing.sql",
       "sha256": "0ecb8fb32b335536ec411bca048aeff1dce153c847e30cdc3fa732955f18b68e",
       "bytes": 7595,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261011130000",
+      "name": "20261011130000_admissions_window_daily_limit.sql",
+      "sha256": "84fd5b76725d4dda5b18ddd87a60983d1a8203b5fa1d2756a35b28d97dc05a85",
+      "bytes": 3661,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261011210000",
+      "name": "20261011210000_course_delete_intake_result_windows.sql",
+      "sha256": "f96b7f56b5c120460b1d48b9be5ededcd6dc4eccf7c08f1d411e71f7ee8b19ac",
+      "bytes": 2415,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261011220000",
+      "name": "20261011220000_admin_reset_coursework_policy_guard.sql",
+      "sha256": "f23efd08253b3f4be2fdc8d10c040f5597ebff7466734b1e0ceac19a7beb9ff9",
+      "bytes": 2096,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261011230000",
+      "name": "20261011230000_admin_reset_academic_registration_guards.sql",
+      "sha256": "938417789780c8f1cdfb1bd9b6bece6739a17ace918828f12241b54af02c55fa",
+      "bytes": 3060,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261012000100",
+      "name": "20261012000100_admin_reset_statement_timeout.sql",
+      "sha256": "05e1d05bd2ab9e284b759a35ae424f2dadca5cafb4b3a993544f4ec2d9b964cc",
+      "bytes": 346,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261012000200",
+      "name": "20261012000200_admin_reset_ten_minute_timeout.sql",
+      "sha256": "92f747d7e036798832b4ffb6e717778fab13d59b0c1ab9fe3b8d958d77b065fb",
+      "bytes": 275,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261012000300",
+      "name": "20261012000300_admin_reset_cache_fk_dependencies.sql",
+      "sha256": "459a92558454cb93d1cc4721e9ecf09a9c95f43d53778487cc5516fed18404e5",
+      "bytes": 3187,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261012000400",
+      "name": "20261012000400_postgres_auth_core.sql",
+      "sha256": "3a54f8722d6a4542b5e4e6b4bfb0a2cd48f171b1900777b123d60f0889360727",
+      "bytes": 20007,
+      "transactional": false,
+      "source_of_truth": true
+    },
+    {
+      "version": "20261012000500",
+      "name": "20261012000500_postgrest_runtime_roles.sql",
+      "sha256": "8228e2274e4314e3abfee35d0f36fb57ae116a7740b7a176f929ec27d5692273",
+      "bytes": 1123,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "202610130001",
+      "name": "202610130001_students_updated_by_audit.sql",
+      "sha256": "21d9ee039017f670055f3564b074456ba3832eda4bdfdef23d05c5a00b4cacb6",
+      "bytes": 646,
+      "transactional": true,
+      "source_of_truth": true
+    },
+    {
+      "version": "202610130002",
+      "name": "202610130002_applicant_qualification_eligibility.sql",
+      "sha256": "c465a1f553c45d2d63ab170298f232e82ef47aef21157290c1bf36d4418bb415",
+      "bytes": 3264,
       "transactional": true,
       "source_of_truth": true
     }

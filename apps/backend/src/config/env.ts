@@ -34,6 +34,10 @@ const envSchema = z.object({
 
   SUPABASE_URL: optionalUrl,
   SUPABASE_SERVICE_ROLE_KEY: optionalText,
+  // Google OAuth is handled by the backend and creates PostgreSQL Auth sessions.
+  GOOGLE_OAUTH_CLIENT_ID: optionalText,
+  GOOGLE_OAUTH_CLIENT_SECRET: optionalText,
+  GOOGLE_OAUTH_REDIRECT_URI: optionalUrl,
   // Origin used only to recognize old Supabase Storage URLs already stored in
   // file metadata; PostgreSQL mode never makes requests to this origin.
   LEGACY_STORAGE_ORIGIN: optionalUrl,
@@ -96,6 +100,10 @@ const envSchema = z.object({
   NATIONAL_RESULTS_PROVIDER_URL: optionalUrl,
   NATIONAL_RESULTS_PROVIDER_API_KEY: optionalText,
 }).superRefine((settings, context) => {
+  const googleOAuthValues = [settings.GOOGLE_OAUTH_CLIENT_ID, settings.GOOGLE_OAUTH_CLIENT_SECRET, settings.GOOGLE_OAUTH_REDIRECT_URI];
+  if (googleOAuthValues.some(Boolean) && !googleOAuthValues.every(Boolean)) {
+    context.addIssue({ code: "custom", path: ["GOOGLE_OAUTH_REDIRECT_URI"], message: "Set GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_OAUTH_REDIRECT_URI together to enable Google Applicant Sign-In." });
+  }
   if (Boolean(settings.POSTGREST_URL) !== Boolean(settings.POSTGREST_SERVICE_ROLE_KEY)) {
     context.addIssue({ code: "custom", path: ["POSTGREST_SERVICE_ROLE_KEY"], message: "Set POSTGREST_URL and POSTGREST_SERVICE_ROLE_KEY together." });
   }

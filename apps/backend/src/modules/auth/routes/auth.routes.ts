@@ -6,6 +6,8 @@ import { rateLimit } from "../../../middleware/rateLimit.js";
 const router = Router();
 
 router.get("/health", controller.authHealth);
+router.get("/google/applicant/start", rateLimit({ windowMs: 15 * 60 * 1000, max: 20, name: "applicant-google-start" }), controller.googleApplicantStart);
+router.get("/google/applicant/callback", rateLimit({ windowMs: 15 * 60 * 1000, max: 30, name: "applicant-google-callback" }), controller.googleApplicantCallback);
 router.post("/applicant-register", rateLimit({ windowMs: 15 * 60 * 1000, max: 5, name: "applicant-register" }), controller.registerApplicant);
 router.post("/applicant-verification-resend", rateLimit({ windowMs: 60 * 60 * 1000, max: 3, name: "applicant-verification-resend" }), controller.resendApplicantVerification);
 router.post("/applicant-verification-confirm", rateLimit({ windowMs: 15 * 60 * 1000, max: 10, name: "applicant-verification-confirm" }), controller.confirmApplicantVerification);

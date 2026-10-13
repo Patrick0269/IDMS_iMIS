@@ -1,7 +1,12 @@
 {
-  "generated_at": "2026-10-11T06:10:12.007Z",
-  "count": 867,
+  "generated_at": "2026-10-13T04:58:22.231Z",
+  "count": 878,
   "routes": [
+    {
+      "method": "GET",
+      "path": "/admission-eligibility",
+      "source": "apps/backend/src/modules/academic-core/academic-core.routes.ts"
+    },
     {
       "method": "POST",
       "path": "/course-offerings",
@@ -35,6 +40,11 @@
     {
       "method": "POST",
       "path": "/hod/course-allocation",
+      "source": "apps/backend/src/modules/academic-core/academic-core.routes.ts"
+    },
+    {
+      "method": "PUT",
+      "path": "/programmes/:id/admission-eligibility",
       "source": "apps/backend/src/modules/academic-core/academic-core.routes.ts"
     },
     {
@@ -123,6 +133,11 @@
       "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
     },
     {
+      "method": "POST",
+      "path": "/applications/classify-eligible",
+      "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
+    },
+    {
       "method": "GET",
       "path": "/context",
       "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
@@ -175,6 +190,16 @@
     {
       "method": "POST",
       "path": "/students/:id/progress",
+      "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/students/positions-batch",
+      "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/students/progress-batch",
       "source": "apps/backend/src/modules/academic-progression/academic-progression.routes.ts"
     },
     {
@@ -529,6 +554,11 @@
     },
     {
       "method": "POST",
+      "path": "/students/password-reset",
+      "source": "apps/backend/src/modules/admissions/admissions.routes.ts"
+    },
+    {
+      "method": "POST",
       "path": "/students/photo-matches",
       "source": "apps/backend/src/modules/admissions/admissions.routes.ts"
     },
@@ -864,6 +894,16 @@
     },
     {
       "method": "GET",
+      "path": "/google/applicant/callback",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "GET",
+      "path": "/google/applicant/start",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "GET",
       "path": "/health",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
@@ -873,8 +913,18 @@
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
     {
+      "method": "POST",
+      "path": "/logout",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
       "method": "GET",
       "path": "/me",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/password-recovery-complete",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
     {
@@ -885,6 +935,11 @@
     {
       "method": "POST",
       "path": "/password-setup-complete",
+      "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
+    },
+    {
+      "method": "POST",
+      "path": "/refresh",
       "source": "apps/backend/src/modules/auth/routes/auth.routes.ts"
     },
     {

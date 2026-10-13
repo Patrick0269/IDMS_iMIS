@@ -6,6 +6,7 @@ import { getSupabase } from "../../config/database.js";
 import { env } from "../../config/env.js";
 import { buildAdmissionPdf } from "./admission-pdf.js";
 import { rolesGrantRole, scopeRoleAssignments } from "../../utils/security.js";
+import { isEligibleForProgramme, type AdmissionRule, type ApplicantQualification } from "./programme-eligibility.js";
 
 const router = Router();
 router.use(authenticate);
@@ -28,6 +29,23 @@ function applicationNumber(): string {
 
 const allowedDocumentTypes = new Set(["RESULT_SLIP", "CERTIFICATE", "ACADEMIC_CERTIFICATE", "BIRTH_CERTIFICATE", "IDENTITY", "OTHER"]);
 const allowedMimeTypes = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function applicableAdmissionRules(db: ReturnType<typeof getSupabase>, programmeIds: string[], intakeId: string | null) {
+  if (!programmeIds.length) return [];
+  const globalQuery = db.from("idmc_programme_admission_rules")
+    .select("programme_id,intake_id,accepted_qualification_types,minimum_qualification_level,require_verified_qualification")
+    .in("programme_id", programmeIds).is("intake_id", null);
+  const specificQuery = intakeId && uuidPattern.test(intakeId)
+    ? db.from("idmc_programme_admission_rules")
+      .select("programme_id,intake_id,accepted_qualification_types,minimum_qualification_level,require_verified_qualification")
+      .in("programme_id", programmeIds).eq("intake_id", intakeId)
+    : null;
+  const [globalRules, intakeRules] = await Promise.all([globalQuery, specificQuery ?? Promise.resolve({ data: [], error: null })]);
+  if (globalRules.error) throw globalRules.error;
+  if (intakeRules.error) throw intakeRules.error;
+  return [...(globalRules.data ?? []), ...(intakeRules.data ?? [])];
+}
 
 function validIndexNumber(input: string): boolean {
   return /^[A-Z]\d{4}\/\d{4}\/\d{4}$/i.test(input) || /^[A-Z0-9][A-Z0-9./-]{7,29}$/i.test(input);
@@ -46,14 +64,6 @@ function qualificationMetaText(input: Record<string, any>): string {
   if (result.length <= 4000) return result;
   delete compact.subjects;
   return JSON.stringify(compact);
-}
-
-function isApplicantProgramme(programme: any): boolean {
-  const classification = String(programme?.award_level ?? "") + " " + String(programme?.programme_type ?? "");
-  const name = String(programme?.programme_name ?? "").toUpperCase();
-  return !/TECHNICIAN|BACHELOR|DEGREE|MASTER|POSTGRAD|PHD|DOCTOR|SHORT.?COURSE/i.test(classification + " " + name)
-    && /CERTIFICATE|DIPLOMA/i.test(classification)
-    && (/SOCIAL\s*WORK/.test(name) || (/PROJECT/.test(name) && /BUSINESS\s+ADMINISTRATION/.test(name)));
 }
 
 async function ownQualification(req: Request, id: string) {
@@ -130,9 +140,20 @@ router.get("/lookups/years", handler(async (_req, res) => {
 }));
 
 router.get("/lookups/programmes", handler(async (_req, res) => {
-  const result = await getSupabase().from("programmes").select("id,programme_code,programme_name,programme_type,award_level,mode_of_study,duration_years,specialization,direct_entry_requirements,tuition_fee,status").eq("status", "ACTIVE").order("programme_name");
-  if (result.error) throw result.error;
-  send(res, (result.data ?? []).filter(isApplicantProgramme));
+  const applicant = await ownApplicant(_req);
+  if (applicant.error) throw applicant.error;
+  if (!applicant.data) return send(res, []);
+  const db = getSupabase(), intakeId = value(_req.query.intakeId, 80);
+  if (intakeId && !uuidPattern.test(intakeId)) return fail(res, 400, "Choose a valid intake before viewing eligible programmes.");
+  const [programmes, qualifications] = await Promise.all([
+    db.from("programmes").select("id,programme_code,programme_name,programme_type,award_level,mode_of_study,duration_years,specialization,direct_entry_requirements,tuition_fee,status").eq("status", "ACTIVE").order("programme_name"),
+    db.from("academic_qualifications").select("qualification_type,qualification_level,verification_status").eq("applicant_id", applicant.data.id),
+  ]);
+  if (programmes.error) throw programmes.error;
+  if (qualifications.error) throw qualifications.error;
+  const rules = await applicableAdmissionRules(db, (programmes.data ?? []).map((programme: any) => programme.id), intakeId);
+  const applicable = rules as AdmissionRule[], earned = (qualifications.data ?? []) as ApplicantQualification[];
+  send(res, (programmes.data ?? []).filter((programme: any) => isEligibleForProgramme(applicable, earned, programme.id, intakeId)));
 }));
 
 router.get("/online-status", handler(async (_req, res) => {
@@ -279,10 +300,17 @@ router.put("/applications/:id/choices", handler(async (req, res) => {
   if (!Array.isArray(choices) || choices.length < 1 || choices.length > 2) return fail(res, 400, "Provide one or two programme choices.");
   const programmeIds = [...new Set(choices.map((item: any) => String(item?.programmeId ?? "").trim()).filter(Boolean))];
   if (programmeIds.length !== choices.length) return fail(res, 400, "Select a valid programme for each choice.");
-  const programmes = await getSupabase().from("programmes").select("id,programme_name,programme_type,award_level,status").in("id", programmeIds);
+  const db = getSupabase();
+  const [programmes, qualifications] = await Promise.all([
+    db.from("programmes").select("id,programme_name,programme_type,award_level,status").in("id", programmeIds),
+    db.from("academic_qualifications").select("qualification_type,qualification_level,verification_status").eq("applicant_id", application.applicant_id),
+  ]);
   if (programmes.error) throw programmes.error;
-  if ((programmes.data ?? []).length !== programmeIds.length || (programmes.data ?? []).some((programme: any) => programme.status !== "ACTIVE" || !isApplicantProgramme(programme))) return fail(res, 400, "Applications are currently open for Certificate and Diploma programmes in Social Work and Project and Business Administration only.");
-  const saved = await getSupabase().rpc("idmc_save_application_choices", { p_application: application.id, p_choices: choices });
+  if (qualifications.error) throw qualifications.error;
+  const rules = await applicableAdmissionRules(db, programmeIds, application.intake_id ?? null);
+  const applicable = rules as AdmissionRule[], earned = (qualifications.data ?? []) as ApplicantQualification[];
+  if ((programmes.data ?? []).length !== programmeIds.length || (programmes.data ?? []).some((programme: any) => programme.status !== "ACTIVE" || !isEligibleForProgramme(applicable, earned, programme.id, application.intake_id))) return fail(res, 400, "Your saved qualifications do not meet the approved entry rules for one or more selected programmes. Review your qualifications or contact Admissions.");
+  const saved = await db.rpc("idmc_save_application_choices", { p_application: application.id, p_choices: choices });
   if (saved.error) throw saved.error;
   send(res, saved.data);
 }));
@@ -296,7 +324,7 @@ router.post("/applications", handler(async (req, res) => {
   const academicYearId=intake.academic_year_id;
   if(req.body?.academicYearId&&req.body.academicYearId!==academicYearId)return fail(res,400,'Academic year must match the selected intake.');
   const category = String(value(req.body?.applicationCategory, 20) || "DIPLOMA").toUpperCase();
-  if (!["DIPLOMA", "CERTIFICATE"].includes(category)) return fail(res, 400, "Choose Diploma or Certificate as the entry category.");
+  if (!["DIPLOMA", "CERTIFICATE", "TECHNICIAN_CERTIFICATE"].includes(category)) return fail(res, 400, "Choose Certificate, Technician Certificate or Diploma as the entry category.");
   const payload = { applicant_id: applicant.data.id,intake_id:intake.id, academic_year_id: academicYearId, application_number: applicationNumber(), application_type: "NEW", entry_category:category, application_round: value(req.body?.applicationRound, 50), status: "DRAFT", updated_at: new Date().toISOString() };
   const result = await getSupabase().from("applications").insert(payload).select().single();
   if (result.error) throw result.error;
@@ -562,7 +590,7 @@ router.patch("/applications/:id", handler(async (req, res) => {
   const legacyCategory = requestedType === "CERTIFICATE" ? "CERTIFICATE" : requestedType === "DIPLOMA" ? "DIPLOMA" : null;
   const applicationType = ["NEW", "TRANSFER", "POSTGRADUATE", "SHORT_COURSE", "INTERNATIONAL", "OTHER"].includes(requestedType) ? requestedType : current.application_type;
   const category = String(value(req.body?.applicationCategory, 20) || legacyCategory || current.entry_category || "DIPLOMA").toUpperCase();
-  if (!["DIPLOMA", "CERTIFICATE"].includes(category)) return fail(res, 400, "Choose Diploma or Certificate as the entry category.");
+  if (!["DIPLOMA", "CERTIFICATE", "TECHNICIAN_CERTIFICATE"].includes(category)) return fail(res, 400, "Choose Certificate, Technician Certificate or Diploma as the entry category.");
   const payload = { intake_id:current.intake_id||value(req.body?.intakeId,80), academic_year_id: value(req.body?.academicYearId, 80) || current.academic_year_id, application_type: applicationType, entry_category:category, application_round: value(req.body?.applicationRound, 50), sponsorship_type: value(req.body?.sponsorshipType, 50) || null, sponsor_name: value(req.body?.sponsorName, 200) || null, sponsor_occupation: value(req.body?.sponsorOccupation, 150) || null, sponsor_phone: value(req.body?.sponsorPhone, 50) || null, sponsor_address: value(req.body?.sponsorAddress, 500) || null, updated_at: new Date().toISOString() };
   const result = await getSupabase().from("applications").update(payload).eq("id", current.id).select().single();
   if (result.error) throw result.error;
@@ -572,7 +600,7 @@ router.patch("/applications/:id", handler(async (req, res) => {
 type ChildConfig = { path: string; table: string; ownerColumn: "application_id" | "applicant_id"; fields: Record<string, string> };
 const children: ChildConfig[] = [
   { path: "choices", table: "application_choices", ownerColumn: "application_id", fields: { programmeId: "programme_id", choiceNumber: "choice_number", preferenceType: "preference_type" } },
-  { path: "qualifications", table: "academic_qualifications", ownerColumn: "applicant_id", fields: { qualificationType: "qualification_type", institutionName: "institution_name", country: "country", awardName: "award_name", indexNumber: "index_number", startYear: "start_year", completionYear: "completion_year", grade: "grade", gpa: "gpa", fieldOfStudy: "field_of_study" } },
+  { path: "qualifications", table: "academic_qualifications", ownerColumn: "applicant_id", fields: { qualificationType: "qualification_type", qualificationLevel: "qualification_level", certificateNumber: "certificate_number", institutionName: "institution_name", country: "country", awardName: "award_name", indexNumber: "index_number", startYear: "start_year", completionYear: "completion_year", grade: "grade", gpa: "gpa", fieldOfStudy: "field_of_study" } },
   { path: "documents", table: "application_documents", ownerColumn: "application_id", fields: { documentType: "document_type", documentName: "document_name", fileUrl: "file_url", fileSize: "file_size", mimeType: "mime_type", documentNumber: "document_number", issueDate: "issue_date", expiryDate: "expiry_date" } }
 ];
 
@@ -610,6 +638,18 @@ for (const config of children) {
     }
     const payload: Record<string, unknown> = { [config.ownerColumn]: ownerId, updated_at: new Date().toISOString() };
     for (const [input, column] of Object.entries(config.fields)) if (req.body?.[input] !== undefined) payload[column] = req.body[input] === "" ? null : req.body[input];
+    if (config.path === "qualifications") {
+      const qualificationType = String(payload.qualification_type ?? "").toUpperCase();
+      const allowedTypes = new Set(["PRIMARY", "SECONDARY", "ADVANCED_LEVEL", "CERTIFICATE", "TECHNICIAN_CERTIFICATE", "DIPLOMA", "ADVANCED_DIPLOMA", "BACHELOR", "POSTGRADUATE_DIPLOMA", "MASTERS", "PHD", "PROFESSIONAL", "OTHER"]);
+      if (!allowedTypes.has(qualificationType)) return fail(res, 400, "Choose a valid qualification type.");
+      const rawLevel = payload.qualification_level;
+      if (rawLevel != null) {
+        const parsedLevel = Number(rawLevel);
+        if (!Number.isInteger(parsedLevel) || parsedLevel < 1 || parsedLevel > 10) return fail(res, 400, "Qualification level must be a whole number from 1 to 10.");
+        payload.qualification_level = parsedLevel;
+      }
+      if (qualificationType === "TECHNICIAN_CERTIFICATE" && payload.qualification_level == null) payload.qualification_level = 5;
+    }
     const result = await getSupabase().from(config.table).insert(payload).select().single();
     if (result.error) throw result.error;
     send(res, result.data, 201);
@@ -633,6 +673,17 @@ for (const config of children) {
     }
     const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
     for (const [input, column] of Object.entries(config.fields)) if (req.body?.[input] !== undefined) payload[column] = req.body[input] === "" ? null : req.body[input];
+    if (config.path === "qualifications" && payload.qualification_type !== undefined) {
+      const qualificationType = String(payload.qualification_type ?? "").toUpperCase();
+      const allowedTypes = new Set(["PRIMARY", "SECONDARY", "ADVANCED_LEVEL", "CERTIFICATE", "TECHNICIAN_CERTIFICATE", "DIPLOMA", "ADVANCED_DIPLOMA", "BACHELOR", "POSTGRADUATE_DIPLOMA", "MASTERS", "PHD", "PROFESSIONAL", "OTHER"]);
+      if (!allowedTypes.has(qualificationType)) return fail(res, 400, "Choose a valid qualification type.");
+      if (payload.qualification_level != null) {
+        const parsedLevel = Number(payload.qualification_level);
+        if (!Number.isInteger(parsedLevel) || parsedLevel < 1 || parsedLevel > 10) return fail(res, 400, "Qualification level must be a whole number from 1 to 10.");
+        payload.qualification_level = parsedLevel;
+      }
+      if (qualificationType === "TECHNICIAN_CERTIFICATE" && payload.qualification_level == null) payload.qualification_level = 5;
+    }
     const result = await getSupabase().from(config.table).update(payload).eq("id", req.params.id).select().single();
     if (result.error) throw result.error;
     send(res, result.data);
@@ -667,12 +718,21 @@ router.post("/applications/:id/submit", handler(async (req, res) => {
   if (!editableStatuses.has(application.status)) return fail(res, 409, `Application is already ${application.status}.`);
   const db = getSupabase();
   const [choices, qualifications, documents] = await Promise.all([
-    db.from("application_choices").select("id", { count: "exact", head: true }).eq("application_id", application.id),
-    db.from("academic_qualifications").select("id", { count: "exact", head: true }).eq("applicant_id", application.applicant_id),
+    db.from("application_choices").select("id,programme_id").eq("application_id", application.id),
+    db.from("academic_qualifications").select("id,qualification_type,qualification_level,verification_status").eq("applicant_id", application.applicant_id),
     db.from("application_documents").select("id", { count: "exact", head: true }).eq("application_id", application.id)
   ]);
   if (req.body?.confirmed !== true) return fail(res, 400, "Confirm that the application information is complete and correct before submission.");
-  if (!choices.count || !qualifications.count || !documents.count) return fail(res, 400, "Add at least one programme choice, qualification and document before submission.");
+  if (choices.error) throw choices.error;
+  if (qualifications.error) throw qualifications.error;
+  if (documents.error) throw documents.error;
+  if (!choices.data?.length || !qualifications.data?.length || !documents.count) return fail(res, 400, "Add at least one programme choice, qualification and document before submission.");
+  const programmeIds = [...new Set(choices.data.map((row: any) => row.programme_id))];
+  const programmes = await db.from("programmes").select("id,status").in("id", programmeIds);
+  if (programmes.error) throw programmes.error;
+  const rules = await applicableAdmissionRules(db, programmeIds, application.intake_id ?? null);
+  const eligibleProgrammes = new Set((programmes.data ?? []).filter((programme: any) => programme.status === "ACTIVE" && isEligibleForProgramme(rules as AdmissionRule[], qualifications.data as ApplicantQualification[], programme.id, application.intake_id)).map((programme: any) => programme.id));
+  if (choices.data.some((choice: any) => !eligibleProgrammes.has(choice.programme_id))) return fail(res, 409, "One or more selected programmes no longer match your qualifications or current admission rules. Update your choices before submitting.");
   const rejected = await db.from("academic_qualifications").select("id", { count: "exact", head: true }).eq("applicant_id", application.applicant_id).eq("verification_status", "REJECTED");
   if (rejected.error) throw rejected.error;
   if (rejected.count) return fail(res, 409, "A rejected qualification must be corrected before submission.");

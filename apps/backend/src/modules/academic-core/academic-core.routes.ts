@@ -27,6 +27,7 @@ const REG_APPROVE = "registration.approve";
 const TT_VIEW = "timetable.view";
 const TT_MANAGE = "timetable.manage";
 const TT_PUBLISH = "timetable.publish";
+const ADMISSION_QUALIFICATION_TYPES = new Set(["PRIMARY", "SECONDARY", "ADVANCED_LEVEL", "CERTIFICATE", "TECHNICIAN_CERTIFICATE", "DIPLOMA", "ADVANCED_DIPLOMA", "BACHELOR", "POSTGRADUATE_DIPLOMA", "MASTERS", "PHD", "PROFESSIONAL", "OTHER"]);
 
 router.post("/cross-cutting/sync-roster", requirePermission(MANAGE), async (req, res, next) => {
   try {
@@ -138,6 +139,46 @@ router.get("/reference-data", async (req, res, next) => {
     const entries=await Promise.all(Object.entries(tables).map(async ([key,table])=>{const result=await db.from(table).select("*").limit(2000);if(result.error)throw result.error;return [key,result.data??[]] as const;}));
     res.json({success:true,data:Object.fromEntries(entries)});
   } catch(error){ next(error); }
+});
+
+router.get("/admission-eligibility", requirePermission(VIEW), async (_req, res, next) => {
+  try {
+    const result = await getSupabase().from("idmc_programme_admission_rules")
+      .select("id,programme_id,intake_id,accepted_qualification_types,minimum_qualification_level,require_verified_qualification,approved_by,reason,updated_at")
+      .is("intake_id", null).order("updated_at", { ascending: false });
+    if (result.error) throw result.error;
+    res.json({ success: true, data: result.data ?? [] });
+  } catch (error) { next(error); }
+});
+
+router.put("/programmes/:id/admission-eligibility", requirePermission(MANAGE), async (req, res, next) => {
+  try {
+    const programmeId = String(req.params.id ?? "").trim(), actorId = String(req.user?.id ?? "");
+    const types = req.body?.acceptedQualificationTypes;
+    const levelValue = req.body?.minimumQualificationLevel;
+    const minimumLevel = levelValue == null || levelValue === "" ? null : Number(levelValue);
+    const requireVerified = req.body?.requireVerifiedQualification;
+    const reason = typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 1000) : "";
+    if (!/^[0-9a-f-]{36}$/i.test(programmeId)) return res.status(400).json({ success: false, message: "Choose a valid programme." });
+    if (!Array.isArray(types) || !types.length || types.some((type: unknown) => typeof type !== "string" || !ADMISSION_QUALIFICATION_TYPES.has(type.toUpperCase()))) return res.status(400).json({ success: false, message: "Select one or more valid qualification types from the approved entry policy." });
+    if (minimumLevel != null && (!Number.isInteger(minimumLevel) || minimumLevel < 1 || minimumLevel > 10)) return res.status(400).json({ success: false, message: "Minimum qualification level must be a whole number from 1 to 10, or left empty." });
+    if (typeof requireVerified !== "boolean") return res.status(400).json({ success: false, message: "Specify whether the accepted qualification must be verified." });
+    if (reason.length < 5) return res.status(400).json({ success: false, message: "Record the institutional approval or reference for this entry rule." });
+    const db = getSupabase();
+    const programme = await db.from("programmes").select("id").eq("id", programmeId).maybeSingle();
+    if (programme.error) throw programme.error;
+    if (!programme.data) return res.status(404).json({ success: false, message: "Programme not found." });
+    const previous = await db.from("idmc_programme_admission_rules").select("*").eq("programme_id", programmeId).is("intake_id", null).maybeSingle();
+    if (previous.error) throw previous.error;
+    const payload = { programme_id: programmeId, intake_id: null, accepted_qualification_types: [...new Set((types as string[]).map((type) => type.toUpperCase()))], minimum_qualification_level: minimumLevel, require_verified_qualification: requireVerified, approved_by: actorId, reason, updated_at: new Date().toISOString() };
+    const saved = previous.data
+      ? await db.from("idmc_programme_admission_rules").update(payload).eq("id", previous.data.id).select("*").single()
+      : await db.from("idmc_programme_admission_rules").insert(payload).select("*").single();
+    if (saved.error) throw saved.error;
+    try { await createAuditLog({ actorUserId: actorId, actionCode: "PROGRAMME_ADMISSION_ELIGIBILITY_UPDATE", moduleCode: "ACADEMICS", entityType: "idmc_programme_admission_rules", entityId: saved.data.id, oldValues: previous.data ?? null, newValues: saved.data }); }
+    catch (error) { console.warn("Admission eligibility audit logging failed", error); }
+    res.json({ success: true, data: saved.data, message: "Approved programme eligibility rule saved." });
+  } catch (error) { next(error); }
 });
 
 registerCrudResource(router, { moduleCode:"ACADEMICS", entityType:"academic_years", table:"academic_years", permissionView:VIEW, permissionManage:MANAGE,

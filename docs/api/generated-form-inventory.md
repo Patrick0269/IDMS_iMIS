@@ -4,14 +4,16 @@ This is structural discovery. The E2E status remains unverified until a real bro
 
 | Page | Form ID | Submit | Fields |
 |---|---|---|---|
+| `admissions.html` | `admissionsRecoveryForm` | JS | `registrationNumber`, `birthYear` |
 | `admissions.html` | `officerApplicationForm` | JS | `firstName`, `middleName`, `lastName`, `email`, `phone`, `dateOfBirth`, `gender`, `nationality`, `region`, `district`, `addressLine1`, `academicYearId`, `programmeId`, `secondProgrammeId`, `qualificationType`, `institutionName`, `indexNumber`, `awardName`, `completionYear`, `grade`, `qualification2Type`, `institution2Name`, `index2Number`, `completion2Year`, `kinName`, `kinRelationship`, `kinPhone`, `kinEmail`, `kinAddress`, `applicantConfirmed` |
 | `alumni.html` | `recordForm` | JS |  |
 | `applicant-access.html` | `applicantLoginForm` | JS | `email`, `password` |
+| `applicant-access.html` | `applicantRecoveryForm` | JS | `email` |
 | `applicant-access.html` | `applicantRegisterForm` | JS | `firstName`, `middleName`, `lastName`, `phone`, `email`, `dateOfBirth`, `gender`, `nationality`, `nationalIdNumber`, `passportNumber`, `password`, `confirmPassword`, `consent` |
 | `applicant-access.html` | `applicantResendForm` | JS | `email` |
 | `applicant-portal.html` | `profileForm` | JS | `firstName`, `middleName`, `lastName`, `email`, `phone`, `dateOfBirth`, `gender`, `nationality`, `maritalStatus`, `birthDistrict`, `birthRegion`, `birthCountry`, `nationalIdNumber`, `passportNumber`, `city`, `region`, `district`, `country`, `addressLine1`, `addressLine2`, `permanentAddress`, `bankName`, `bankBranch`, `bankAccountNumber`, `nhifCardNumber`, `disabilityStatus`, `disabilityDetails` |
 | `applicant-portal.html` | `applicationDetailsForm` | JS | `academicYearId`, `applicationCategory`, `applicationRound`, `sponsorshipType`, `sponsorName`, `sponsorOccupation`, `sponsorPhone`, `sponsorAddress` |
-| `applicant-portal.html` | `qualificationForm` | JS | `qualificationId`, `country`, `educationLevel`, `indexNumber`, `institutionName`, `programmeName`, `startYear`, `endYear`, `certificateFile` |
+| `applicant-portal.html` | `qualificationForm` | JS | `qualificationId`, `country`, `educationLevel`, `indexNumber`, `institutionName`, `programmeName`, `qualificationLevel`, `certificateNumber`, `startYear`, `endYear`, `certificateFile` |
 | `applicant-portal.html` | `choiceForm` | JS | `programmeId`, `secondProgrammeId` |
 | `applicant-portal.html` | `nextOfKinForm` | JS | `kinName`, `kinRelationship`, `kinPhone`, `kinOccupation`, `kinEmail`, `kinAddress` |
 | `assessment.html` | `marksForm` | JS |  |
@@ -29,7 +31,7 @@ This is structural discovery. The E2E status remains unverified until a real bro
 | `finance-portal.html` | `feeForm` | JS | `name`, `academicYear`, `semester`, `firstInstallmentAmount`, `programmeLevel`, `applyToAll` |
 | `finance-portal.html` | `paymentSettingsForm` | JS | `bankName`, `accountName`, `controlNumber`, `lock` |
 | `finance.html` | `recordForm` | JS |  |
-| `forgot-password.html` | `recoveryForm` | JS | `accountType`, `registrationNumber`, `studentEmail`, `formFourYear`, `phone`, `lecturerEmail` |
+| `forgot-password.html` | `recoveryForm` | JS | `accountType`, `registrationNumber`, `birthYear`, `phone`, `lecturerEmail` |
 | `graduation.html` | `recordForm` | JS |  |
 | `historical-students.html` | `manualForm` | JS | `studentNumber`, `formFourIndex`, `formFourYear`, `firstName`, `middleName`, `lastName`, `cohortYear`, `programmeCode`, `programmeVersionCode`, `academicYear`, `studentStatus`, `gender`, `dateOfBirth`, `phone`, `email` |
 | `hod-course-allocation.html` | `haForm` | JS | `courseOfferingId`, `lecturerUserId`, `assignmentRole`, `workloadHours`, `notes` |
@@ -47,7 +49,7 @@ This is structural discovery. The E2E status remains unverified until a real bro
 | `results.html` | `resultPolicyForm` | JS | `courseOfferingId`, `gradeScaleId`, `courseworkWeight`, `examinationWeight`, `minimumCourseworkRequired`, `minimumExamRequired`, `minimumPassMark` |
 | `schools.html` | (none) | JS | `schoolCode`, `status`, `schoolName`, `campusId`, `description` |
 | `set-password.html` | `passwordForm` | JS |  |
-| `staff-accounts.html` | `accountForm` | JS | `mode`, `identifier`, `firstName`, `middleName`, `lastName`, `email`, `username`, `password`, `employeeNumber`, `roleCode`, `institutionId`, `departmentId`, `jobTitle`, `phone`, `employmentType`, `appointmentDate` |
+| `staff-accounts.html` | `accountForm` | JS | `mode`, `identifier`, `firstName`, `middleName`, `lastName`, `email`, `username`, `password`, `employeeNumber`, `roleCodes`, `institutionId`, `departmentId`, `jobTitle`, `phone`, `employmentType`, `appointmentDate` |
 | `staff-self-service.html` | `profileForm` | JS | `phone`, `emergencyContactName`, `emergencyContactPhone`, `postalAddress`, `physicalAddress` |
 | `staff-self-service.html` | `leaveForm` | JS | `leaveTypeId`, `startDate`, `endDate`, `reason` |
 | `staff-self-service.html` | `expenseForm` | JS | `expenseType`, `title`, `amount`, `meetingDate`, `description` |

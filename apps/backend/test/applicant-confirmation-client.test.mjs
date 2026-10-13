@@ -51,6 +51,24 @@ test("verified applicant callback saves the session and routes directly to the a
   assert.equal(calls.cleared, false);
 });
 
+test("Google applicant callback saves the PostgreSQL-issued session and opens the applicant portal", async () => {
+  const { calls } = runConfirmation("#access_token=google-access&refresh_token=postgres-refresh&token_type=bearer&type=google&new_applicant=1", {
+    roles: [{ id: "applicant-role", roleCode: "APPLICANT" }]
+  });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(calls.session.access_token, "google-access");
+  assert.equal(calls.session.refresh_token, "postgres-refresh");
+  assert.equal(calls.role, "applicant-role");
+  assert.equal(calls.redirect, "/applicant-portal.html");
+  assert.equal(calls.cleanedUrl, "/applicant-access.html");
+});
+
+test("Google sign-in failures show a safe message and remove the error query", () => {
+  const { calls, elements } = runConfirmation("", undefined, "?google_error=account_exists");
+  assert.equal(elements.get("applicantMessage").textContent.includes("already uses this email"), true);
+  assert.equal(calls.cleanedUrl, "/applicant-access.html");
+});
+
 test("verification callback does not grant access if the returned identity lacks the applicant role", async () => {
   const { calls, elements } = runConfirmation("#access_token=verified-token&type=signup", { roles: [] });
   await new Promise(resolve => setTimeout(resolve, 0));

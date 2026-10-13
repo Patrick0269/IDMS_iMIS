@@ -42,6 +42,7 @@
           <button type="button" data-amx-stage="versions"><span>Programme Versions</span></button>
           <button type="button" data-amx-stage="curricula"><span>Curricula</span></button>
           <button type="button" data-amx-stage="prerequisites"><span>Prerequisites</span></button>
+          <button type="button" id="openProgrammeRequirements"><span>Admission Requirements</span></button>
         </nav>
         <div class="academic-side-label">TEACHING &amp; ASSESSMENT</div>
         <nav class="academic-secondary-nav" aria-label="Teaching and assessment">
@@ -59,11 +60,11 @@
       <div class="iw-academic-main">
         <div id="amxPanelHost"></div>
         <details class="amx-secondary programme-requirements-details" id="programmeRequirementsDetails">
-          <summary>Programme Entry Requirements</summary>
+          <summary>Programme Entry Requirements &amp; Approved Rules</summary>
           <section class="programme-requirements-card" id="programmeRequirementsPanel">
-            <p>Academic Management controls the requirements applicants see for Social Work and Project and Business Administration.</p>
+            <p>Academic staff can record approved programme entry requirements here. Use the approved institutional source as the policy reference. Configure accepted qualification types and levels; do not enter unapproved grade or subject requirements.</p>
             <p role="status" aria-live="polite">Loading programme requirements...</p>
-            <div class="iw-table-wrap"><table class="iw-table"><thead><tr><th>Code</th><th>Programme</th><th>Award</th><th>Specialization</th><th>Direct entry requirements</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+            <div class="iw-table-wrap"><table class="iw-table"><thead><tr><th>Code</th><th>Programme</th><th>Award</th><th>Specialization</th><th>Published entry requirements</th><th>Automated qualification rule</th><th>Action</th></tr></thead><tbody></tbody></table></div>
           </section>
         </details>
       </div>
@@ -72,7 +73,7 @@
   <button id="academicSidebarBackdrop" type="button" aria-label="Close academic navigation"></button>
   <script src="/assets/js/config.js"></script><script src="/assets/js/auth.js"></script><script src="/assets/js/api.js?v=20261011-friendly-network-errors"></script>
   <script type="module" src="/assets/js/academic-management-editor.js?v=20261008-offering-hr"></script>
-  <script src="/assets/js/programme-requirements-editor.js?v=20261007-requirements-refresh"></script>
+  <script src="/assets/js/programme-requirements-editor.js?v=20261013-academic-admissions-nav"></script>
   <script src="/assets/js/workflow-entry.js?v=20261004-r2"></script><script src="/assets/js/institutional-context-actions.js?v=20261008-upload-progress"></script>
 <script src="../assets/js/idmc-institution-logo.js?v=1791461354603" data-idmc-logo="true" data-logo="../images/idms-logo.jpg"></script>
 <script defer src="../assets/js/hr-staff-layout.js?v=20261011-intake-sidebar"></script><script defer src="../assets/js/coursework-entry.js?v=20261009-single"></script></body>

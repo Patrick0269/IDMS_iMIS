@@ -9,6 +9,7 @@
     "enable_nodejs_http_server_modules"
   ],
   "workers_dev": true,
+  "triggers": { "crons": ["*/5 * * * *"] },
   "assets": {
     "directory": "./apps/frontend",
     "binding": "ASSETS",

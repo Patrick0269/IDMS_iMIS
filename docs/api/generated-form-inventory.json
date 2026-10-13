@@ -1,7 +1,17 @@
 {
-  "generated_at": "2026-10-11T06:10:12.152Z",
-  "count": 71,
+  "generated_at": "2026-10-13T04:58:22.436Z",
+  "count": 73,
   "forms": [
+    {
+      "page": "admissions.html",
+      "form_id": "admissionsRecoveryForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "registrationNumber",
+        "birthYear"
+      ]
+    },
     {
       "page": "admissions.html",
       "form_id": "officerApplicationForm",
@@ -55,6 +65,15 @@
       "fields": [
         "email",
         "password"
+      ]
+    },
+    {
+      "page": "applicant-access.html",
+      "form_id": "applicantRecoveryForm",
+      "method": "JS",
+      "action": null,
+      "fields": [
+        "email"
       ]
     },
     {
@@ -150,6 +169,8 @@
         "indexNumber",
         "institutionName",
         "programmeName",
+        "qualificationLevel",
+        "certificateNumber",
         "startYear",
         "endYear",
         "certificateFile"
@@ -354,8 +375,7 @@
       "fields": [
         "accountType",
         "registrationNumber",
-        "studentEmail",
-        "formFourYear",
+        "birthYear",
         "phone",
         "lecturerEmail"
       ]
@@ -555,7 +575,7 @@
         "username",
         "password",
         "employeeNumber",
-        "roleCode",
+        "roleCodes",
         "institutionId",
         "departmentId",
         "jobTitle",

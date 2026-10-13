@@ -122,11 +122,11 @@ function normalizePhone(value: unknown): string {
 
 /** Recover an account only after matching the account's existing institutional records. */
 export async function requestVerifiedPasswordReset(
-  input: { accountType: "student" | "lecturer"; email?: string; registrationNumber?: string; birthYear?: number; phone?: string },
+  input: { accountType: "student" | "lecturer" | "applicant"; email?: string; registrationNumber?: string; birthYear?: number; phone?: string },
   deliver: typeof sendAccountPasswordRecoveryEmail = sendAccountPasswordRecoveryEmail,
 ): Promise<boolean> {
   const suppliedEmail = String(input.email ?? "").trim().toLowerCase();
-  if (input.accountType === "lecturer" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suppliedEmail)) return false;
+  if (["lecturer", "applicant"].includes(input.accountType) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(suppliedEmail)) return false;
   const db = getSupabase();
   let email = suppliedEmail;
   let userId: string | null = null;
@@ -162,9 +162,21 @@ export async function requestVerifiedPasswordReset(
     const lecturer = matches[0]!;
     userId = String(lecturer.user_id);
     recoveryName = [lecturer.first_name, lecturer.last_name].filter(Boolean).join(" ") || recoveryName;
+  } else if (input.accountType === "applicant") {
+    const records = await db.from("applicants").select("id,auth_user_id,email,first_name,last_name,status").ilike("email", suppliedEmail).limit(20);
+    if (records.error) throw records.error;
+    const matches = (records.data ?? []).filter((row: any) => String(row.email ?? "").trim().toLowerCase() === suppliedEmail
+      && String(row.status ?? "").toUpperCase() === "ACTIVE" && row.auth_user_id);
+    if (matches.length !== 1) return false;
+    const applicant = matches[0]!;
+    userId = String(applicant.auth_user_id);
+    email = suppliedEmail;
+    recoveryName = [applicant.first_name, applicant.last_name].filter(Boolean).join(" ") || recoveryName;
   } else return false;
 
-  const profile = await db.from("users").select("id,auth_user_id,status,display_name,first_name,last_name,email").eq("id", userId).maybeSingle();
+  let profileQuery: any = db.from("users").select("id,auth_user_id,status,display_name,first_name,last_name,email");
+  profileQuery = input.accountType === "applicant" ? profileQuery.eq("auth_user_id", userId) : profileQuery.eq("id", userId);
+  const profile = await profileQuery.maybeSingle();
   if (profile.error) throw profile.error;
   if (!profile.data || profile.data.status !== "ACTIVE" || !profile.data.auth_user_id) return false;
   if (input.accountType === "student") email = String(profile.data.email ?? "").trim().toLowerCase();

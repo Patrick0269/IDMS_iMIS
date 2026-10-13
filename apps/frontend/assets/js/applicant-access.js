@@ -20,6 +20,18 @@
   const userError = (error, fallback) => window.IDMCAuth?.toUserMessage?.(error) || error?.message || fallback;
 
   const params = new URLSearchParams(window.location.search);
+  const googleErrorMessages = {
+    cancelled: "Google sign-in was cancelled. You can try again or sign in with email and password.",
+    account_exists: "An IDMS account already uses this email. Sign in to that account or contact Admissions to link it safely.",
+    unavailable: "Google sign-in is not configured yet. Contact Admissions or ICT, or use email and password.",
+    invalid: "The Google sign-in response could not be verified. Please try again.",
+    failed: "Google sign-in could not be completed. Please try again or use email and password."
+  };
+  const googleError = params.get("google_error");
+  if (googleError) {
+    history.replaceState(null, "", window.location.pathname);
+    showMessage(googleErrorMessages[googleError] || googleErrorMessages.failed, "error");
+  }
   async function completeEmailConfirmation() {
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const accessToken = hash.get("access_token");
@@ -55,7 +67,7 @@
       }
       return;
     }
-    if (!accessToken || (confirmationType && !["signup", "magiclink"].includes(confirmationType))) {
+    if (!accessToken || (confirmationType && !["signup", "magiclink", "google"].includes(confirmationType))) {
       if (params.has("verified")) showMessage("Your email confirmation link has been opened. Sign in to continue.", "success");
       return;
     }
@@ -68,13 +80,13 @@
       expires_at: Number(hash.get("expires_at")) || null
     };
     history.replaceState(null, "", window.location.pathname);
-    await openApplicantSession(session);
+    await openApplicantSession(session, confirmationType === "google" && hash.get("new_applicant") === "1");
   }
 
-  async function openApplicantSession(session) {
+  async function openApplicantSession(session, isNewApplicant = false) {
     try {
       window.IDMCAuth.saveSession(session);
-      showMessage("Email verified. Opening your applicant account…", "success");
+      showMessage(isNewApplicant ? "Google verified your email. Opening your new applicant profile…" : "Opening your applicant account…", "success");
       const profile = await window.IDMCAuth.getCurrentUser();
       const roles = profile?.roles || profile?.user?.roles || [];
       const applicantRole = roles.find(role => String(role.roleCode || role.role_code || role.code || "").toUpperCase() === "APPLICANT");
@@ -87,6 +99,11 @@
     }
   }
   void completeEmailConfirmation();
+
+  ["applicantGoogleLogin", "applicantGoogleRegister"].forEach((id) => {
+    const button = document.getElementById(id);
+    button?.addEventListener("click", () => { window.location.assign(`${apiBase}/auth/google/applicant/start`); });
+  });
 
   document.getElementById("applicantLoginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -133,6 +150,9 @@
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.success === false) throw requestError(response, payload, "Unable to create applicant account.");
       form.reset();
+      form.hidden = true;
+      document.getElementById("registerHeading").textContent = "Registration received";
+      document.getElementById("applicantLoginForm").elements.email.value = values.email;
       if (payload.data?.verificationEmailSent === false) {
         const resendForm = document.getElementById("applicantResendForm");
         resendForm.elements.email.value = values.email;
@@ -149,6 +169,22 @@
     } finally {
       button.disabled = false;
     }
+  });
+  document.getElementById("applicantRecoveryForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget, button = document.getElementById("applicantRecoveryButton");
+    button.disabled = true;
+    try {
+      const response = await fetch(`${apiBase}/auth/password-reset`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountType: "applicant", email: form.elements.email.value })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload.success === false) throw requestError(response, payload, "Unable to request a password reset.");
+      showMessage(payload.message || "If the address matches an active applicant account, a secure reset link will be sent. Check Inbox and Spam/Junk.", "success");
+    } catch (error) {
+      showMessage(userError(error, "Unable to request a password reset. Please try again later."), "error");
+    } finally { button.disabled = false; }
   });
   document.getElementById("applicantResendForm").addEventListener("submit", async (event) => {
     event.preventDefault();

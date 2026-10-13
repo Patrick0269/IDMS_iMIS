@@ -17,11 +17,13 @@
     <div id="applicantMessage" class="message" role="status" aria-live="polite" hidden></div>
     <div class="auth-grid">
       <section class="panel" aria-labelledby="loginHeading"><span class="panel-kicker">Returning applicant</span><h2 id="loginHeading">Sign in to your account</h2><p>If you have already created an IDMS applicant account, enter the same email and password.</p>
+        <button class="submit" id="applicantGoogleLogin" type="button">Continue with Google</button><p class="form-note">Use the Google account connected to your Applicant profile.</p>
         <form id="applicantLoginForm"><div class="field-grid"><label class="field wide">Email address<input name="email" type="email" required autocomplete="email" maxlength="255"></label><label class="field wide">Password<input name="password" type="password" required autocomplete="current-password"></label></div><button class="submit" id="applicantLoginButton" type="submit">Sign in to Applicant Portal</button></form>
-        <p class="form-note">This applicant sign-in is separate from staff and student login.</p>
+        <p class="form-note">This applicant sign-in is separate from staff and student login.</p><details class="support"><summary>Forgot password?</summary><form id="applicantRecoveryForm"><label class="field">Account email<input name="email" type="email" required autocomplete="email" maxlength="255"></label><button class="submit" id="applicantRecoveryButton" type="submit">Send password reset link</button></form></details>
         <div class="support"><a href="/login.html">Staff and student sign in →</a></div>
       </section>
       <section class="panel" aria-labelledby="registerHeading"><span class="panel-kicker">New applicant</span><h2 id="registerHeading">Create an applicant account</h2><p>Use the name shown on your academic certificates. You can complete your application details after you sign in.</p>
+        <button class="submit" id="applicantGoogleRegister" type="button">Continue with Google</button><p class="form-note">Google verifies your email. You will complete your applicant profile after sign-in.</p>
         <form id="applicantRegisterForm"><div class="field-grid">
           <label class="field">First name<input name="firstName" required autocomplete="given-name" maxlength="100"></label><label class="field">Middle name<input name="middleName" autocomplete="additional-name" maxlength="100"></label>
           <label class="field">Last name<input name="lastName" required autocomplete="family-name" maxlength="100"></label><label class="field">Phone number<input name="phone" type="tel" autocomplete="tel" maxlength="50" placeholder="+255 7XX XXX XXX"></label>
@@ -37,6 +39,6 @@
     <p class="footer">Institute of Development and Medical Sciences · IDMS iMIS</p>
   </main>
   <script src="assets/js/config.js"></script><script src="assets/js/auth.js"></script><script src="assets/js/api.js"></script>
-  <script src="assets/js/applicant-access.js?v=20261012-applicant-date-validation"></script>
+  <script src="assets/js/applicant-access.js?v=20261013-google-postgres-auth"></script>
 </body>
 </html>

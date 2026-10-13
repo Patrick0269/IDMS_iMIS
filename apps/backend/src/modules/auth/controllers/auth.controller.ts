@@ -1,6 +1,68 @@
 import type { Request, Response } from "express";
+import { OAuth2Client } from "google-auth-library";
 import * as authService from "../services/auth.service.js";
+import { finishGoogleApplicantLogin, getGoogleApplicantOAuthConfig } from "../services/google-applicant-auth.service.js";
+import { env } from "../../../config/env.js";
 import { logError } from "../../../utils/logger.js";
+import { randomBytes } from "node:crypto";
+
+const OAUTH_COOKIE_OPTIONS = { httpOnly: true, secure: env.NODE_ENV === "production", sameSite: "lax" as const, path: "/api/v1/auth", maxAge: 10 * 60 * 1000 };
+function readCookie(req: Request, name: string): string | null {
+  const prefix = `${name}=`;
+  const item = String(req.headers.cookie || "").split(";").map(part => part.trim()).find(part => part.startsWith(prefix));
+  if (!item) return null;
+  try { return decodeURIComponent(item.slice(prefix.length)); } catch { return null; }
+}
+function applicantAccessUrl() { return new URL("applicant-access.html", `${env.FRONTEND_URL.replace(/\/+$/, "")}/`).toString(); }
+
+export function googleApplicantStart(_req: Request, res: Response): void {
+  try {
+    const config = getGoogleApplicantOAuthConfig();
+    const state = randomBytes(32).toString("base64url");
+    const nonce = randomBytes(32).toString("base64url");
+    res.cookie("idmc_google_state", state, OAUTH_COOKIE_OPTIONS);
+    res.cookie("idmc_google_nonce", nonce, OAUTH_COOKIE_OPTIONS);
+    const client = new OAuth2Client(config.clientId, config.clientSecret, config.redirectUri);
+    res.redirect(client.generateAuthUrl({ response_type: "code", scope: ["openid", "email", "profile"], state, nonce, prompt: "select_account" }));
+  } catch (error) {
+    logError("Google Applicant Sign-In could not start", error);
+    const target = new URL(applicantAccessUrl()); target.searchParams.set("google_error", "unavailable");
+    res.redirect(target.toString());
+  }
+}
+
+export async function googleApplicantCallback(req: Request, res: Response): Promise<void> {
+  const clearCookies = () => {
+    const options = { ...OAUTH_COOKIE_OPTIONS, maxAge: 0 };
+    res.cookie("idmc_google_state", "", options);
+    res.cookie("idmc_google_nonce", "", options);
+  };
+  const fail = (code: string) => { clearCookies(); const target = new URL(applicantAccessUrl()); target.searchParams.set("google_error", code); res.redirect(target.toString()); };
+  const state = typeof req.query.state === "string" ? req.query.state : "";
+  const code = typeof req.query.code === "string" ? req.query.code : "";
+  const expectedState = readCookie(req, "idmc_google_state");
+  const expectedNonce = readCookie(req, "idmc_google_nonce");
+  if (req.query.error || !state || !expectedState || state !== expectedState || !expectedNonce || !code) { fail(req.query.error === "access_denied" ? "cancelled" : "invalid"); return; }
+  try {
+    const config = getGoogleApplicantOAuthConfig();
+    const client = new OAuth2Client(config.clientId, config.clientSecret, config.redirectUri);
+    const tokenResponse = await client.getToken(code);
+    const idToken = tokenResponse.tokens.id_token;
+    if (!idToken) throw new Error("Google OAuth response did not contain an ID token.");
+    const ticket = await client.verifyIdToken({ idToken, audience: config.clientId });
+    const payload = ticket.getPayload();
+    if (!payload || payload.nonce !== expectedNonce) throw Object.assign(new Error("Google identity nonce did not match the authentication request."), { statusCode: 401 });
+    const result = await finishGoogleApplicantLogin(payload);
+    clearCookies();
+    const session = result.session;
+    const fragment = new URLSearchParams({ access_token: session.access_token, refresh_token: session.refresh_token || "", expires_in: String(session.expires_in || ""), expires_at: String(session.expires_at || ""), token_type: session.token_type || "bearer", type: "google", new_applicant: result.isNewApplicant ? "1" : "0" });
+    res.redirect(`${applicantAccessUrl()}#${fragment.toString()}`);
+  } catch (error) {
+    logError("Google Applicant Sign-In failed", error);
+    const status = Number((error as { statusCode?: number })?.statusCode);
+    fail(status === 409 ? "account_exists" : status === 503 ? "unavailable" : "failed");
+  }
+}
 
 export async function registerApplicant(req: Request, res: Response): Promise<void> {
   const firstName = String(req.body?.firstName ?? "").trim().slice(0, 100);
@@ -151,7 +213,7 @@ export async function completePasswordRecovery(req: Request, res: Response): Pro
 export async function requestVerifiedPasswordReset(req: Request, res: Response): Promise<void> {
   try {
     await authService.requestVerifiedPasswordReset({
-      accountType: String(req.body?.accountType ?? "").trim().toLowerCase() as "student" | "lecturer",
+      accountType: String(req.body?.accountType ?? "").trim().toLowerCase() as "student" | "lecturer" | "applicant",
       email: String(req.body?.email ?? "").trim(),
       registrationNumber: String(req.body?.registrationNumber ?? "").trim(),
       birthYear: Number(req.body?.birthYear),
@@ -160,7 +222,7 @@ export async function requestVerifiedPasswordReset(req: Request, res: Response):
   } catch (error) {
     logError("Verified password reset request failed", error);
   }
-  res.json({ success: true, message: "Your request has been received. If the details match an active account, a secure link will be sent to the registered email address. Check your Inbox and Spam/Junk in a few minutes. If it does not arrive, contact the ICT Office." });
+  res.json({ success: true, message: "If the details match an active account, a secure password-reset link will be sent to the registered email address. Check Inbox and Spam/Junk." });
 }
 
 export async function passwordSetupComplete(req: Request, res: Response): Promise<void> {
